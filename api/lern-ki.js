@@ -1,9 +1,9 @@
 const requests = new Map();
-let cachedModel = '';
+let cachedModels = [];
 
-async function findAvailableModel(key) {
-  if (process.env.GEMINI_MODEL) return process.env.GEMINI_MODEL.replace(/^models\//, '');
-  if (cachedModel) return cachedModel;
+async function findAvailableModels(key) {
+  if (process.env.GEMINI_MODEL) return [process.env.GEMINI_MODEL.replace(/^models\//, '')];
+  if (cachedModels.length) return cachedModels;
   const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', {
     headers: { 'x-goog-api-key': key }
   });
@@ -13,10 +13,12 @@ async function findAvailableModel(key) {
     model.supportedGenerationMethods?.includes('generateContent') &&
     !/image|vision|embedding|tts|audio|live/i.test(model.name)
   );
-  const preferred = usable.find(model => /flash/i.test(model.name)) || usable[0];
-  if (!preferred) throw new Error('Für diesen API-Schlüssel ist kein Textmodell verfügbar.');
-  cachedModel = preferred.name.replace(/^models\//, '');
-  return cachedModel;
+  if (!usable.length) throw new Error('Für diesen API-Schlüssel ist kein Textmodell verfügbar.');
+  cachedModels = usable.sort((a, b) => {
+    const score = model => (/flash/i.test(model.name) ? 20 : 0) + (!/exp|preview|latest/i.test(model.name) ? 10 : 0);
+    return score(b) - score(a);
+  }).map(model => model.name.replace(/^models\//, ''));
+  return cachedModels;
 }
 
 export default async function handler(req, res) {
@@ -48,24 +50,29 @@ Erfinde keine Fakten. Weise bei Unsicherheit darauf hin. Bitte niemals um privat
 Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu einer erwachsenen Vertrauensperson und im Notfall zu 112.`;
 
   try {
-    const model = await findAvailableModel(key);
+    const models = await findAvailableModels(key);
     const safeHistory = Array.isArray(history) ? history.slice(-12).filter(item =>
       ['user', 'model'].includes(item?.role) && typeof item?.text === 'string' && item.text.trim()
     ).map(item => ({ role: item.role, parts: [{ text: item.text.slice(0, 3000) }] })) : [];
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: system }] },
-        contents: [...safeHistory, { role: 'user', parts: [{ text: question.trim() }] }],
-        generationConfig: { temperature: 0.45, maxOutputTokens: 3000 }
-      })
-    });
-    const data = await response.json();
+    const payload = {
+      system_instruction: { parts: [{ text: system }] },
+      contents: [...safeHistory, { role: 'user', parts: [{ text: question.trim() }] }],
+      generationConfig: { temperature: 0.45, maxOutputTokens: 3000 }
+    };
+    let response, data, model;
+    for (const candidate of models.slice(0, 12)) {
+      model = candidate;
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(payload)
+      });
+      data = await response.json();
+      if (response.ok || ![400, 404].includes(response.status)) break;
+      console.warn('[lern-ki] Modell übersprungen', { status: response.status, model });
+    }
     if (!response.ok) {
       const googleMessage = data?.error?.message || 'Unbekannter Google-Fehler';
       console.error('[lern-ki] Gemini-Fehler', { status: response.status, model, message: googleMessage });
-      if (response.status === 400 || response.status === 404) cachedModel = '';
+      if (response.status === 400 || response.status === 404) cachedModels = [];
       const hint = response.status === 400 || response.status === 404
         ? 'Google hat das automatisch ausgewählte KI-Modell nicht angenommen. Bitte versuche es gleich erneut.'
         : response.status === 403
