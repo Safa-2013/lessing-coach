@@ -15,10 +15,18 @@ async function findAvailableModels(key) {
     !/image|vision|embedding|tts|audio|live/i.test(model.name)
   );
   if (!usable.length) throw new Error('Für diesen API-Schlüssel ist kein Textmodell verfügbar.');
-  cachedModels = usable.sort((a, b) => {
+  const ranked = usable.sort((a, b) => {
     const score = model => (/gemini-2\.5-flash$/i.test(model.name) ? 100 : 0) + (/gemini-2\.0-flash$/i.test(model.name) ? 90 : 0) + (/flash/i.test(model.name) ? 20 : 0) + (!/exp|preview|latest|legacy/i.test(model.name) ? 10 : 0);
     return score(b) - score(a);
   }).map(model => model.name.replace(/^models\//, ''));
+  const pick = pattern => ranked.find(name => pattern.test(name));
+  cachedModels = [...new Set([
+    pick(/flash(?!.*lite)/i),
+    pick(/pro/i),
+    pick(/flash.*lite/i),
+    pick(/gemma/i),
+    ...ranked
+  ].filter(Boolean))];
   return cachedModels;
 }
 
@@ -59,15 +67,15 @@ Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu 
     const payload = {
       system_instruction: { parts: [{ text: system }] },
       contents: [...safeHistory, { role: 'user', parts: [{ text: question.trim() }] }],
-      generationConfig: { temperature: 0.45, maxOutputTokens: 3000 }
+      generationConfig: { temperature: 0.45, maxOutputTokens: 1800 }
     };
     let response, data, model;
     const retryable = new Set([400, 404, 408, 429, 500, 502, 503, 504]);
     const failures = [];
-    for (const candidate of models.slice(0, 5)) {
+    for (const candidate of models.slice(0, 4)) {
       model = candidate;
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 9000);
+      const timeout = setTimeout(() => controller.abort(), 5000);
       try {
         response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
           method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(payload), signal: controller.signal
