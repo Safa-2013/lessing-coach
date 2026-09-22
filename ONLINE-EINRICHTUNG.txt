@@ -4,13 +4,15 @@ Die Website funktioniert sofort als lokale Testversion.
 
 Für echten Betrieb auf mehreren Geräten werden zusätzlich benötigt:
 1. Eine geschützte Online-Datenbank, zum Beispiel Supabase.
-2. Eine sichere serverseitige Lern-KI-Adresse.
-3. Ein echter Admin-Login über den Server statt eines Passworts im Browser.
+2. Ein echter Admin-Login über den Server statt eines Passworts im Browser.
 
 Wichtig:
 - Keine geheimen KI- oder Datenbank-Schlüssel direkt in index.html eintragen.
 - Für Schülerdaten müssen Datenschutz, Zugriffsrechte und Löschfristen mit der Schule geklärt werden.
-- Der Admin kann unter „Einstellungen“ eine sichere Lern-KI-Adresse eintragen.
+- Die Google-Gemini-Verbindung ist bereits unter api/lern-ki.js eingebaut.
+- In Vercel unter Settings > Environment Variables den Namen GEMINI_API_KEY anlegen.
+- Als Wert den Schlüssel aus Google AI Studio eintragen und danach neu bereitstellen.
+- Den Schlüssel niemals in index.html oder öffentlich bei GitHub eintragen.
 
 Die Testversion enthält bereits:
 - Terminbeantragung ohne Schülerkonto
