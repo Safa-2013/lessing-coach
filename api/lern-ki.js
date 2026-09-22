@@ -15,7 +15,7 @@ async function findAvailableModels(key) {
   );
   if (!usable.length) throw new Error('Für diesen API-Schlüssel ist kein Textmodell verfügbar.');
   cachedModels = usable.sort((a, b) => {
-    const score = model => (/flash/i.test(model.name) ? 20 : 0) + (!/exp|preview|latest/i.test(model.name) ? 10 : 0);
+    const score = model => (/gemini-2\.5-flash$/i.test(model.name) ? 100 : 0) + (/gemini-2\.0-flash$/i.test(model.name) ? 90 : 0) + (/flash/i.test(model.name) ? 20 : 0) + (!/exp|preview|latest|legacy/i.test(model.name) ? 10 : 0);
     return score(b) - score(a);
   }).map(model => model.name.replace(/^models\//, ''));
   return cachedModels;
@@ -60,18 +60,21 @@ Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu 
       generationConfig: { temperature: 0.45, maxOutputTokens: 3000 }
     };
     let response, data, model;
-    for (const candidate of models.slice(0, 12)) {
+    const retryable = new Set([400, 404, 408, 429, 500, 502, 503, 504]);
+    const failures = [];
+    for (const candidate of models.slice(0, 20)) {
       model = candidate;
       response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(payload)
       });
       data = await response.json();
-      if (response.ok || ![400, 404].includes(response.status)) break;
-      console.warn('[lern-ki] Modell übersprungen', { status: response.status, model });
+      if (response.ok || !retryable.has(response.status)) break;
+      failures.push({ status: response.status, model, message: data?.error?.message || 'Fehler' });
+      console.warn('[lern-ki] Modell übersprungen', failures[failures.length - 1]);
     }
     if (!response.ok) {
       const googleMessage = data?.error?.message || 'Unbekannter Google-Fehler';
-      console.error('[lern-ki] Gemini-Fehler', { status: response.status, model, message: googleMessage });
+      console.error('[lern-ki] Gemini-Fehler', { status: response.status, model, message: googleMessage, attempts: failures.length });
       if (response.status === 400 || response.status === 404) cachedModels = [];
       const hint = response.status === 400 || response.status === 404
         ? 'Google hat das automatisch ausgewählte KI-Modell nicht angenommen. Bitte versuche es gleich erneut.'
@@ -79,7 +82,9 @@ Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu 
           ? 'Der Gemini-API-Schlüssel ist ungültig oder die API ist nicht freigeschaltet.'
           : response.status === 429
             ? 'Das kostenlose Gemini-Limit ist gerade erreicht.'
-            : 'Google Gemini konnte nicht antworten.';
+            : response.status >= 500
+              ? 'Google Gemini ist gerade überlastet. Bitte versuche es in einer Minute erneut.'
+              : 'Google Gemini konnte nicht antworten.';
       return res.status(response.status).json({ error: hint });
     }
     const answer = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
