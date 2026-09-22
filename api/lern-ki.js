@@ -27,7 +27,8 @@ Erfinde keine Fakten. Weise bei Unsicherheit darauf hin. Bitte niemals um privat
 Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu einer erwachsenen Vertrauensperson und im Notfall zu 112.`;
 
   try {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent', {
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify({
@@ -37,11 +38,26 @@ Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu 
       })
     });
     const data = await response.json();
-    if (!response.ok) return res.status(response.status).json({ error: 'Google Gemini konnte nicht antworten.' });
+    if (!response.ok) {
+      const googleMessage = data?.error?.message || 'Unbekannter Google-Fehler';
+      console.error('[lern-ki] Gemini-Fehler', { status: response.status, model, message: googleMessage });
+      const hint = response.status === 400 || response.status === 404
+        ? 'Das ausgewählte Gemini-Modell ist nicht verfügbar.'
+        : response.status === 403
+          ? 'Der Gemini-API-Schlüssel ist ungültig oder die API ist nicht freigeschaltet.'
+          : response.status === 429
+            ? 'Das kostenlose Gemini-Limit ist gerade erreicht.'
+            : 'Google Gemini konnte nicht antworten.';
+      return res.status(response.status).json({ error: hint });
+    }
     const answer = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
-    if (!answer) return res.status(502).json({ error: 'Keine Antwort erhalten.' });
+    if (!answer) {
+      console.error('[lern-ki] Leere Gemini-Antwort', { model, finishReason: data.candidates?.[0]?.finishReason });
+      return res.status(502).json({ error: 'Keine Antwort erhalten.' });
+    }
     return res.status(200).json({ answer });
-  } catch {
+  } catch (error) {
+    console.error('[lern-ki] Verbindungsfehler', { message: String(error) });
     return res.status(502).json({ error: 'Die Lern-KI ist gerade nicht erreichbar.' });
   }
 }
