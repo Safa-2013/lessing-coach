@@ -4,6 +4,8 @@ let workingModel = '';
 
 async function findAvailableModels(key) {
   if (process.env.GEMINI_MODEL) return [process.env.GEMINI_MODEL.replace(/^models\//, '')];
+  // Schnelle feste Modelle statt automatischer Google-Auswahl
+  return ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
   if (cachedModels.length) return cachedModels;
   const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', {
     headers: { 'x-goog-api-key': key }
