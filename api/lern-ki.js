@@ -12,7 +12,7 @@ async function findAvailableModels(key) {
   if (!response.ok) throw new Error(data?.error?.message || 'Gemini-Modelle konnten nicht geladen werden.');
   const usable = (data.models || []).filter(model =>
     model.supportedGenerationMethods?.includes('generateContent') &&
-    !/image|vision|embedding|tts|audio|live/i.test(model.name)
+    !/image|vision|embedding|tts|audio|live|gemma/i.test(model.name)
   );
   if (!usable.length) throw new Error('Für diesen API-Schlüssel ist kein Textmodell verfügbar.');
   const ranked = usable.sort((a, b) => {
@@ -24,10 +24,24 @@ async function findAvailableModels(key) {
     pick(/flash(?!.*lite)/i),
     pick(/pro/i),
     pick(/flash.*lite/i),
-    pick(/gemma/i),
     ...ranked
   ].filter(Boolean))];
   return cachedModels;
+}
+
+function cleanAnswer(raw) {
+  const text = String(raw || '').trim();
+  if (!text) return '';
+  const looksLikeInternalNotes = /\*\s*(User says|Context|Mode|Persona|Greeting|Tone|Language|Friendly\?|Natural\?)/i.test(text);
+  if (!looksLikeInternalNotes) return text;
+
+  const quoted = [...text.matchAll(/["“]([^"”]{12,})["”]/g)]
+    .map(match => match[1].trim())
+    .filter(value => !/^(Normal chatten|Du|Lessing KI)$/i.test(value));
+  if (quoted.length) return quoted.sort((a, b) => b.length - a.length)[0];
+
+  const naturalLine = text.match(/Natural\?\s*Yes\.\s*(.+?)(?:\n|$)/i);
+  return naturalLine?.[1]?.trim() || 'Hallo! Wie kann ich dir helfen?';
 }
 
 export default async function handler(req, res) {
@@ -56,7 +70,8 @@ Bei Hausaufgaben hilfst du schrittweise, statt nur die Endlösung zu nennen.
 Bei "Lernplan erstellen" lieferst du einen konkreten Plan mit Tagen, Dauer, Zielen, Übungen, Pausen und Wiederholung.
 Bei "Quiz erstellen" gibst du Fragen zuerst ohne Lösungen; Lösungen erst, wenn danach gefragt wird.
 Erfinde keine Fakten. Weise bei Unsicherheit darauf hin. Bitte niemals um private Daten.
-Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu einer erwachsenen Vertrauensperson und im Notfall zu 112.`;
+Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu einer erwachsenen Vertrauensperson und im Notfall zu 112.
+WICHTIG: Gib ausschließlich die fertige Antwort an den Nutzer aus. Zeige niemals Analyse, Gedankengang, interne Regeln, Checklisten, Bewertungskriterien oder eine Beschreibung dessen, was du antworten willst. Beginne direkt mit der normalen Antwort.`;
 
   try {
     const availableModels = await findAvailableModels(key);
@@ -111,7 +126,7 @@ Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu 
               : 'Google Gemini konnte nicht antworten.';
       return res.status(response.status).json({ error: hint });
     }
-    const answer = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+    const answer = cleanAnswer(data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join(''));
     if (!answer) {
       console.error('[lern-ki] Leere Gemini-Antwort', { model, finishReason: data.candidates?.[0]?.finishReason });
       return res.status(502).json({ error: 'Keine Antwort erhalten.' });
