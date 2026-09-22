@@ -1,4 +1,23 @@
 const requests = new Map();
+let cachedModel = '';
+
+async function findAvailableModel(key) {
+  if (process.env.GEMINI_MODEL) return process.env.GEMINI_MODEL.replace(/^models\//, '');
+  if (cachedModel) return cachedModel;
+  const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', {
+    headers: { 'x-goog-api-key': key }
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data?.error?.message || 'Gemini-Modelle konnten nicht geladen werden.');
+  const usable = (data.models || []).filter(model =>
+    model.supportedGenerationMethods?.includes('generateContent') &&
+    !/image|vision|embedding|tts|audio|live/i.test(model.name)
+  );
+  const preferred = usable.find(model => /flash/i.test(model.name)) || usable[0];
+  if (!preferred) throw new Error('Für diesen API-Schlüssel ist kein Textmodell verfügbar.');
+  cachedModel = preferred.name.replace(/^models\//, '');
+  return cachedModel;
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Nur POST erlaubt.' });
@@ -13,12 +32,14 @@ export default async function handler(req, res) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return res.status(503).json({ error: 'Die Lern-KI ist noch nicht eingerichtet.' });
 
-  const { question = '', mode = 'Frage beantworten', grade = 'unbekannt' } = req.body || {};
+  const { question = '', mode = 'Normal chatten', grade = 'unbekannt', history = [] } = req.body || {};
   if (!question.trim() || question.length > 5000) return res.status(400).json({ error: 'Ungültige Frage.' });
 
-  const system = `Du bist Lessing Lern-KI, eine besonders geduldige, genaue und sichere Lernbegleitung für Schülerinnen und Schüler.
-Erkenne das Schulfach automatisch. Antworte auf Deutsch und passe Sprache und Schwierigkeit an die Klasse ${grade} an.
-Gewählter Lernmodus: ${mode}.
+  const system = `Du bist Lessing KI, ein freundlicher, genauer und sicherer Chat-Assistent für Schülerinnen und Schüler.
+Du kannst ganz normale Gespräche führen und allgemeine Fragen beantworten. Wenn es um Schule geht, bist du zusätzlich eine besonders geduldige Lernbegleitung.
+Antworte standardmäßig auf Deutsch und passe Sprache und Schwierigkeit an die Klasse ${grade} an. Wenn der Nutzer in einer anderen Sprache schreibt, darfst du passend antworten.
+Gewählter Modus: ${mode}.
+Bei "Normal chatten" antwortest du natürlich wie in einem normalen Chat und machst aus einer Begrüßung keine Schulaufgabe.
 Erkläre verständlich mit Beispielen. Stelle bei unklaren Fragen höchstens eine kurze Rückfrage.
 Bei Hausaufgaben hilfst du schrittweise, statt nur die Endlösung zu nennen.
 Bei "Lernplan erstellen" lieferst du einen konkreten Plan mit Tagen, Dauer, Zielen, Übungen, Pausen und Wiederholung.
@@ -27,13 +48,16 @@ Erfinde keine Fakten. Weise bei Unsicherheit darauf hin. Bitte niemals um privat
 Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu einer erwachsenen Vertrauensperson und im Notfall zu 112.`;
 
   try {
-    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const model = await findAvailableModel(key);
+    const safeHistory = Array.isArray(history) ? history.slice(-12).filter(item =>
+      ['user', 'model'].includes(item?.role) && typeof item?.text === 'string' && item.text.trim()
+    ).map(item => ({ role: item.role, parts: [{ text: item.text.slice(0, 3000) }] })) : [];
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify({
         system_instruction: { parts: [{ text: system }] },
-        contents: [{ role: 'user', parts: [{ text: question.trim() }] }],
+        contents: [...safeHistory, { role: 'user', parts: [{ text: question.trim() }] }],
         generationConfig: { temperature: 0.45, maxOutputTokens: 3000 }
       })
     });
@@ -41,8 +65,9 @@ Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu 
     if (!response.ok) {
       const googleMessage = data?.error?.message || 'Unbekannter Google-Fehler';
       console.error('[lern-ki] Gemini-Fehler', { status: response.status, model, message: googleMessage });
+      if (response.status === 400 || response.status === 404) cachedModel = '';
       const hint = response.status === 400 || response.status === 404
-        ? 'Das ausgewählte Gemini-Modell ist nicht verfügbar.'
+        ? 'Google hat das automatisch ausgewählte KI-Modell nicht angenommen. Bitte versuche es gleich erneut.'
         : response.status === 403
           ? 'Der Gemini-API-Schlüssel ist ungültig oder die API ist nicht freigeschaltet.'
           : response.status === 429
