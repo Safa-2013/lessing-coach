@@ -1,5 +1,6 @@
 const requests = new Map();
 let cachedModels = [];
+let workingModel = '';
 
 async function findAvailableModels(key) {
   if (process.env.GEMINI_MODEL) return [process.env.GEMINI_MODEL.replace(/^models\//, '')];
@@ -50,7 +51,8 @@ Erfinde keine Fakten. Weise bei Unsicherheit darauf hin. Bitte niemals um privat
 Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu einer erwachsenen Vertrauensperson und im Notfall zu 112.`;
 
   try {
-    const models = await findAvailableModels(key);
+    const availableModels = await findAvailableModels(key);
+    const models = workingModel ? [workingModel, ...availableModels.filter(name => name !== workingModel)] : availableModels;
     const safeHistory = Array.isArray(history) ? history.slice(-12).filter(item =>
       ['user', 'model'].includes(item?.role) && typeof item?.text === 'string' && item.text.trim()
     ).map(item => ({ role: item.role, parts: [{ text: item.text.slice(0, 3000) }] })) : [];
@@ -62,20 +64,34 @@ Bei Gewalt, Missbrauch, Selbstverletzung oder akuter Gefahr rätst du sofort zu 
     let response, data, model;
     const retryable = new Set([400, 404, 408, 429, 500, 502, 503, 504]);
     const failures = [];
-    for (const candidate of models.slice(0, 20)) {
+    for (const candidate of models.slice(0, 5)) {
       model = candidate;
-      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(payload)
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 9000);
+      try {
+        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(payload), signal: controller.signal
+        });
+      } catch (error) {
+        clearTimeout(timeout);
+        failures.push({ status: 408, model, message: 'Zeitüberschreitung' });
+        continue;
+      }
+      clearTimeout(timeout);
       data = await response.json();
+      if (response.ok) { workingModel = model; break; }
       if (response.ok || !retryable.has(response.status)) break;
       failures.push({ status: response.status, model, message: data?.error?.message || 'Fehler' });
       console.warn('[lern-ki] Modell übersprungen', failures[failures.length - 1]);
     }
+    if (!response) {
+      console.error('[lern-ki] Alle Modellversuche hatten eine Zeitüberschreitung', { attempts: failures.length });
+      return res.status(504).json({ error: 'Google Gemini antwortet gerade zu langsam. Bitte versuche es gleich erneut.' });
+    }
     if (!response.ok) {
       const googleMessage = data?.error?.message || 'Unbekannter Google-Fehler';
       console.error('[lern-ki] Gemini-Fehler', { status: response.status, model, message: googleMessage, attempts: failures.length });
-      if (response.status === 400 || response.status === 404) cachedModels = [];
+      if (response.status === 400 || response.status === 404) { cachedModels = []; workingModel = ''; }
       const hint = response.status === 400 || response.status === 404
         ? 'Google hat das automatisch ausgewählte KI-Modell nicht angenommen. Bitte versuche es gleich erneut.'
         : response.status === 403
