@@ -1,0 +1,23 @@
+LESSING-COACH – ONLINE-EINRICHTUNG
+
+Die Website funktioniert sofort als lokale Testversion.
+
+Für echten Betrieb auf mehreren Geräten werden zusätzlich benötigt:
+1. Eine geschützte Online-Datenbank, zum Beispiel Supabase.
+2. Eine sichere serverseitige Lern-KI-Adresse.
+3. Ein echter Admin-Login über den Server statt eines Passworts im Browser.
+
+Wichtig:
+- Keine geheimen KI- oder Datenbank-Schlüssel direkt in index.html eintragen.
+- Für Schülerdaten müssen Datenschutz, Zugriffsrechte und Löschfristen mit der Schule geklärt werden.
+- Der Admin kann unter „Einstellungen“ eine sichere Lern-KI-Adresse eintragen.
+
+Die Testversion enthält bereits:
+- Terminbeantragung ohne Schülerkonto
+- persönlichen Anfragecode
+- Status und Chat
+- Terminbestätigung und Abholungshinweis
+- Sperren von Wochentagen, einzelnen Tagen und Ferienzeiträumen
+- Browser-Benachrichtigungen
+- Datensicherung und Wiederherstellung
+- Lern-KI-Oberfläche mit allen üblichen Schulfächern
