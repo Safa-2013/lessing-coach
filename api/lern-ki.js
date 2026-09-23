@@ -1,15 +1,14 @@
 const requests = new Map();
 
-function cleanAnswer(raw) {
-  const text = String(raw || "").trim();
-  return text || "Hallo! Wie kann ich dir helfen?";
+function cleanAnswer(text) {
+  if (!text) return "Hallo! Wie kann ich dir helfen?";
+  return String(text).trim();
 }
 
-async function getModels() {
+function getModels() {
   return [
     "gemini-2.5-flash-lite",
-    "gemini-3.6-flash",
-    "gemini-2.0-flash-lite"
+    "gemini-3.6-flash"
   ];
 }
 
@@ -21,9 +20,10 @@ export default async function handler(req, res) {
     });
   }
 
-  const key = process.env.GEMINI_API_KEY;
 
-  if (!key) {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
     return res.status(503).json({
       error: "GEMINI_API_KEY fehlt in Vercel."
     });
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
   if (!question.trim()) {
     return res.status(400).json({
-      error: "Keine Frage eingegeben."
+      error: "Keine Frage."
     });
   }
 
@@ -48,86 +48,98 @@ export default async function handler(req, res) {
   const system = `
 Du bist Lessing KI.
 
-Du bist ein freundlicher KI-Assistent für Schülerinnen und Schüler.
+Du bist ein schneller, freundlicher Lernassistent für Schüler.
 
-Du kannst:
-- normal chatten
-- Fragen beantworten
-- beim Lernen helfen
-- Lernpläne erstellen
-- Quiz erstellen
-- Hausaufgaben erklären
+Regeln:
+- Antworte auf Deutsch.
+- Erkläre einfach.
+- Hilf bei Hausaufgaben Schritt für Schritt.
+- Erstelle Lernpläne wenn gefragt.
+- Erstelle Quiz wenn gefragt.
+- Bei normalen Fragen antworte wie ein normaler Chat.
+- Keine internen Gedanken zeigen.
+- Keine langen Einleitungen.
 
-Antworte auf Deutsch.
-Passe dich der Klasse ${grade} an.
+Klasse:
+${grade}
 
 Modus:
 ${mode}
-
-Wichtig:
-Gib nur die fertige Antwort aus.
-Keine internen Gedanken oder Analysen.
 `;
 
 
-  const payload = {
-    system_instruction: {
-      parts: [
-        {
-          text: system
-        }
-      ]
-    },
+  const contents = [];
 
-    contents: [
-      ...(Array.isArray(history)
-        ? history.slice(-10).map(m => ({
-            role: m.role,
-            parts: [
-              {
-                text: String(m.text || "")
-              }
-            ]
-          }))
-        : []),
 
-      {
-        role: "user",
-        parts: [
-          {
-            text: question
-          }
-        ]
+  if (Array.isArray(history)) {
+    history.slice(-6).forEach(msg => {
+
+      if (
+        msg.role === "user" ||
+        msg.role === "model"
+      ) {
+        contents.push({
+          role: msg.role,
+          parts:[
+            {
+              text:String(msg.text).slice(0,1500)
+            }
+          ]
+        });
       }
-    ],
 
-    generationConfig: {
-      temperature: 0.5,
-      maxOutputTokens: 1500
-    }
-  };
+    });
+  }
 
 
-  const models = await getModels();
+  contents.push({
+    role:"user",
+    parts:[
+      {
+        text:question
+      }
+    ]
+  });
 
-  let lastError = null;
 
 
-  for (const model of models) {
+  let lastError;
+
+
+  for (const model of getModels()) {
 
     try {
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
-          method: "POST",
+          method:"POST",
 
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": key
+          headers:{
+            "Content-Type":"application/json",
+            "x-goog-api-key":apiKey
           },
 
-          body: JSON.stringify(payload)
+          body:JSON.stringify({
+
+            system_instruction:{
+              parts:[
+                {
+                  text:system
+                }
+              ]
+            },
+
+
+            contents,
+
+
+            generationConfig:{
+              temperature:0.3,
+              maxOutputTokens:700
+            }
+
+          })
         }
       );
 
@@ -135,44 +147,44 @@ Keine internen Gedanken oder Analysen.
       const data = await response.json();
 
 
-      if (response.ok) {
+      if(response.ok){
 
         const answer =
-          data?.candidates?.[0]?.content?.parts
-          ?.map(p => p.text)
+          data?.candidates?.[0]
+          ?.content?.parts
+          ?.map(p=>p.text)
           .join("");
 
 
         return res.status(200).json({
-          answer: cleanAnswer(answer)
+          answer:cleanAnswer(answer)
         });
 
       }
 
 
-      lastError = data?.error?.message || "Gemini Fehler";
-
-
-      console.log(
-        "Modell fehlgeschlagen:",
-        model,
-        lastError
-      );
+      lastError=data?.error?.message;
 
 
     } catch(error){
 
-      lastError = error.message;
+      lastError=error.message;
 
     }
 
   }
 
 
+
+  console.error(
+    "Gemini Fehler:",
+    lastError
+  );
+
+
   return res.status(503).json({
     error:
-    "Google Gemini ist momentan nicht verfügbar. Bitte später erneut versuchen.",
-    details:lastError
+    "Die KI ist gerade ausgelastet. Bitte erneut versuchen."
   });
 
 }
