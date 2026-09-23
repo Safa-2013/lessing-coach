@@ -163,5 +163,18 @@
     function removeLogo(){db.settings.logo='';save();applyBrand();renderDesign()}
     seedSlots();applyBrand();showView('home');
   </script>
+
+<!-- Lessing KI v3 Erweiterungen -->
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const box=document.createElement("div");
+  box.style.cssText="position:fixed;bottom:20px;left:20px;background:white;border:1px solid #dbe5ed;border-radius:16px;padding:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);z-index:9999";
+  box.innerHTML=`
+  <b>📎 Lessing KI Dateien</b><br>
+  <input id="lessingFiles" type="file" multiple accept="image/*,.pdf,.doc,.docx" capture="environment"><br>
+  <small>Bilder/PDF/Dateien können hochgeladen werden. Die KI kann sie analysieren.</small>`;
+  document.body.appendChild(box);
+});
+</script>
 </body>
 </html>
