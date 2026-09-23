@@ -28,42 +28,43 @@ export default async function handler(req, res) {
 
   if (!question.trim()) {
     return res.status(400).json({
-      error: "Keine Nachricht eingegeben."
+      error: "Keine Nachricht."
     });
   }
 
 
-  // Schutz gegen Spam
+
+  // Schutz gegen zu viele Anfragen
   const ip = req.headers["x-forwarded-for"] || "unknown";
   const now = Date.now();
 
-  const oldRequests = (requests.get(ip) || [])
-    .filter(time => now - time < 600000);
+  const userRequests = (requests.get(ip) || [])
+    .filter(t => now - t < 600000);
 
-  if (oldRequests.length >= 20) {
+
+  if (userRequests.length >= 20) {
     return res.status(429).json({
       error: "Bitte kurz warten."
     });
   }
 
-  oldRequests.push(now);
-  requests.set(ip, oldRequests);
+
+  userRequests.push(now);
+  requests.set(ip, userRequests);
 
 
 
-  const systemPrompt = `
+  const system = `
 Du bist Lessing KI.
 
-Du bist ein moderner KI-Assistent für Schülerinnen und Schüler.
+Du bist ein schneller KI-Assistent für Schüler.
 
 Du kannst:
-- normal chatten
 - Fragen beantworten
-- beim Lernen helfen
+- Lernen erklären
 - Lernpläne erstellen
 - Tests erstellen
-- Themen erklären
-- Aufgaben Schritt für Schritt erklären
+- normal chatten
 
 Klasse:
 ${grade}
@@ -71,11 +72,8 @@ ${grade}
 Modus:
 ${mode}
 
-Regeln:
-- Antworte freundlich und verständlich.
-- Passe dich dem Alter an.
-- Zeige keine internen Gedanken.
-- Gib nur die fertige Antwort aus.
+Antworte kurz, klar und verständlich.
+Keine internen Gedanken anzeigen.
 `;
 
 
@@ -83,9 +81,9 @@ Regeln:
   const contents = [
     {
       role: "user",
-      parts: [
+      parts:[
         {
-          text: systemPrompt
+          text: system
         }
       ]
     }
@@ -93,23 +91,24 @@ Regeln:
 
 
 
-  if (Array.isArray(history)) {
+  if(Array.isArray(history)){
 
-    history.slice(-10).forEach(item => {
+    history.slice(-6).forEach(msg=>{
 
-      if (
-        item &&
-        typeof item.text === "string" &&
-        (item.role === "user" || item.role === "model")
-      ) {
+      if(msg?.text){
 
         contents.push({
-          role: item.role,
-          parts: [
+
+          role: msg.role === "model"
+            ? "model"
+            : "user",
+
+          parts:[
             {
-              text: item.text.substring(0,3000)
+              text:String(msg.text).slice(0,1500)
             }
           ]
+
         });
 
       }
@@ -121,27 +120,36 @@ Regeln:
 
 
   contents.push({
+
     role:"user",
+
     parts:[
       {
-        text:question
+        text:question.trim()
       }
     ]
+
   });
 
 
 
-  try {
+  try{
 
 
     const response = await fetch(
+
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+
       {
+
         method:"POST",
 
         headers:{
+
           "Content-Type":"application/json",
+
           "x-goog-api-key":apiKey
+
         },
 
         body:JSON.stringify({
@@ -149,13 +157,17 @@ Regeln:
           contents,
 
           generationConfig:{
-            temperature:0.5,
-            maxOutputTokens:2000
+
+            temperature:0.4,
+
+            maxOutputTokens:800
+
           }
 
         })
 
       }
+
     );
 
 
@@ -166,13 +178,13 @@ Regeln:
 
     if(!response.ok){
 
-      console.error("Gemini Fehler:", data);
+      console.error(data);
 
       return res.status(response.status).json({
 
         error:
           data?.error?.message ||
-          "Gemini konnte nicht antworten."
+          "Gemini Fehler"
 
       });
 
@@ -192,7 +204,7 @@ Regeln:
 
       return res.status(500).json({
 
-        error:"Keine Antwort von Gemini erhalten."
+        error:"Keine Antwort erhalten."
 
       });
 
@@ -208,7 +220,7 @@ Regeln:
 
 
 
-  } catch(error){
+  }catch(error){
 
 
     console.error(error);
@@ -216,7 +228,7 @@ Regeln:
 
     return res.status(500).json({
 
-      error:"Verbindung zu Gemini fehlgeschlagen."
+      error:"KI nicht erreichbar."
 
     });
 
