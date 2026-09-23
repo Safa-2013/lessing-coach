@@ -3,32 +3,10 @@ let cachedModels = [];
 let workingModel = '';
 
 async function findAvailableModels(key) {
-  if (process.env.GEMINI_MODEL) return [process.env.GEMINI_MODEL.replace(/^models\//, '')];
-  // Schnelle feste Modelle statt automatischer Google-Auswahl
+  if (process.env.GEMINI_MODEL) {
+    return [process.env.GEMINI_MODEL.replace(/^models\//, '')];
+  }
   return ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
-  if (cachedModels.length) return cachedModels;
-  const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', {
-    headers: { 'x-goog-api-key': key }
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message || 'Gemini-Modelle konnten nicht geladen werden.');
-  const usable = (data.models || []).filter(model =>
-    model.supportedGenerationMethods?.includes('generateContent') &&
-    !/image|vision|embedding|tts|audio|live|gemma/i.test(model.name)
-  );
-  if (!usable.length) throw new Error('Für diesen API-Schlüssel ist kein Textmodell verfügbar.');
-  const ranked = usable.sort((a, b) => {
-    const score = model => (/gemini-2\.5-flash$/i.test(model.name) ? 100 : 0) + (/gemini-2\.0-flash$/i.test(model.name) ? 90 : 0) + (/flash/i.test(model.name) ? 20 : 0) + (!/exp|preview|latest|legacy/i.test(model.name) ? 10 : 0);
-    return score(b) - score(a);
-  }).map(model => model.name.replace(/^models\//, ''));
-  const pick = pattern => ranked.find(name => pattern.test(name));
-  cachedModels = [...new Set([
-    pick(/flash(?!.*lite)/i),
-    pick(/pro/i),
-    pick(/flash.*lite/i),
-    ...ranked
-  ].filter(Boolean))];
-  return cachedModels;
 }
 
 function cleanAnswer(raw) {
