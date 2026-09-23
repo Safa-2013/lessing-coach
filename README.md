@@ -1,9 +1,9 @@
-# Lessing Coach Update
 
-Neue Struktur:
-- ChatGPT ähnliche Oberfläche
-- Microsoft Schulaccount Login Vorbereitung
-- Dashboard ohne Begrüßung
-- Lernbereiche vorbereitet
+Lessing Coach GPT UI
 
-Backend/API kann mit der bestehenden Gemini API verbunden werden.
+Diese Version ist die neue Oberfläche:
+- ChatGPT ähnliches Layout
+- Sidebar
+- Fächer-Karten
+- Lernkarten
+- Vorbereitung für Microsoft Schulaccount Login
