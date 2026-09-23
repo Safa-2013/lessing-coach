@@ -1,0 +1,5 @@
+KI Bereich:
+- dunkle GPT-ähnliche Oberfläche
+- Chat Ansicht
+- Lernfunktionen
+- nur innerhalb der KI-Seite

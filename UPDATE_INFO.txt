@@ -1,0 +1,6 @@
+Lessing Schulportal Update
+
+- Startseite bleibt unverändert (alte Version mit Terminplaner)
+- Nur der KI-Bereich bekommt die neue GPT-ähnliche Ansicht
+- Admin-Anmeldung bleibt überall aktiv
+- Keine Änderungen an anderen Bereichen
