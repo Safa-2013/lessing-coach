@@ -1,19 +1,36 @@
+import {useState} from 'react';
+
 export default function App(){
-return <div className="app">
-<aside>
-<h2>🎓 Lessing Coach</h2><p>Dein KI-Lernassistent</p>
-<nav>
-<div>💬 Neuer Chat</div><div>📅 Lernplaner</div><div>📝 Aufgaben</div><div>🎓 Prüfungsvorbereitung</div><div>📄 Zusammenfassungen</div><div>⚙ Einstellungen</div>
-</nav>
-</aside>
-<main>
-<h1>Was möchtest du heute lernen?</h1>
-<p>Dein KI-Lernassistent für Fragen, Erklärungen und Lernpläne.</p>
-<div className="subjects">
-{["Mathematik","Deutsch","Englisch","Biologie","Chemie","Physik","Geschichte","Erdkunde","Informatik"].map(x=><button>{x}</button>)}
-</div>
-<div className="input"><input placeholder="Stelle mir eine Frage..."/><button>↑</button></div>
-<div className="cards"><section>Lernplan erstellen</section><section>Aufgaben lösen</section><section>Themen verstehen</section></div>
-</main>
-</div>
+ const [page,setPage]=useState('home');
+
+ return <div className="app">
+ <aside>
+  <h2>🎓 Lessing Coach</h2>
+  <button onClick={()=>setPage('home')}>🏠 Startseite</button>
+  <button onClick={()=>setPage('calendar')}>📅 Terminplaner</button>
+  <button onClick={()=>setPage('ai')}>🤖 KI-Lernassistent</button>
+  <button>📚 Lernpläne</button>
+  <button>📝 Aufgaben</button>
+  <button>⚙ Einstellungen</button>
+  <div className="profile">👤 Benutzer<br/>Admin</div>
+ </aside>
+
+ <main>
+ {page==='home' && <>
+ <h1>Was möchtest du heute lernen?</h1>
+ <div className="cards">
+ <div>📅 Terminplaner</div>
+ <div>🤖 KI-Lernassistent</div>
+ <div>📝 Aufgaben</div>
+ </div>
+ </>}
+
+ {page==='calendar' && <><h1>Terminplaner</h1><p>Hier kommen Termine und Kalender.</p></>}
+
+ {page==='ai' && <><h1>KI-Lernassistent</h1>
+ <div className="chat">Schreibe deine Frage...</div>
+ <input placeholder="Nachricht schreiben..."/>
+ </>}
+ </main>
+ </div>
 }
