@@ -1,0 +1,2 @@
+Microsoft Schulaccount:
+Für echten Login wird Microsoft Entra ID OAuth benötigt.
