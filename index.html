@@ -1,40 +1,52 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Lessing KI</title>
+<title>Lessing Schulportal</title>
 <style>
-body{font-family:Arial;background:#f7f9fc;margin:0}
-.chat{max-width:900px;margin:40px auto;background:white;border-radius:20px;padding:25px}
-.msg{padding:15px;border-radius:15px;margin:12px 0}
-.user{background:#d9ecff}
-.ai{background:#fff;border:1px solid #ddd}
-.input{display:flex;gap:10px}
-input{flex:1;padding:15px;border-radius:12px;border:1px solid #ccc}
-button{padding:15px 25px;background:#174d7c;color:white;border:0;border-radius:12px}
+body{font-family:Arial;margin:0;background:#f5f8fc;color:#18324a}
+header{background:#155487;color:white;padding:20px;font-size:24px}
+.container{max-width:1100px;margin:30px auto;background:white;padding:25px;border-radius:20px}
+.menu button{margin:5px;padding:12px;border:0;border-radius:10px;background:#e8f1fa}
+.card{margin-top:20px;padding:20px;border-radius:15px;background:#f1f6fb}
+input,textarea,select{padding:12px;width:90%;margin:5px;border-radius:8px;border:1px solid #ccc}
 </style>
 </head>
 <body>
-<div class="chat">
-<h1>KI-Chat & Lernhilfe</h1>
-<div id="chat"></div>
-<div class="input">
-<input id="q" placeholder="Schreibe eine Nachricht...">
-<button onclick="send()">Senden</button>
+<header>Lessing Schulportal</header>
+<div class="container">
+<div class="menu">
+<button>KI-Chat</button>
+<button>Terminplaner</button>
+<button>Lernpläne</button>
+<button>Fächer</button>
+</div>
+
+<div class="card">
+<h2>KI-Chat & Lernhilfe</h2>
+<input placeholder="Schreibe eine Nachricht...">
+<button>Senden</button>
+</div>
+
+<div class="card">
+<h2>Terminplaner</h2>
+<input placeholder="Termin">
+<input type="date">
+<select>
+<option>Mathe</option>
+<option>Deutsch</option>
+<option>Englisch</option>
+<option>Chemie</option>
+<option>Physik</option>
+<option>Biologie</option>
+</select>
+<textarea placeholder="Notizen"></textarea>
+</div>
+
+<div class="card">
+<h2>Lernplan erstellen</h2>
+<p>Fach auswählen → Ziel eingeben → KI erstellt Lernplan.</p>
 </div>
 </div>
-<script>
-async function send(){
- const q=document.getElementById("q");
- const text=q.value;
- if(!text)return;
- document.getElementById("chat").innerHTML += '<div class="msg user">'+text+'</div>';
- q.value="";
- document.getElementById("chat").innerHTML += '<div class="msg ai">Lessing KI schreibt...</div>';
- const r=await fetch("/api/lern-ki",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:text})});
- const d=await r.json();
- document.getElementById("chat").lastChild.innerHTML=d.answer||d.error;
-}
-</script>
 </body>
 </html>
