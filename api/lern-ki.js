@@ -6,7 +6,7 @@ async function findAvailableModels(key) {
   if (process.env.GEMINI_MODEL) {
     return [process.env.GEMINI_MODEL.replace(/^models\//, '')];
   }
-  return ['gemini-2.5-flash', 'gemini-2.0-flash'];
+ return ['gemini-2.5-flash'];
 }
 
 function cleanAnswer(raw) {
