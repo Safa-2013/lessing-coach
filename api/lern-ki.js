@@ -1,14 +1,12 @@
 const requests = new Map();
 
 function cleanAnswer(text) {
-  if (!text) return "Hallo! Wie kann ich dir helfen?";
-  return String(text).trim();
+  return String(text || "").trim() || "Hallo! Wie kann ich dir helfen?";
 }
 
 function getModels() {
   return [
-    "gemini-2.5-flash-lite",
-    "gemini-3.6-flash"
+    "gemini-2.5-flash-lite"
   ];
 }
 
@@ -40,7 +38,7 @@ export default async function handler(req, res) {
 
   if (!question.trim()) {
     return res.status(400).json({
-      error: "Keine Frage."
+      error:"Keine Frage"
     });
   }
 
@@ -53,12 +51,11 @@ Du bist ein schneller, freundlicher Lernassistent für Schüler.
 Regeln:
 - Antworte auf Deutsch.
 - Erkläre einfach.
-- Hilf bei Hausaufgaben Schritt für Schritt.
-- Erstelle Lernpläne wenn gefragt.
-- Erstelle Quiz wenn gefragt.
-- Bei normalen Fragen antworte wie ein normaler Chat.
+- Bei Schule hilfst du Schritt für Schritt.
+- Bei normalen Fragen chatte normal.
 - Keine internen Gedanken zeigen.
 - Keine langen Einleitungen.
+- Komm direkt zur Antwort.
 
 Klasse:
 ${grade}
@@ -68,47 +65,40 @@ ${mode}
 `;
 
 
-  const contents = [];
-
-
-  if (Array.isArray(history)) {
-    history.slice(-6).forEach(msg => {
-
-      if (
-        msg.role === "user" ||
-        msg.role === "model"
-      ) {
-        contents.push({
-          role: msg.role,
+  const contents = [
+    ...(
+      Array.isArray(history)
+      ? history.slice(-6).map(m => ({
+          role:m.role,
           parts:[
             {
-              text:String(msg.text).slice(0,1500)
+              text:String(m.text).slice(0,1000)
             }
           ]
-        });
-      }
-
-    });
-  }
-
-
-  contents.push({
-    role:"user",
-    parts:[
-      {
-        text:question
-      }
-    ]
-  });
-
-
-
-  let lastError;
+        }))
+      : []
+    ),
+    {
+      role:"user",
+      parts:[
+        {
+          text:question
+        }
+      ]
+    }
+  ];
 
 
   for (const model of getModels()) {
 
     try {
+
+      const controller = new AbortController();
+
+      const timer = setTimeout(()=>{
+        controller.abort();
+      },8000);
+
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
@@ -136,12 +126,17 @@ ${mode}
 
             generationConfig:{
               temperature:0.3,
-              maxOutputTokens:700
+              maxOutputTokens:600
             }
 
-          })
+          }),
+
+          signal:controller.signal
         }
       );
+
+
+      clearTimeout(timer);
 
 
       const data = await response.json();
@@ -150,10 +145,9 @@ ${mode}
       if(response.ok){
 
         const answer =
-          data?.candidates?.[0]
-          ?.content?.parts
-          ?.map(p=>p.text)
-          .join("");
+        data?.candidates?.[0]?.content?.parts
+        ?.map(p=>p.text)
+        .join("");
 
 
         return res.status(200).json({
@@ -163,28 +157,20 @@ ${mode}
       }
 
 
-      lastError=data?.error?.message;
+      console.log("Gemini Fehler:",data);
 
 
     } catch(error){
 
-      lastError=error.message;
+      console.log("Timeout:",error.message);
 
     }
 
   }
 
 
-
-  console.error(
-    "Gemini Fehler:",
-    lastError
-  );
-
-
   return res.status(503).json({
-    error:
-    "Die KI ist gerade ausgelastet. Bitte erneut versuchen."
+    error:"Die KI ist gerade ausgelastet. Bitte erneut versuchen."
   });
 
 }
