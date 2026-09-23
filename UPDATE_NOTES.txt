@@ -1,0 +1,12 @@
+Lessing Schulportal Update
+
+Grundlage:
+- Startseite bleibt wie die alte Version:
+  Termin beantragen + Lern-KI
+- KI wird erst nach Klick geöffnet
+- Admin Login bleibt als eigener Zugang
+- Nächster Schritt:
+  zentrales Login-System mit Rollen:
+  Admin / Schüler / Lehrer
+
+Admin soll nach einmaligem Login alle Dienste nutzen können.
