@@ -1,0 +1,14 @@
+Lessing KI Update
+
+Änderungen:
+- alte Ansicht behalten
+- kein Fächer-System
+- neue schnellere Gemini API
+- automatische Modell-Auswahl
+- weniger Wartezeit
+
+Vercel:
+Environment Variable hinzufügen:
+GEMINI_API_KEY = dein Google Gemini API Key
+
+Danach neu deployen.
