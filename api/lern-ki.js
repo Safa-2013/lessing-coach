@@ -1,13 +1,8 @@
 const requests = new Map();
 
 function cleanAnswer(text) {
-  return String(text || "").trim() || "Hallo! Wie kann ich dir helfen?";
-}
-
-function getModels() {
-  return [
-    "gemini-2.5-flash-lite"
-  ];
+  const answer = String(text || "").trim();
+  return answer || "Hallo! Wie kann ich dir helfen?";
 }
 
 export default async function handler(req, res) {
@@ -19,9 +14,9 @@ export default async function handler(req, res) {
   }
 
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const key = process.env.GEMINI_API_KEY;
 
-  if (!apiKey) {
+  if (!key) {
     return res.status(503).json({
       error: "GEMINI_API_KEY fehlt in Vercel."
     });
@@ -31,14 +26,13 @@ export default async function handler(req, res) {
   const {
     question = "",
     mode = "Normal chatten",
-    grade = "unbekannt",
-    history = []
+    grade = "unbekannt"
   } = req.body || {};
 
 
   if (!question.trim()) {
     return res.status(400).json({
-      error:"Keine Frage"
+      error: "Keine Frage."
     });
   }
 
@@ -46,131 +40,154 @@ export default async function handler(req, res) {
   const system = `
 Du bist Lessing KI.
 
-Du bist ein schneller, freundlicher Lernassistent für Schüler.
+Du bist ein schneller KI-Lernassistent für Schüler.
 
-Regeln:
-- Antworte auf Deutsch.
-- Erkläre einfach.
-- Bei Schule hilfst du Schritt für Schritt.
-- Bei normalen Fragen chatte normal.
-- Keine internen Gedanken zeigen.
-- Keine langen Einleitungen.
-- Komm direkt zur Antwort.
+Antworte:
+- kurz und verständlich
+- auf Deutsch
+- freundlich
+- ohne lange Einleitung
 
-Klasse:
-${grade}
+Bei Schule:
+- erkläre Schritt für Schritt
+- gib Beispiele
 
-Modus:
-${mode}
+Bei normalen Fragen:
+- chatte normal.
+
+Klasse: ${grade}
+Modus: ${mode}
+
+Zeige niemals interne Gedanken.
 `;
 
 
-  const contents = [
-    ...(
-      Array.isArray(history)
-      ? history.slice(-6).map(m => ({
-          role:m.role,
-          parts:[
-            {
-              text:String(m.text).slice(0,1000)
-            }
-          ]
-        }))
-      : []
-    ),
-    {
-      role:"user",
-      parts:[
-        {
-          text:question
-        }
-      ]
-    }
-  ];
+  try {
+
+    const controller = new AbortController();
+
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 6000);
 
 
-  for (const model of getModels()) {
 
-    try {
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+      {
 
-      const controller = new AbortController();
+        method: "POST",
 
-      const timer = setTimeout(()=>{
-        controller.abort();
-      },8000);
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": key
+        },
 
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-        {
-          method:"POST",
+        body: JSON.stringify({
 
-          headers:{
-            "Content-Type":"application/json",
-            "x-goog-api-key":apiKey
+          system_instruction: {
+            parts: [
+              {
+                text: system
+              }
+            ]
           },
 
-          body:JSON.stringify({
 
-            system_instruction:{
-              parts:[
+          contents: [
+            {
+              role: "user",
+              parts: [
                 {
-                  text:system
+                  text: question.trim()
                 }
               ]
-            },
-
-
-            contents,
-
-
-            generationConfig:{
-              temperature:0.3,
-              maxOutputTokens:600
             }
-
-          }),
-
-          signal:controller.signal
-        }
-      );
+          ],
 
 
-      clearTimeout(timer);
+          generationConfig: {
+
+            temperature: 0.2,
+
+            maxOutputTokens: 350
+
+          }
+
+        }),
 
 
-      const data = await response.json();
-
-
-      if(response.ok){
-
-        const answer =
-        data?.candidates?.[0]?.content?.parts
-        ?.map(p=>p.text)
-        .join("");
-
-
-        return res.status(200).json({
-          answer:cleanAnswer(answer)
-        });
+        signal: controller.signal
 
       }
+    );
 
 
-      console.log("Gemini Fehler:",data);
+    clearTimeout(timeout);
 
 
-    } catch(error){
 
-      console.log("Timeout:",error.message);
+    const data = await response.json();
+
+
+
+    if (!response.ok) {
+
+      console.log(data);
+
+      return res.status(response.status).json({
+
+        error:
+        data?.error?.message ||
+        "Gemini Fehler"
+
+      });
 
     }
 
+
+
+    const answer =
+      data?.candidates?.[0]?.content?.parts
+      ?.map(p => p.text)
+      ?.join("");
+
+
+
+    return res.status(200).json({
+
+      answer: cleanAnswer(answer)
+
+    });
+
+
+
+  } catch(error) {
+
+
+    if(error.name === "AbortError") {
+
+      return res.status(504).json({
+
+        error:
+        "KI antwortet zu langsam."
+
+      });
+
+    }
+
+
+    console.log(error);
+
+
+    return res.status(500).json({
+
+      error:
+      "KI Fehler."
+
+    });
+
   }
-
-
-  return res.status(503).json({
-    error:"Die KI ist gerade ausgelastet. Bitte erneut versuchen."
-  });
 
 }
