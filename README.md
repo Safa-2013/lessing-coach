@@ -17,3 +17,6 @@ Google führt Gemini 3.6 Flash als stabiles Modell; Gemini 3.8 Flash ist ebenfal
 
 ## Microsoft
 Für den Microsoft-Schul-Login müssen Client-ID, Tenant-ID und SPA-Redirect-URL in Microsoft Entra konfiguriert werden.
+
+## Schulzeiten
+In der KI gibt es jetzt "Mein Schultag". Montag bis Freitag können individuelle Schulschlusszeiten (z. B. Montag 13:20 und andere Tage 16:00) eingetragen werden. Diese Zeiten werden automatisch an die Lern-KI für Lernpläne und Zeitplanung übergeben.
