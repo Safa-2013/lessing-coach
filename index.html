@@ -116,7 +116,7 @@
   <div id="loginModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-card login-card">
       <div class="panel-head"><h2>Anmeldung</h2><button class="back" onclick="closeLogin()">✕</button></div>
-      <p class="meta">Schüler, Mitarbeiter und Admins können sich hier anmelden.</p>
+      <p class="meta">Nur Mitarbeiter und Admins können sich hier anmelden. Schülerinnen und Schüler benötigen kein Konto.</p>
       <form id="loginForm">
         <div class="field"><label for="loginUser">Benutzername</label><input id="loginUser" required autocomplete="username"></div>
         <div class="field" style="margin-top:14px"><label for="loginPass">Passwort</label><input id="loginPass" type="password" required autocomplete="current-password"></div>
@@ -135,7 +135,7 @@
     const KEY='lessing_schulportal_v1';
     const allSubjects=['Mathematik','Deutsch','Englisch','Französisch','Spanisch','Italienisch','Latein','Biologie','Chemie','Physik','Naturwissenschaften','Geschichte','Geografie / Erdkunde','Gemeinschaftskunde','Politik','Wirtschaft / WBS','Informatik','Technik','Alltagskultur, Ernährung, Soziales (AES)','Religion','Ethik','Philosophie','Psychologie','Pädagogik','Kunst','Musik','Sport'];
     const defaultDesign={navy:'#163f63',blue:'#236aa2',paper:'#f4f8fb',ink:'#102334',contentWidth:1500,baseSize:16,radius:20,aiSideWidth:330,aiHeight:540,panelPadding:36,headerPadding:18,shadow:12,aiSidePosition:'left'};
-    const initial={settings:{schoolName:'Lessing Schulportal',appointmentTypes:['Lerncoaching','Schulleitung','Beratung','Streit klären'],teachers:[],services:[
+    const initial={settings:{schoolName:'Lessing Schulportal',appointmentTypes:['Lerncoaching','Schulleitung','Beratung','Streit klären'],teachers:[{id:'teacher-yilmaz',name:'Herr Yilmaz',service:'Lerncoaching'},{id:'teacher-heinz',name:'Herr Heinz',service:'Beratung'}],services:[
 {name:'Lerncoaching',color:'#16a36a'},{name:'Schulleitung',color:'#e55353'},{name:'Beratung',color:'#3276e8'},{name:'Streit klären',color:'#d49b2a'}],
 accounts:[
 {username:'Lessing',password:'Schulen',name:'Hauptadministrator',role:'admin'},
@@ -147,6 +147,10 @@ accounts:[
     db.settings.aiEndpoint=db.settings.aiEndpoint||'/api/lern-ki';
     db.settings.subjects=[...new Set([...(db.settings.subjects||[]),...allSubjects])];
     db.settings.teachers=db.settings.teachers||[];
+    // Schülerkonten sind ausdrücklich nicht vorgesehen: Kinder stellen Anfragen ohne Login.
+    db.settings.accounts=(db.settings.accounts||[]).filter(a=>a.role!=='schueler');
+    const defaultTeachers=[{id:'teacher-yilmaz',name:'Herr Yilmaz',service:'Lerncoaching'},{id:'teacher-heinz',name:'Herr Heinz',service:'Beratung'}];
+    defaultTeachers.forEach(t=>{if(!db.settings.teachers.some(x=>x.id===t.id||x.name===t.name&&x.service===t.service))db.settings.teachers.push(t)});
     db.settings.services=db.settings.services||initial.settings.services;
     db.settings.appointmentTypes=[...new Set([...(db.settings.appointmentTypes||[]),...db.settings.services.map(s=>s.name)])];
     db.settings.accounts=db.settings.accounts||initial.settings.accounts;
@@ -180,9 +184,11 @@ accounts:[
     }
     function renderBookingPeople(){
       const el=document.getElementById('bookingTeacher'); if(!el)return;
-      const list=db.settings.teachers.length?db.settings.teachers:[{id:'auto',name:'Noch keine Lehrkraft hinterlegt'}];
-      el.innerHTML='<option value="">Bitte auswählen</option>'+list.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
+      const selectedService=document.getElementById('bookingType')?.value||'';
+      const list=db.settings.teachers.filter(x=>!selectedService||x.service===selectedService);
+      el.innerHTML='<option value="">Bitte auswählen</option>'+(list.length?list.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join(''):'<option value="" disabled>Für diesen Bereich ist noch keine Lehrkraft hinterlegt</option>');
     }
+    document.getElementById('bookingType')?.addEventListener('change',()=>renderBookingPeople());
     function serviceColor(name){return (db.settings.services.find(s=>s.name===name)||{}).color||'#3276e8'}
     function renderFreeSlots(){const usedDates=new Set(db.appointments.filter(a=>!['Abgelehnt','Abgesagt'].includes(a.status)).map(a=>String(a.date).slice(0,10)));const dates=[];const start=new Date();start.setHours(12,0,0,0);for(let i=1;i<=75&&dates.length<25;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=d.toISOString().slice(0,10),day=d.getDay();if(day===0||day===6)continue;if(db.settings.blockedWeekdays.includes(day))continue;if(usedDates.has(iso))continue;dates.push(iso)}document.getElementById('bookingDate').innerHTML='<option value="">Bitte auswählen</option>'+dates.map(date=>`<option value="${date}">${formatAppointmentDate(date)}</option>`).join('')+(dates.length?'':'<option disabled>Zurzeit sind alle Wochentage gesperrt</option>')}
     document.getElementById('bookingForm').addEventListener('submit',e=>{
@@ -286,9 +292,9 @@ accounts:[
     function renderAccounts(){
       const el=document.getElementById('admin-accounts');
       const visible=db.settings.accounts.filter(a=>isBigAdmin()||(!a.hidden&&a.role!=='bigadmin'));
-      el.innerHTML=`<div class="admin-section"><div class="panel-head"><h2>Konten verwalten</h2><span class="meta">${isBigAdmin()?'Großadmin: alle Konten':'Admin: Schüler, Mitarbeiter und normale Admins'}</span></div>
-      <form id="accountForm" class="grid"><div class="field"><label>Benutzername</label><input id="newUsername" required></div><div class="field"><label>Name</label><input id="newName" required></div><div class="field"><label>Passwort</label><input id="newPassword" required></div><div class="field"><label>Rolle</label><select id="newRole">${isBigAdmin()?'<option value="bigadmin">Großadmin</option>':''}<option value="admin">Admin</option><option value="mitarbeiter">Mitarbeiter</option><option value="schueler">Schüler</option></select></div><div class="field full"><button class="btn">Konto erstellen</button></div></form>
-      <div style="margin-top:24px">${visible.map(a=>`<div class="account-row"><div><strong>${esc(a.name)}</strong><br><span class="meta">@${esc(a.username)}</span></div><div><span class="role-pill role-${esc(a.role)}">${a.role==='bigadmin'?'Großadmin':a.role==='mitarbeiter'?'Mitarbeiter':a.role==='admin'?'Admin':'Schüler'}</span></div><div><button class="btn secondary small" onclick="changePassword('${a.username}')">Passwort ändern</button></div><div>${a.username==='Lessing'||a.username==='admin'?'<span class="meta">Systemkonto</span>':`<button class="btn danger small" onclick="deleteAccount('${a.username}')">Löschen</button>`}</div></div>`).join('')}</div></div>`;
+      el.innerHTML=`<div class="admin-section"><div class="panel-head"><h2>Konten verwalten</h2><span class="meta">${isBigAdmin()?'Großadmin: alle Konten':'Admin: Mitarbeiter und normale Admins'}</span></div>
+      <form id="accountForm" class="grid"><div class="field"><label>Benutzername</label><input id="newUsername" required></div><div class="field"><label>Name</label><input id="newName" required></div><div class="field"><label>Passwort</label><input id="newPassword" required></div><div class="field"><label>Rolle</label><select id="newRole">${isBigAdmin()?'<option value="bigadmin">Großadmin</option>':''}<option value="admin">Admin</option><option value="mitarbeiter">Mitarbeiter</option></select></div><div class="field full"><button class="btn">Konto erstellen</button></div></form>
+      <div style="margin-top:24px">${visible.map(a=>`<div class="account-row"><div><strong>${esc(a.name)}</strong><br><span class="meta">@${esc(a.username)}</span></div><div><span class="role-pill role-${esc(a.role)}">${a.role==='bigadmin'?'Großadmin':a.role==='mitarbeiter'?'Mitarbeiter':'Admin'}</span></div><div><button class="btn secondary small" onclick="changePassword('${a.username}')">Passwort ändern</button></div><div>${a.username==='Lessing'||a.username==='admin'?'<span class="meta">Systemkonto</span>':`<button class="btn danger small" onclick="deleteAccount('${a.username}')">Löschen</button>`}</div></div>`).join('')}</div></div>`;
       document.getElementById('accountForm').addEventListener('submit',e=>{e.preventDefault();const u=newUsername.value.trim();if(db.settings.accounts.some(a=>a.username===u)){toast('Benutzername existiert bereits');return}const role=newRole.value;if(role==='bigadmin'&&!isBigAdmin()){toast('Nur Großadmin kann Großadmins erstellen');return}db.settings.accounts.push({username:u,name:newName.value.trim(),password:newPassword.value,role});save();renderAccounts();toast('Konto erstellt')})
     }
     function changePassword(username){const a=db.settings.accounts.find(x=>x.username===username);if(!a)return;const p=prompt(`Neues Passwort für ${username}:`);if(p){a.password=p;save();toast('Passwort geändert')}}
