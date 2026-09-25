@@ -1,34 +1,41 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lessing Coaching Design</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lessing Coach Ansicht</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<aside class="sidebar">
-<h2>Lessing<br>Schulen<br>Coaching</h2>
-<a>⌂ Startseite</a>
-<a>▣ Termin & Coaching</a>
-<a>▣ Termine</a>
-<a>✦ Lern-KI</a>
-<a>ⓘ Über Lessing</a>
-<a>?</a>
-<a>☎ Kontakt</a>
-</aside>
+<div class="sidebar">
+  <h2>🎓 Lessing Coach</h2>
+  <p class="sub">Dein KI-Lernassistent</p>
+  <div class="active">💬 Neuer Chat</div>
+  <div>▣ Lernplaner</div>
+  <div>☑ Aufgaben</div>
+  <div>🎓 Prüfungsvorbereitung</div>
+  <div>▤ Zusammenfassungen</div>
+  <div>⚙ Einstellungen</div>
+</div>
 
 <main>
-<button class="login">Anmelden</button>
-<p class="small">LESSING SCHULEN COACHING</p>
-<h1>Alles an einem <span>Ort.</span></h1>
-<p>Termine erstellen, Lernunterstützung erhalten und mit der Lern-KI lernen.</p>
+  <button class="login">Anmelden</button>
+  <h1>Hallo 👋</h1>
+  <h3>Was möchtest du heute lernen?</h3>
+  <p>Dein persönlicher KI-Lernassistent. Stelle Fragen, erhalte Erklärungen und erstelle Lernpläne.</p>
 
-<div class="cards">
-<div class="card orange"><h2>💬 Termin & Coaching</h2><p>Unterstützung anfragen und passende Bereiche auswählen.</p></div>
-<div class="card blue"><h2>📅 Termine</h2><p>Erstellte Termine ansehen.</p></div>
-<div class="card green"><h2>🤖 Lern-KI</h2><p>Fragen stellen und lernen.</p></div>
-</div>
+  <section class="subjects">
+    <button>📘 Mathematik</button><button>📕 Deutsch</button><button>🇬🇧 Englisch</button>
+    <button>🌿 Biologie</button><button>⚗ Chemie</button><button>⚛ Physik</button>
+  </section>
+
+  <div class="input">＋ &nbsp; Stelle mir eine Frage... ➤</div>
+
+  <section class="cards">
+    <div>Lernplan erstellen<br><small>Erhalte einen individuellen Lernplan.</small></div>
+    <div>Aufgaben lösen<br><small>Lade Aufgaben hoch oder schreibe sie.</small></div>
+    <div>Themen verstehen<br><small>Einfache Erklärungen erhalten.</small></div>
+  </section>
 </main>
 </body>
 </html>
