@@ -1,16 +1,17 @@
-# Lessing Schulen Coaching – mobile/flexible Version
+# Lessing Schulen Coaching – FINAL
+
+Die Ansichten wurden für Desktop und Handy überarbeitet und die Navigation/Interaktionen funktionieren ohne externe Dienste.
 
 Enthalten:
-- Startseite nach der gelieferten Referenz
-- dauerhaftes Seitenmenü auf Desktop, aufklappbares Menü auf Handy
-- Termin & Coaching ohne Schülerkonto
-- Termine mit Anfragecode
-- Lern-KI mit Vorname, Nachname und Klasse vor dem Chat
-- kompakte Chatansicht ohne große Leerflächen
-- Kontakt-Chat an alle Admins (im Frontend-Demo über localStorage)
-- Hilfe/Anleitung
-- Admin-Kontrollzentrum
-- keine Schülerkonten
+- Startseite im hellen Lessing-Stil
+- mobile Seitenleiste statt einer dauerhaft überbreiten Desktop-Leiste
+- Termin & Coaching Formular
+- Anfragecode und Terminabruf
+- Kontakt-Chat mit Nachrichtenverlauf
+- separate Lern-KI-Ansicht im dunklen KI-Stil
+- Vorname/Nachname/Klasse vor dem KI-Chat, ohne Schülerkonto
+- Fächer, Quick Prompts, Datei-Anhang, Chat-Eingabe und lokale Antwortlogik
+- Admin-Dashboard für lokale Demo-Daten
+- keine persönlichen Beispielnamen im Design
 
-## Wichtig
-Dies ist eine vollständige Frontend-Demo. Eine echte KI, echte Mehrfach-Admin-Synchronisierung, sichere Authentifizierung und serverseitige Fehlerweiterleitung benötigen Backend/API/Supabase/Vercel-Konfiguration. Die ZIP behauptet nicht, dass diese externen Dienste bereits verbunden sind.
+Hinweis: Eine echte generative KI benötigt einen sicheren Server/API-Endpunkt. In dieser ZIP wird dafür keine geheime API-Key-Datei eingebaut.
