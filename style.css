@@ -1,1 +1,44 @@
-*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#080b16;color:white;display:flex}.sidebar{width:280px;min-height:100vh;background:#101827;padding:25px}.sidebar h2{margin-bottom:0}.sub{color:#aaa}.sidebar div{padding:18px 12px;margin:5px 0;border-radius:12px}.active{background:#22284a}main{padding:50px;flex:1;background:radial-gradient(circle,#1b2040,#080b16)}.login{float:right;background:#2563eb;color:white;border:0;padding:12px 25px;border-radius:20px}h1{font-size:48px;margin-top:40px}h3{font-size:42px;background:linear-gradient(90deg,#a855f7,#38bdf8);color:transparent;background-clip:text}.subjects{display:grid;grid-template-columns:repeat(5,1fr);gap:15px;margin:40px 0}.subjects button{padding:22px;background:#151b2d;border:1px solid #30364d;color:white;border-radius:15px;font-size:18px}.input{border:1px solid #555;border-radius:35px;padding:22px;color:#aaa}.cards{display:flex;gap:20px;margin-top:40px}.cards div{flex:1;padding:35px;background:#151b2d;border-radius:20px;border:1px solid #39405b;font-size:22px}.cards small{color:#aaa}
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#090d18;
+color:white;
+display:flex;
+min-height:100vh;
+}
+.menu{
+width:260px;
+background:#10182b;
+padding:25px;
+}
+.menu h2{font-size:22px}
+button{
+width:100%;
+padding:14px;
+margin:8px 0;
+border:0;
+border-radius:12px;
+background:#1d4ed8;
+color:white;
+cursor:pointer;
+font-size:16px;
+}
+.content{
+flex:1;
+padding:30px;
+text-align:center;
+}
+.tabs{
+display:flex;
+gap:10px;
+max-width:700px;
+margin:20px auto;
+}
+.tabs button{margin:0}
+#screen{
+width:95%;
+max-width:1500px;
+border-radius:20px;
+box-shadow:0 0 40px #000;
+}

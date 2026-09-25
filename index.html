@@ -3,39 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lessing Coach Ansicht</title>
+<title>Lessing Coaching UI</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="sidebar">
-  <h2>🎓 Lessing Coach</h2>
-  <p class="sub">Dein KI-Lernassistent</p>
-  <div class="active">💬 Neuer Chat</div>
-  <div>▣ Lernplaner</div>
-  <div>☑ Aufgaben</div>
-  <div>🎓 Prüfungsvorbereitung</div>
-  <div>▤ Zusammenfassungen</div>
-  <div>⚙ Einstellungen</div>
+<div class="menu">
+<h2>🎓 Lessing Coach</h2>
+<button onclick="show('ki')">Lern-KI</button>
+<button onclick="show('start')">Startseite</button>
+<button onclick="show('chat')">Chat</button>
 </div>
 
-<main>
-  <button class="login">Anmelden</button>
-  <h1>Hallo 👋</h1>
-  <h3>Was möchtest du heute lernen?</h3>
-  <p>Dein persönlicher KI-Lernassistent. Stelle Fragen, erhalte Erklärungen und erstelle Lernpläne.</p>
+<div class="content">
+<h1>Lessing Schulen Coaching</h1>
+<div class="tabs">
+<button onclick="show('ki')">KI Ansicht</button>
+<button onclick="show('start')">Start Ansicht</button>
+<button onclick="show('chat')">Chat Ansicht</button>
+</div>
 
-  <section class="subjects">
-    <button>📘 Mathematik</button><button>📕 Deutsch</button><button>🇬🇧 Englisch</button>
-    <button>🌿 Biologie</button><button>⚗ Chemie</button><button>⚛ Physik</button>
-  </section>
+<img id="screen" src="images/ki.png" alt="Ansicht">
+</div>
 
-  <div class="input">＋ &nbsp; Stelle mir eine Frage... ➤</div>
-
-  <section class="cards">
-    <div>Lernplan erstellen<br><small>Erhalte einen individuellen Lernplan.</small></div>
-    <div>Aufgaben lösen<br><small>Lade Aufgaben hoch oder schreibe sie.</small></div>
-    <div>Themen verstehen<br><small>Einfache Erklärungen erhalten.</small></div>
-  </section>
-</main>
+<script>
+function show(page){
+ document.getElementById('screen').src='images/'+page+'.png';
+}
+</script>
 </body>
 </html>
