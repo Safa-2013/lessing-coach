@@ -1,0 +1,8 @@
+
+body{margin:0;font-family:Arial;background:#080b14;color:white;display:flex}
+.ki-side{width:250px;background:#0c1220;min-height:100vh;padding:25px}
+.ki-side a{display:block;padding:15px;color:white}
+.ki-main{padding:50px;flex:1}.ki-main span{color:#8b5cff}
+.subjects{display:grid;grid-template-columns:repeat(5,1fr);gap:15px;margin-top:40px}
+.subjects div,.input{background:#151c2d;padding:25px;border-radius:18px}
+.input{margin-top:30px;color:#aaa}
