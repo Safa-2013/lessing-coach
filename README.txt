@@ -1,13 +1,15 @@
-LESSING COACH – ADMIN / KI UPDATE
+LESSING COACH – FIXED VERSION
 
-- Keine Schülerkonten.
-- Hauptadmin: Lessing / Schulen
-- Normaler Admin: admin / 1234
-- Hauptadmin kann andere Admin-Konten ohne deren Passwort öffnen.
-- Hauptadmin bleibt normalen Admins gegenüber verborgen.
-- Normale Admins können weitere normale Admin-Konten erstellen.
-- KI-Fehler werden ausschließlich im Hauptadmin-Bereich „KI-Fehler“ gesammelt.
-- Optional kann settings.aiErrorEndpoint auf einen eigenen serverseitigen Endpoint gesetzt werden; nur dieser Endpoint erhält die Fehlerdaten.
-- Schüler-/öffentliche Ansicht und Admin-Design sind getrennt.
+Änderungen:
+- Feste linke Navigation bleibt auf jeder Schülerseite sichtbar.
+- Keine obere Navigationsleiste mehr.
+- Startseite auf das gewünschte 3-Karten-Layout umgestellt.
+- Lern-KI verlangt vor dem ersten Chat Vorname, Nachname und Klasse.
+- KI-Chat wird ohne künstlich große Leerfläche aufgebaut und wächst mit dem Inhalt.
+- KI-Chats werden lokal pro Name/Nachname/Klasse gespeichert, ohne Schülerkonto.
+- Hilfe-Seite mit Anleitung ergänzt.
+- Kontakt-Seite mit Kontakt-Chat-Oberfläche ergänzt.
+- Über-Lessing-Seite ergänzt.
 
-Wichtig: Diese ZIP ist weiterhin eine einzelne HTML-App mit localStorage. Für echte gemeinsame Konten und Fehlerzustellung über mehrere Geräte braucht die Anwendung einen serverseitigen Speicher/Auth-Dienst. Die Oberfläche verhindert die Anzeige für normale Admins, ersetzt aber keine serverseitige Zugriffskontrolle.
+WICHTIG:
+Die vorhandene Basisdatei speichert Daten mit localStorage im Browser. Deshalb ist der Kontakt-Chat in dieser Version noch NICHT automatisch zwischen verschiedenen Geräten/Admins synchronisiert. Eine echte gemeinsame Admin-Inbox über alle Geräte benötigt ein Backend (z. B. Supabase) und darf nicht als fertig behauptet werden, solange dieses Backend nicht angeschlossen ist.
