@@ -1,22 +1,23 @@
-# Lessing Schulportal – KI-Fix
+# Lessing Coach – aktualisierte Version
 
-## KI
-Die KI verwendet standardmäßig `gemini-3.6-flash` statt des nicht mehr verfügbaren `gemini-2.5-flash`.
+## Enthalten
+- komplette bestehende Lessing-Schulportal-Oberfläche
+- 13:20 **oder** 15:50 als Schulschluss-Auswahl
+- normaler KI-Chat
+- mehrere lokale KI-Chats mit Namen, Verlauf und Export
+- Bild/PDF/Text-Anhang für die KI
+- Lernplan-/Quiz-/Erklär-Modi
+- Admin-Bereich und Design-Editor aus dem bisherigen Stand
+- lokale Sicherung/Import
+- serverseitige Gemini-Anbindung über `/api/lern-ki`
 
-- Alte gespeicherte `gemini-2.x`-Einstellungen werden beim Laden automatisch auf `gemini-3.6-flash` umgestellt.
-- Falls ein API-Konto das Modell nicht anbietet, versucht die API automatisch `gemini-3.8-flash`.
-- Die KI benötigt in Vercel weiterhin `GEMINI_API_KEY`.
+## Gemini verbinden
+In Vercel unter **Settings → Environment Variables** setzen:
 
-Google führt Gemini 3.6 Flash als stabiles Modell; Gemini 3.8 Flash ist ebenfalls aktuell verfügbar.
+- `GEMINI_API_KEY` = dein Google AI Studio API-Key
+- optional `GEMINI_MODEL` = `gemini-3.8-flash`
 
-## Anmeldung
-- Großadmin: `admin / 1234`
-- Hauptadministrator: `lessing / admin123`
-- Keine Schülerkonten.
-- Mitarbeiter- und Admin-Konten können verwaltet werden.
+Der Schlüssel wird **nicht** in `index.html` gespeichert.
 
-## Microsoft
-Für den Microsoft-Schul-Login müssen Client-ID, Tenant-ID und SPA-Redirect-URL in Microsoft Entra konfiguriert werden.
-
-## Schulzeiten
-In der KI gibt es jetzt "Mein Schultag". Montag bis Freitag können individuelle Schulschlusszeiten (z. B. Montag 13:20 und andere Tage 16:00) eingetragen werden. Diese Zeiten werden automatisch an die Lern-KI für Lernpläne und Zeitplanung übergeben.
+## Wichtig
+Die aktuelle Version speichert Portal-Daten wie Terminanfragen weiterhin lokal im Browser. Für echte Konten, geräteübergreifende Chatverläufe und zentrale Schulspeicherung braucht es als nächsten Backend-Schritt eine eigene Datenbank/Auth-Schicht.

@@ -1,24 +1,39 @@
-export default async function handler(req,res){
-  if(req.method!=='POST') return res.status(405).json({text:'Method not allowed'});
-  try{
-    const {message='',history=[],model='gemini-3.6-flash'}=req.body||{};
-    if(!message.trim()) return res.status(400).json({text:'Bitte schreibe eine Frage.'});
-    if(!process.env.GEMINI_API_KEY) return res.status(503).json({text:'Die Lern-KI ist noch nicht aktiviert. Hinterlege in Vercel die Umgebungsvariable GEMINI_API_KEY.'});
-    const safeHistory=Array.isArray(history)?history.slice(-20).filter(x=>x&&typeof x.text==='string').map(x=>({role:x.role==='assistant'?'model':'user',parts:[{text:x.text.slice(0,6000)}]})):[];
-    safeHistory.push({role:'user',parts:[{text:message.slice(0,6000)}]});
-    // Alte/deaktivierte Modelle niemals weiterverwenden. Das Portal läuft standardmäßig mit einem aktuellen stabilen Flash-Modell.
-    let selectedModel=(typeof model==='string'&&model.trim())?model.trim():'gemini-3.6-flash';
-    if(/^gemini-2\./.test(selectedModel)) selectedModel='gemini-3.6-flash';
-    const payload={systemInstruction:{parts:[{text:'Du bist Lessing KI, ein freundlicher, zuverlässiger Lernassistent für Schülerinnen und Schüler. Erkläre verständlich, altersgerecht und Schritt für Schritt. Du kannst auch ganz normal chatten. Die Nutzer müssen kein Fach auswählen. Erstelle Lernpläne, Übungsaufgaben, Zusammenfassungen und Prüfungsvorbereitung. Behaupte nichts als Tatsache, wenn du es nicht weißt.'}]},contents:safeHistory,generationConfig:{maxOutputTokens:1800}};
-    let r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(selectedModel)}:generateContent?key=${process.env.GEMINI_API_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    let data=await r.json();
-    // Falls ein Account das bevorzugte Modell noch nicht anbietet, einmal automatisch auf ein aktuelles stabiles Flash-Modell wechseln.
-    if(!r.ok && selectedModel!=='gemini-3.8-flash' && (r.status===400 || r.status===404)){
-      r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      data=await r.json();
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  try {
+    const { question, mode = 'Normal chatten', grade = 'nicht angegeben', history = [], attachment = null } = req.body || {};
+    if (!question || typeof question !== 'string') return res.status(400).json({ error: 'Frage fehlt.' });
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) return res.status(500).json({ error: 'GEMINI_API_KEY ist in Vercel noch nicht hinterlegt.' });
+    const model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+    const system = `Du bist Lessing KI, eine sehr gute deutschsprachige Lern- und Alltags-KI für Schülerinnen und Schüler.\n\nRegeln:\n- Antworte auf Deutsch, außer der Nutzer bittet um eine andere Sprache.\n- Du kannst normal chatten und bist nicht auf Schulthemen beschränkt.\n- Beim Lernen: erkläre verständlich, altersgerecht und Schritt für Schritt. Gib nicht einfach nur die Lösung, wenn gemeinsames Lernen sinnvoller ist.\n- Bei Mathematik zeige Rechenwege. Bei Sprachen gib Beispiele und korrigiere freundlich.\n- Bei 'Lernplan erstellen' erstelle einen realistischen Plan mit Zeiten, Pausen, Wiederholung und kleinen Selbsttests.\n- Bei 'Quiz erstellen' stelle zuerst Fragen und verrate die Lösungen nicht sofort.\n- Berücksichtige Klasse/Niveau: ${grade}.\n- Aktueller Modus: ${mode}.\n- Wenn eine Aufgabe als Bild/PDF angehängt wurde, analysiere den Anhang und beziehe dich konkret darauf.\n- Erfinde keine Inhalte aus einem Anhang, die nicht erkennbar sind.\n- Bei gefährlichen, medizinischen oder rechtlichen Fragen keine falsche Sicherheit vermitteln; bei akuter Gefahr auf geeignete Hilfe verweisen.\n- Keine langen Einleitungen; direkt hilfreich antworten.`;
+
+    const contents = [];
+    for (const m of Array.isArray(history) ? history.slice(-12) : []) {
+      if (!m || !m.text) continue;
+      contents.push({ role: m.role === 'model' ? 'model' : 'user', parts: [{ text: String(m.text).slice(0, 12000) }] });
     }
-    if(!r.ok) return res.status(r.status).json({text:data?.error?.message||'KI-Fehler'});
-    const text=data?.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'Keine Antwort erhalten.';
-    return res.status(200).json({text});
-  }catch(e){return res.status(500).json({text:'KI-Fehler: '+e.message})}
+    const parts = [{ text: question.slice(0, 20000) }];
+    if (attachment?.data && attachment?.mimeType) {
+      parts.push({ inline_data: { mime_type: attachment.mimeType, data: attachment.data } });
+    }
+    contents.push({ role: 'user', parts });
+
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: system }] },
+        contents,
+        generationConfig: { temperature: 0.55, maxOutputTokens: 3000 }
+      })
+    });
+    const data = await r.json();
+    if (!r.ok) return res.status(r.status).json({ error: data?.error?.message || 'Gemini API Fehler.' });
+    const answer = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('').trim();
+    if (!answer) return res.status(502).json({ error: 'Die KI hat keine Antwort geliefert.' });
+    return res.status(200).json({ answer });
+  } catch (e) {
+    return res.status(500).json({ error: e?.message || 'Serverfehler.' });
+  }
 }
