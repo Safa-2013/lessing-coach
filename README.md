@@ -1,20 +1,24 @@
-# Lessing Schulportal
+# Lessing Schulportal – KI-Fix
 
-## Start
-- Startdatei: `index.html`
-- API: `api/lern-ki.js`
+## KI
+Die KI verwendet standardmäßig `gemini-3.6-flash` statt des nicht mehr verfügbaren `gemini-2.5-flash`.
 
-## Lern-KI
-Die Lern-KI verwendet die Google Gemini API serverseitig.
-In Vercel muss als Environment Variable gesetzt sein:
+- Alte gespeicherte `gemini-2.x`-Einstellungen werden beim Laden automatisch auf `gemini-3.6-flash` umgestellt.
+- Falls ein API-Konto das Modell nicht anbietet, versucht die API automatisch `gemini-3.8-flash`.
+- Die KI benötigt in Vercel weiterhin `GEMINI_API_KEY`.
 
-`GEMINI_API_KEY`
+Google führt Gemini 3.6 Flash als stabiles Modell; Gemini 3.8 Flash ist ebenfalls aktuell verfügbar.
 
-Die API verwendet standardmäßig `gemini-3.8-flash` und versucht bei Modell-Verfügbarkeit automatisch weitere aktuelle Flash-Modelle.
+## Anmeldung
+- Großadmin: `admin / 1234`
+- Hauptadministrator: `lessing / Schulen`
+- Normale Admins können weitere Admin- und Mitarbeiterkonten erstellen.
+- Das Systemkonto `admin` und das Hauptkonto `lessing` sind geschützt und können nicht gelöscht werden.
+- Keine Schülerkonten.
+- Mitarbeiter- und Admin-Konten können verwaltet werden.
 
-## Konten
-- Großadmin: `admin` / `1234`
-- Hauptadministrator: `lessing` / `Schulen`
+## Microsoft
+Für den Microsoft-Schul-Login müssen Client-ID, Tenant-ID und SPA-Redirect-URL in Microsoft Entra konfiguriert werden.
 
-## Wichtig
-Die vier Dateien müssen in der deployten Struktur so liegen, dass `index.html` im Projekt-Root und `api/lern-ki.js` im Root-Verzeichnis `api/` liegen.
+## Schulzeiten
+In der KI gibt es jetzt "Mein Schultag". Montag bis Freitag können individuelle Schulschlusszeiten (z. B. Montag 13:20 und andere Tage 16:00) eingetragen werden. Diese Zeiten werden automatisch an die Lern-KI für Lernpläne und Zeitplanung übergeben.
