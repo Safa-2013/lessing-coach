@@ -1,17 +1,13 @@
-# Lessing Schulen Coaching – FINAL
+# Lessing Schulen Coaching
 
-Die Ansichten wurden für Desktop und Handy überarbeitet und die Navigation/Interaktionen funktionieren ohne externe Dienste.
+## Deployment
+Die Website ist als statische Oberfläche aufgebaut und enthält zusätzlich einen Vercel-KI-Endpunkt unter `/api/ai`.
 
-Enthalten:
-- Startseite im hellen Lessing-Stil
-- mobile Seitenleiste statt einer dauerhaft überbreiten Desktop-Leiste
-- Termin & Coaching Formular
-- Anfragecode und Terminabruf
-- Kontakt-Chat mit Nachrichtenverlauf
-- separate Lern-KI-Ansicht im dunklen KI-Stil
-- Vorname/Nachname/Klasse vor dem KI-Chat, ohne Schülerkonto
-- Fächer, Quick Prompts, Datei-Anhang, Chat-Eingabe und lokale Antwortlogik
-- Admin-Dashboard für lokale Demo-Daten
-- keine persönlichen Beispielnamen im Design
+### Echte Lern-KI
+In Vercel unter **Settings → Environment Variables** setzen:
+- `GEMINI_API_KEY` = dein Google-Gemini-API-Key
 
-Hinweis: Eine echte generative KI benötigt einen sicheren Server/API-Endpunkt. In dieser ZIP wird dafür keine geheime API-Key-Datei eingebaut.
+Danach neu deployen. Der Schlüssel wird ausschließlich serverseitig verwendet und nicht in den Browser-Code geschrieben.
+
+### Gemeinsame Admin-/Chat-Daten
+Die aktuelle ZIP speichert Demo-/Fallback-Daten lokal im Browser. Für echte geräteübergreifende Chats, mehrere Admins, Rollen und Big-Admin-Rechte muss ein gemeinsamer Backend-Dienst (z. B. Supabase) mit seinen Projektzugangsdaten verbunden werden. Ohne diese Zugangsdaten kann eine ZIP keine Nachrichten zwischen verschiedenen Geräten übertragen.
