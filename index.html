@@ -1,114 +1,27 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lessing Schulen Coaching</title>
+<title>Lessing Coaching</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="app">
-<aside class="sidebar" id="sidebar">
-  <div class="brand"><div class="brand-logo">L</div><div><b>Lessing</b><b>Schulen</b><b>Coaching</b></div></div>
-  <nav>
-    <button class="nav active" data-page="home">⌂ <span>Startseite</span></button>
-    <button class="nav" data-page="coaching">▣ <span>Termin &amp; Coaching</span></button>
-    <button class="nav" data-page="termine">▦ <span>Termine</span></button>
-    <button class="nav" data-page="ki">✦ <span>Lern-KI</span></button>
-    <hr>
-    <button class="nav" data-page="about">ⓘ <span>Über Lessing</span></button>
-    <button class="nav" data-page="help">? <span>Hilfe</span></button>
-    <button class="nav" data-page="contact">◌ <span>Kontakt</span></button>
-  </nav>
-  <div id="studentBadge" class="student-badge hidden"></div>
-</aside>
-
-<header class="mobilebar">
-  <button id="menuBtn">☰</button><strong>Lessing Schulen Coaching</strong><button id="mobileAdmin">⚙</button>
-</header>
-
-<main class="main">
-<header class="topbar"><div id="studentTop"></div><button id="adminLogin" class="admin-login">Anmelden</button></header>
-
-<section id="home" class="page active">
-  <div class="hero">
-    <div class="eyebrow">LESSING SCHULEN COACHING</div>
-    <h1>Alles an einem <span>Ort.</span></h1>
-    <p>Termine erstellen, Lernunterstützung erhalten und mit der Lern-KI lernen – einfach und verständlich.</p>
-  </div>
-  <div class="home-cards">
-    <article class="home-card orange"><div class="art art-orange">● ●<div>● ◌ ●</div></div><h2>Termin &amp; Coaching</h2><p>Termine erstellen, Unterstützung anfragen und einen passenden Bereich auswählen.</p><button onclick="showPage('coaching')">Jetzt öffnen　→</button></article>
-    <article class="home-card blue"><div class="art art-blue">▦<small>✓</small> ◷</div><h2>Termine</h2><p>Mit deinem Namen kannst du deine erstellten Termine wieder ansehen.</p><button onclick="showPage('termine')">Jetzt öffnen　→</button></article>
-    <article class="home-card green"><div class="art art-green">✦　◉　✦<small>📚</small></div><h2>Lern-KI</h2><p>Normal chatten, Aufgaben lösen, erklären lassen und Lernpläne erstellen.</p><button onclick="showPage('ki')">Jetzt öffnen　→</button></article>
-  </div>
-</section>
-
-<section id="coaching" class="page">
- <div class="section-title"><div class="eyebrow">TERMIN &amp; COACHING</div><h1>Termin &amp; Coaching</h1><p>Kein Schülerkonto nötig. Gib deine Daten erst ein, wenn du einen Termin erstellen möchtest.</p></div>
- <div class="form-card">
-  <h2>Termin erstellen</h2>
-  <div class="form-grid">
-   <label>Vorname<input id="sFirst" placeholder="Vorname"></label>
-   <label>Nachname<input id="sLast" placeholder="Nachname"></label>
-   <label>Klasse<input id="sClass" placeholder="z. B. 8b"></label>
-   <label>Bereich<select id="area"><option>Nachhilfe</option><option>Lernberatung</option><option>Coaching</option><option>Sonstige Unterstützung</option></select></label>
-   <label>Fach<input id="subject" placeholder="z. B. Mathematik"></label>
-   <label>Datum<input id="date" type="date"></label>
-   <label>Uhrzeit<input id="time" type="time"></label>
-  </div>
-  <label>Nachricht<textarea id="note" placeholder="Was möchtest du besprechen?"></textarea></label>
-  <button id="create" class="primary orange-btn">Termin-Anfrage erstellen</button>
-  <div id="created" class="result hidden"></div>
- </div>
-</section>
-
-<section id="termine" class="page">
- <div class="section-title"><div class="eyebrow">TERMINE</div><h1>Meine Termine</h1><p>Gib deinen Namen ein, um deine gespeicherten Termine zu öffnen.</p></div>
- <div class="form-card compact">
-  <div class="lookup"><input id="lookupName" placeholder="Vorname Nachname"><button id="lookup" class="primary">Anzeigen</button></div>
-  <div id="myAppointments"></div>
- </div>
-</section>
-
-<section id="ki" class="page">
- <div class="ki-page">
-  <div class="ki-top">
-   <div><div class="eyebrow purple">LESSING KI</div><h1>Deine <span>Lern-KI</span></h1><p>Stelle normale Fragen, lass dir Themen erklären oder erstelle Lernpläne.</p></div>
-   <div class="model">Lern-KI　⌄</div>
-  </div>
-  <div class="subjects">
-   <button>🧮 Mathematik</button><button>📕 Deutsch</button><button>🇬🇧 Englisch</button><button>🌿 Biologie</button><button>⚗️ Chemie</button>
-   <button>⚛️ Physik</button><button>🏛️ Geschichte</button><button>🌍 Erdkunde</button><button>💻 Informatik</button><button>••• Weitere Fächer</button>
-  </div>
-  <div class="ai-chat">
-   <div class="ai-head"><div><b>Lern-KI</b><small id="aiStudent">Gast</small></div><button id="newChat">＋ Neuer Chat</button></div>
-   <div id="messages"></div>
-   <div class="quick"><button>Erkläre mir …</button><button>Übungsaufgaben …</button><button>Zusammenfassung …</button><button>Lernplan …</button></div>
-   <div class="composer"><button id="attach">＋</button><input id="prompt" placeholder="Stelle mir eine Frage …"><button id="send">↑</button></div>
-   <small id="aiStatus">Bereit</small>
-  </div>
- </div>
-</section>
-
-<section id="contact" class="page">
- <div class="section-title"><h1>Chat</h1><p>Schreibe deine Nachricht an unser Team. Deine Anfrage wird an alle Admins weitergeleitet.</p></div>
- <div class="contact">
-  <div class="today">Heute</div><div id="contactMessages"></div>
-  <div class="contact-compose"><button>⌕</button><input id="contactInput" placeholder="Nachricht schreiben …"><button id="emoji">☺</button><button id="contactSend">➤</button></div>
- </div>
-</section>
-
-<section id="about" class="page simple"><div><div class="eyebrow">ÜBER LESSING</div><h1>Lessing Schulen Coaching</h1><p>Termine, Unterstützung und digitales Lernen an einem Ort.</p></div></section>
-<section id="help" class="page simple"><div><div class="eyebrow">HILFE</div><h1>Hilfe</h1><p>Schüler müssen sich nicht anmelden. Eine Identifikation wird erst beim Erstellen eines Termins abgefragt.</p></div></section>
-
-<section id="admin" class="page admin-page">
- <div class="section-title"><div class="eyebrow">ADMIN-BEREICH</div><h1>Übersicht</h1><p>Nur eingeloggte Admins sehen diesen Bereich.</p></div>
- <div class="admin-grid"><div class="admin-box"><h2>Termin-Anfragen</h2><div id="adminAppointments"></div></div><div class="admin-box"><h2>Schüler-Kontakte</h2><div id="adminContacts"></div></div></div>
- <button id="adminLogout" class="secondary">Admin abmelden</button>
-</section>
-</main>
+<div class="box">
+<h1>Lessing Schulen Coaching</h1>
+<button onclick="openLogin()">Anmelden</button>
+<div id="login" class="hidden">
+<h2>Admin Anmeldung</h2>
+<input id="user" placeholder="Benutzername">
+<input id="pass" type="password" placeholder="Passwort">
+<button onclick="login()">Einloggen</button>
+<p id="msg"></p>
 </div>
-
-<div id="adminModal" class="modal hidden"><div class="modal-card"><button class="close" data-close>×</button><div class="login-logo">L</div><h2>Admin-Anmeldung</h2><p>Diese Anmeldung ist ausschließlich für Mitarbeiter/Admins.</p><input id="adminUser" placeholder="Benutzername"><input id="adminPass" type="password" placeholder="Passwort"><button id="doAdmin" class="primary">Anmelden</button><small id="adminError"></small></div></div>
-<script src="config.js"></script><script src="app.js"></script>
-</body></html>
+<div id="panel" class="hidden">
+<h2 id="role"></h2>
+<p>Admin-Bereich geladen.</p>
+</div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
