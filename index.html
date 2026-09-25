@@ -126,6 +126,9 @@ main{width:min(1450px,calc(100% - 32px));margin:28px auto 60px}.home{max-width:1
   .ai-page-active .ai-redesign .ai-back{right:10px;}
 }
 
+
+.ai-private-note{font-size:.74rem;color:#7f89a0;padding:6px 12px 0;min-height:18px}.ai-private-note:empty{display:none}
+@media(max-width:900px){.ai-private-note{padding:4px 10px 0;font-size:.7rem}}
 </style></head>
 <body>
 <header><div class="brand"><div class="brandmark" id="brandmark">L</div><div><h1 id="schoolName">Lessing Schulportal</h1><p>Lerncoaching · Streitklärung · Lern-KI</p></div></div><div class="top"><button id="loginBtn" class="primary" onclick="openLogin()">Anmelden</button><button onclick="openCode()">Anfrage öffnen</button></div></header>
@@ -262,10 +265,11 @@ document.getElementById('schoolScheduleForm').onsubmit=e=>{e.preventDefault();['
 function schoolScheduleContext(){const names={mon:'Montag',tue:'Dienstag',wed:'Mittwoch',thu:'Donnerstag',fri:'Freitag'};const rows=Object.entries(db.schoolSchedule||{}).filter(([k,v])=>v).map(([k,v])=>`${names[k]}: Schule aus um ${v} Uhr`);return rows.length?`
 
 Persönlicher Schultages-Kontext des Nutzers (für Zeitplanung berücksichtigen): ${rows.join(', ')}.`:''}
-function chatKey(){return currentUser&&currentUser.id?currentUser.id:'guest'}
-function loadChatHistory(){const saved=db.chatHistories?.[chatKey()];return Array.isArray(saved)?saved:[]}
-function saveChatHistory(){db.chatHistories=db.chatHistories||{};db.chatHistories[chatKey()]=aiHistory.slice(-50);save()}
-function renderAI(){updateAIScheduleCard();const m=document.getElementById('aiMessages');aiHistory=loadChatHistory();m.innerHTML='';if(aiHistory.length){m.classList.add('has-history');aiHistory.forEach(x=>addBubble(x.text,x.role==='user'?'user':'ai',{scroll:false}));}else{m.classList.remove('has-history');m.innerHTML='<div class="bubble ai">Hallo! 👋 Ich bin deine Lern-KI. Du kannst mit mir ganz normal chatten – ohne vorher ein Fach auszuwählen.</div>';}fitMessages();}
+function canPersistAIChat(){return !!(currentUser&&['admin','bigadmin'].includes(currentUser.role))}
+function chatKey(){return canPersistAIChat()?`admin:${currentUser.id}`:null}
+function loadChatHistory(){if(!canPersistAIChat())return [];const key=chatKey();const saved=db.chatHistories?.[key];return Array.isArray(saved)?saved:[]}
+function saveChatHistory(){if(!canPersistAIChat())return;db.chatHistories=db.chatHistories||{};db.chatHistories[chatKey()]=aiHistory.slice(-50);save()}
+function renderAI(){updateAIScheduleCard();const privateNote=document.getElementById('aiPrivateNote');if(privateNote)privateNote.textContent=canPersistAIChat()?'Chats dieses Admin-Kontos werden gespeichert.':'Dieser Chat wird nicht dauerhaft gespeichert.';const m=document.getElementById('aiMessages');aiHistory=loadChatHistory();m.innerHTML='';if(aiHistory.length){m.classList.add('has-history');aiHistory.forEach(x=>addBubble(x.text,x.role==='user'?'user':'ai',{scroll:false}));}else{m.classList.remove('has-history');m.innerHTML='<div class="bubble ai">Hallo! 👋 Ich bin deine Lern-KI. Du kannst mit mir ganz normal chatten – ohne vorher ein Fach auszuwählen.</div>';}fitMessages();}
 document.querySelectorAll('.ai-nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ai-nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const mode=b.dataset.mode;const prompts={plan:'Erstelle mir einen Lernplan für diese Woche.',tasks:'Gib mir passende Übungsaufgaben mit Lösungen.',exam:'Bereite mich auf eine Prüfung vor.',summary:'Fasse mein Thema verständlich zusammen.',notes:'Hilf mir beim Erstellen von Lernnotizen.',tools:'Welche Lernmethoden kannst du mir anbieten?'};if(mode!=='chat'){document.getElementById('aiInput').value=prompts[mode]||'';document.getElementById('aiInput').focus()}});
 document.querySelectorAll('.ai-quick button,.ai-feature button').forEach(b=>b.onclick=()=>{document.getElementById('aiInput').value=b.dataset.q;document.getElementById('aiInput').focus()});
 document.getElementById('aiForm').onsubmit=async e=>{e.preventDefault();const q=document.getElementById('aiInput').value.trim();if(!q)return;const m=document.getElementById('aiMessages');m.classList.add('has-history');addBubble(q,'user',{forceBottom:true});document.getElementById('aiInput').value='';const load=addBubble('Ich denke kurz nach …','ai',{forceBottom:true});try{const r=await fetch('/api/lern-ki',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q+schoolScheduleContext(),history:aiHistory,model:db.settings.geminiModel})});const data=await r.json();load.remove();const answer=data.text||'Die KI konnte gerade keine Antwort liefern.';const wasNearBottom=(m.scrollHeight-m.scrollTop-m.clientHeight)<120;addBubble(answer,'ai',{forceBottom:wasNearBottom});aiHistory.push({role:'user',text:q},{role:'assistant',text:answer});if(aiHistory.length>50)aiHistory=aiHistory.slice(-50);saveChatHistory()}catch(err){load.remove();addBubble('Die KI-Schnittstelle ist nicht erreichbar. Prüfe die Vercel-Umgebungsvariable GEMINI_API_KEY.','ai',{forceBottom:false})}};

@@ -22,3 +22,9 @@ Für den Microsoft-Schul-Login müssen Client-ID, Tenant-ID und SPA-Redirect-URL
 
 ## Schulzeiten
 In der KI gibt es jetzt "Mein Schultag". Montag bis Freitag können individuelle Schulschlusszeiten (z. B. Montag 13:20 und andere Tage 16:00) eingetragen werden. Diese Zeiten werden automatisch an die Lern-KI für Lernpläne und Zeitplanung übergeben.
+
+
+## KI-Chat-Speicherung
+- KI-Chats werden ausschließlich für angemeldete Admin-Konten (`admin`/`bigadmin`) dauerhaft gespeichert.
+- Nicht angemeldete Nutzer und normale Schülerkonten erhalten einen nicht-persistenten Chat; beim Neuladen wird dieser nicht aus dem gemeinsamen Speicher geladen.
+- Dadurch wird verhindert, dass ein gemeinsamer Gast-Chat zwischen verschiedenen Nutzern angezeigt wird.
