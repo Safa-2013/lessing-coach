@@ -1,22 +1,13 @@
-LESSING COACH V2
+LESSING COACH – ADMIN / KI UPDATE
 
-Enthalten:
-- Bestehende Startseite bleibt erhalten.
-- KI-Bereich bleibt separat.
-- Anmeldung für Schüler/Mitarbeiter/Admin.
-- Admin-Konten, Mitarbeiter-Konten und Schülerkonten verwalten.
-- Passwortänderung.
-- Großadmin: Benutzername admin / Passwort 1234.
-- Normale Admin-Oberfläche zeigt den Großadmin nicht.
-- Bereiche mit individuellen Farben: Lerncoaching, Schulleitung, Beratung, Streit klären.
-- Lehrkräfte/Ansprechpartner hinzufügen und auswählen.
-- Termin-Anfragen bekommen einen persönlichen Code.
-- Derselbe Schüler-Code kann mehrere Terminanfragen bündeln.
-- Code-Ansicht zeigt bestätigte und offene Termine.
-- Wochen-Stundenplan Montag–Freitag 08:00–16:00.
-- Konfliktprüfung pro Lehrkraft/Zeitraum.
-- Admin sieht bestätigte und offene Termine getrennt.
-- Großadmin sieht alle Termine und alle Konten.
+- Keine Schülerkonten.
+- Hauptadmin: Lessing / Schulen
+- Normaler Admin: admin / 1234
+- Hauptadmin kann andere Admin-Konten ohne deren Passwort öffnen.
+- Hauptadmin bleibt normalen Admins gegenüber verborgen.
+- Normale Admins können weitere normale Admin-Konten erstellen.
+- KI-Fehler werden ausschließlich im Hauptadmin-Bereich „KI-Fehler“ gesammelt.
+- Optional kann settings.aiErrorEndpoint auf einen eigenen serverseitigen Endpoint gesetzt werden; nur dieser Endpoint erhält die Fehlerdaten.
+- Schüler-/öffentliche Ansicht und Admin-Design sind getrennt.
 
-WICHTIG:
-Diese Version ist eine Frontend-/LocalStorage-Demo. Die Konten und Termine liegen im Browser. Für einen echten Schulbetrieb müssen Authentifizierung, Datenbank und Rollenrechte serverseitig (z.B. Supabase) abgesichert werden. Der Großadmin-Zugang admin/1234 ist deshalb nur für den lokalen Prototypen gedacht und kein sicherer Produktionszugang.
+Wichtig: Diese ZIP ist weiterhin eine einzelne HTML-App mit localStorage. Für echte gemeinsame Konten und Fehlerzustellung über mehrere Geräte braucht die Anwendung einen serverseitigen Speicher/Auth-Dienst. Die Oberfläche verhindert die Anzeige für normale Admins, ersetzt aber keine serverseitige Zugriffskontrolle.
