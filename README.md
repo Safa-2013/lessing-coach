@@ -1,26 +1,24 @@
-# Lessing Coach – V3
+# Lessing Schulportal – KI-Fix
 
-## Enthalten
-- zentrale Supabase-Datenbank für Konten, Chats, Lehrkräfte und Termine
-- Custom-Login für Lessing-Portal
-- Großadmin technisch getrennt; normale Admins erhalten keinerlei Großadmin-Daten
-- Hauptadmin: Benutzer `lessing`, Passwort `Schulen`
-- Großadmin: Benutzer `admin`, Passwort `1234`
-- normale Admins können Admin-/Mitarbeiterkonten erstellen; Großadmin kann zusätzlich Großadmin-Konten erstellen
-- keine Schülerkonten
-- öffentliche Terminanfrage mit Bereich, Lehrkraft und Schulschluss 13:20/15:50
-- persönlicher Anfragecode
-- angefragte Termine und manuell erstellte Termine getrennt
-- Termin-Kollisionen werden serverseitig geprüft
-- Stundenplan Mo–Fr 08:00–16:00
-- zentrale KI-Chats pro Admin-Konto
-- mehrere Chats, neuer Chat, Umbenennen, Löschen
-- KI-Scrollposition bleibt beim Lesen älterer Nachrichten erhalten
-- Gemini 3.8 Flash für die KI
-- responsive Handy-/Desktopansichten
+## KI
+Die KI verwendet standardmäßig `gemini-3.6-flash` statt des nicht mehr verfügbaren `gemini-2.5-flash`.
 
-## KI aktivieren
-In den Supabase Edge-Function Secrets `GEMINI_API_KEY` setzen. Google listet `gemini-3.8-flash` als stabiles Produktionsmodell; Gemini 2.5 Flash ist für neue Projekte eingeschränkt. 
+- Alte gespeicherte `gemini-2.x`-Einstellungen werden beim Laden automatisch auf `gemini-3.6-flash` umgestellt.
+- Falls ein API-Konto das Modell nicht anbietet, versucht die API automatisch `gemini-3.8-flash`.
+- Die KI benötigt in Vercel weiterhin `GEMINI_API_KEY`.
 
-## Deployment
-Die Edge Function `lessing-portal` ist bereits im verbundenen Supabase-Projekt bereitgestellt. Für eine statische Vercel/Netlify-Seite genügt `index.html` aus diesem Ordner.
+Google führt Gemini 3.6 Flash als stabiles Modell; Gemini 3.8 Flash ist ebenfalls aktuell verfügbar.
+
+## Anmeldung
+- Großadmin: `admin / 1234`
+- Hauptadministrator: `lessing / Schulen`
+- Normale Admins können weitere Admin- und Mitarbeiterkonten erstellen.
+- Das Systemkonto `admin` und das Hauptkonto `lessing` sind geschützt und können nicht gelöscht werden.
+- Keine Schülerkonten.
+- Mitarbeiter- und Admin-Konten können verwaltet werden.
+
+## Microsoft
+Für den Microsoft-Schul-Login müssen Client-ID, Tenant-ID und SPA-Redirect-URL in Microsoft Entra konfiguriert werden.
+
+## Schulzeiten
+In der KI gibt es jetzt "Mein Schultag". Montag bis Freitag können individuelle Schulschlusszeiten (z. B. Montag 13:20 und andere Tage 16:00) eingetragen werden. Diese Zeiten werden automatisch an die Lern-KI für Lernpläne und Zeitplanung übergeben.
