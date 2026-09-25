@@ -1,1 +1,7 @@
-body{font-family:Arial;background:#f4f8fc;display:grid;place-items:center;height:100vh}.box{background:white;padding:35px;border-radius:20px;text-align:center;width:330px}input{display:block;width:90%;padding:12px;margin:10px auto;border-radius:8px;border:1px solid #ccc}button{padding:12px 20px;border:0;border-radius:10px;background:#1267df;color:white}.hidden{display:none}#msg{color:red}
+body{margin:0;font-family:Arial;background:#f5f8ff;color:#102040;display:flex}
+aside{width:240px;min-height:100vh;background:#092044;color:white;padding:25px}
+aside a,button{display:block;margin:18px 0;color:white;text-decoration:none}
+button{background:#1769ff;border:0;padding:12px;border-radius:10px}
+main{padding:50px;flex:1}
+.cards{display:flex;gap:20px}
+.cards div{background:white;padding:40px;border-radius:25px;flex:1;box-shadow:0 5px 20px #ddd}

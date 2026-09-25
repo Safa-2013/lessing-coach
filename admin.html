@@ -1,1 +1,12 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lessing Admin</title><link rel="stylesheet" href="styles.css"></head><body class="admin-body"><div class="admin-wrap"><aside class="admin-side"><div class="brand"><div class="brand-mark">L</div><div><b>Lessing</b><br><b>Admin</b></div></div><nav><a class="active" href="#overview">Übersicht</a><a href="#requests">Terminanfragen</a><a href="#chats">Alle Chats</a><a href="#errors">KI-Fehler</a><a href="#accounts">Konten verwalten</a><a href="#settings">Einstellungen</a><a href="index.html">← Website</a></nav></aside><main class="admin-main"><div class="admin-top"><h1>Admin-Kontrollzentrum</h1><button onclick="location.href='index.html'">Website öffnen</button></div><section id="overview" class="admin-grid"><div class="stat"><span>Terminanfragen</span><b id="reqCount">0</b></div><div class="stat"><span>Kontakt-Nachrichten</span><b id="chatCount">0</b></div><div class="stat"><span>KI-Fehler</span><b id="errorCount">0</b></div></section><section id="requests" class="admin-panel"><h2>Terminanfragen</h2><div id="adminRequests"></div></section><section id="chats" class="admin-panel"><h2>Alle Chats</h2><div id="adminChats"></div></section><section id="errors" class="admin-panel"><h2>KI-Fehler – Big Admin</h2><p id="adminErrors">Keine KI-Fehler gemeldet.</p></section><section id="accounts" class="admin-panel"><h2>Konten verwalten</h2><p>Schüler benötigen kein Konto. Nur Admin-Konten werden hier verwaltet.</p><button class="primary" onclick="alert('Admin-Verwaltung vorbereitet.')">Admin hinzufügen</button></section><section id="settings" class="admin-panel"><h2>Einstellungen</h2><p>Kontakt-Nachrichten und Terminanfragen werden in dieser Frontend-Version lokal gespeichert.</p><button class="primary" onclick="localStorage.clear();location.reload()">Demo-Daten löschen</button></section></main></div><script src="admin.js"></script></body></html>
+<!doctype html><html><body>
+<h1>Admin Anmeldung</h1>
+<input id='u' placeholder='Benutzername'><input id='p' placeholder='Passwort' type='password'>
+<button onclick='login()'>Einloggen</button>
+<script>
+function login(){
+if(u.value=="admin"&&p.value=="1234")alert("Big Admin angemeldet");
+else if(u.value=="Lessing"&&p.value=="Schulen")alert("Admin angemeldet");
+else alert("Falsch");
+}
+</script>
+</body></html>

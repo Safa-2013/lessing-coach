@@ -3,25 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lessing Coaching</title>
+<title>Lessing Schulen Coaching</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="box">
-<h1>Lessing Schulen Coaching</h1>
-<button onclick="openLogin()">Anmelden</button>
-<div id="login" class="hidden">
-<h2>Admin Anmeldung</h2>
-<input id="user" placeholder="Benutzername">
-<input id="pass" type="password" placeholder="Passwort">
-<button onclick="login()">Einloggen</button>
-<p id="msg"></p>
+<aside>
+<h2>Lessing<br>Schulen<br>Coaching</h2>
+<nav>
+<a href="index.html">Startseite</a>
+<a href="chat.html">Chat</a>
+<a href="termine.html">Termine</a>
+<a href="student.html">Lern-KI</a>
+</nav>
+<button onclick="location.href='admin.html'">Admin</button>
+</aside>
+<main>
+<h1>Alles an einem Ort.</h1>
+<p>Termine erstellen, Unterstützung erhalten und mit der Lern-KI lernen.</p>
+<div class="cards">
+<div>💬<h2>Chat</h2></div>
+<div>📅<h2>Termine</h2></div>
+<div>🤖<h2>Lern-KI</h2></div>
 </div>
-<div id="panel" class="hidden">
-<h2 id="role"></h2>
-<p>Admin-Bereich geladen.</p>
-</div>
-</div>
+</main>
 <script src="app.js"></script>
 </body>
 </html>
