@@ -1,29 +1,22 @@
-# Lessing Coach – Final
-
-## Enthalten
-- `index.html` – komplette Oberfläche
-- `api/lern-ki.js` – KI-Proxy
-- `api/report-ai-error.js` – Fehlerweiterleitung ausschließlich an den Hauptadmin-Webhook
-
-## Admin-Zugänge
-- Hauptadmin: `Lessing` / `Schulen`
-- Normaler Admin: `admin` / `1234`
-
-Normale Admins sehen keinen Hauptadmin und können nur normale Admin-Konten erstellen. Der Hauptadmin kann normale Admin-Konten ohne deren Passwort öffnen.
+# Lessing Schulportal – KI-Fix
 
 ## KI
-Die Oberfläche sendet jetzt korrekt `message` an `/api/lern-ki`. Der API-Key bleibt ausschließlich in Vercel als `GEMINI_API_KEY`.
-Optional kann mit `GEMINI_MODEL` ein anderes unterstütztes Gemini-Modell gewählt werden; Standard ist `gemini-2.5-flash`.
+Die KI verwendet standardmäßig `gemini-3.6-flash` statt des nicht mehr verfügbaren `gemini-2.5-flash`.
 
-## Chat-Speicherung
-Öffentliche KI-Chats werden nicht gespeichert. Wenn ein Admin angemeldet ist und die Lern-KI öffnet, wird dessen Chat separat unter seinem Admin-Konto im Browser gespeichert. Beim Abmelden wird der sichtbare Chat geleert.
+- Alte gespeicherte `gemini-2.x`-Einstellungen werden beim Laden automatisch auf `gemini-3.6-flash` umgestellt.
+- Falls ein API-Konto das Modell nicht anbietet, versucht die API automatisch `gemini-3.8-flash`.
+- Die KI benötigt in Vercel weiterhin `GEMINI_API_KEY`.
 
-## KI-Fehler
-`/api/report-ai-error` leitet Fehler nur an `BIG_ADMIN_ERROR_WEBHOOK` weiter. Ohne gesetzten Webhook wird nichts an einen anderen Empfänger gesendet.
+Google führt Gemini 3.6 Flash als stabiles Modell; Gemini 3.8 Flash ist ebenfalls aktuell verfügbar.
 
-Vercel-Umgebungsvariablen:
-- `GEMINI_API_KEY`
-- optional `GEMINI_MODEL`
-- optional `BIG_ADMIN_ERROR_WEBHOOK`
+## Anmeldung
+- Großadmin: `admin / 1234`
+- Hauptadministrator: `lessing / admin123`
+- Keine Schülerkonten.
+- Mitarbeiter- und Admin-Konten können verwaltet werden.
 
-Wichtig: Diese Version verwendet für Konten und lokale Einstellungen weiterhin Browser-Speicher. Für echte zentrale Konten über mehrere Geräte wird zusätzlich eine serverseitige Datenbank/Auth benötigt.
+## Microsoft
+Für den Microsoft-Schul-Login müssen Client-ID, Tenant-ID und SPA-Redirect-URL in Microsoft Entra konfiguriert werden.
+
+## Schulzeiten
+In der KI gibt es jetzt "Mein Schultag". Montag bis Freitag können individuelle Schulschlusszeiten (z. B. Montag 13:20 und andere Tage 16:00) eingetragen werden. Diese Zeiten werden automatisch an die Lern-KI für Lernpläne und Zeitplanung übergeben.
