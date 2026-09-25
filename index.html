@@ -56,6 +56,40 @@ main{width:min(1450px,calc(100% - 32px));margin:28px auto 60px}.home{max-width:1
 @media(max-width:900px){.ai-redesign{height:auto;min-height:calc(100vh - 110px);max-height:none}.ai-redesign .ai-side{display:none}.ai-redesign .ai-main{padding:24px 18px}.ai-redesign .ai-hero{min-height:170px}.ai-redesign .ai-visual{right:0;opacity:.35;transform:scale(.8);transform-origin:top right}.ai-redesign .ai-back{position:relative;top:auto;right:auto;margin-left:auto}.ai-redesign .ai-features{grid-template-columns:1fr}.ai-feature{min-height:140px}.ai-redesign .ai-footer-quote{display:none}}
 
 .school-availability{display:flex;flex-direction:column;gap:10px}.checkline{display:flex;align-items:center;gap:9px;font-weight:600;color:#52677a;cursor:pointer}.checkline input{width:auto;margin:0;accent-color:#236aa2}.checkline span{line-height:1.4}.school-availability legend{color:#17304a}
+
+/* MOBILE KI FIX */
+@media (max-width:600px){
+  body{overflow-x:hidden}
+  .top{padding:10px 12px!important;min-height:58px!important}
+  .top h1{font-size:1rem!important}
+  .ai-page-active{width:100%!important;margin:0!important}
+  .ai-page-active .ai-redesign{display:block!important;height:auto!important;min-height:calc(100vh - 58px)!important;overflow:visible!important;border-radius:0!important}
+  .ai-redesign .ai-side{display:none!important}
+  .ai-redesign .ai-main{display:flex!important;padding:16px 14px 28px!important;overflow:visible!important;min-width:0!important}
+  .ai-redesign .ai-hero{display:block!important;min-height:0!important;padding-top:48px!important;padding-bottom:18px!important}
+  .ai-redesign .ai-copy{width:100%!important;min-width:0!important}
+  .ai-redesign .ai-kicker{font-size:.68rem!important;margin-bottom:6px!important}
+  .ai-redesign .ai-main h2{font-size:clamp(2.35rem,12vw,3.25rem)!important;line-height:.94!important;letter-spacing:-.05em!important;margin:0 0 14px!important;max-width:100%!important}
+  .ai-redesign .ai-sub{font-size:.93rem!important;line-height:1.42!important;max-width:100%!important}
+  .ai-redesign .ai-visual{display:none!important}
+  .ai-redesign .ai-back{position:absolute!important;top:0!important;right:0!important;margin:0!important;padding:9px 12px!important;font-size:.9rem!important}
+  .ai-redesign .ai-chat-area{margin-top:4px!important;width:100%!important}
+  .ai-redesign .ai-chatbox{width:100%!important}
+  .ai-redesign .chatbar{padding:8px!important;gap:6px!important}
+  .ai-redesign .chatbar input{min-width:0!important;width:100%!important;height:46px!important;font-size:.92rem!important}
+  .ai-redesign .chat-plus{width:42px!important;height:42px!important;font-size:26px!important}
+  .ai-redesign .chat-send{width:44px!important;height:44px!important}
+  .ai-redesign .ai-quick{display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin:8px 0 0!important}
+  .ai-redesign .ai-quick button{font-size:.78rem!important;padding:7px 10px!important;max-width:100%!important}
+  .ai-redesign .ai-features{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;margin-top:16px!important}
+  .ai-feature{min-height:0!important;padding:16px!important}
+  .ai-feature h3{font-size:1rem!important}
+  .ai-feature p{font-size:.84rem!important}
+  .ai-redesign .ai-footer-quote{display:none!important}
+  .schedule-grid,.grid,.split,.account{grid-template-columns:1fr!important}
+  .modal{padding:10px!important}
+  .modalcard{padding:16px!important}
+}
 </style></head>
 <body>
 <header><div class="brand"><div class="brandmark" id="brandmark">L</div><div><h1 id="schoolName">Lessing Schulportal</h1><p>Lerncoaching · Streitklärung · Lern-KI</p></div></div><div class="top"><button id="loginBtn" class="primary" onclick="openLogin()">Anmelden</button><button onclick="openCode()">Anfrage öffnen</button></div></header>
