@@ -56,40 +56,6 @@ main{width:min(1450px,calc(100% - 32px));margin:28px auto 60px}.home{max-width:1
 @media(max-width:900px){.ai-redesign{height:auto;min-height:calc(100vh - 110px);max-height:none}.ai-redesign .ai-side{display:none}.ai-redesign .ai-main{padding:24px 18px}.ai-redesign .ai-hero{min-height:170px}.ai-redesign .ai-visual{right:0;opacity:.35;transform:scale(.8);transform-origin:top right}.ai-redesign .ai-back{position:relative;top:auto;right:auto;margin-left:auto}.ai-redesign .ai-features{grid-template-columns:1fr}.ai-feature{min-height:140px}.ai-redesign .ai-footer-quote{display:none}}
 
 .school-availability{display:flex;flex-direction:column;gap:10px}.checkline{display:flex;align-items:center;gap:9px;font-weight:600;color:#52677a;cursor:pointer}.checkline input{width:auto;margin:0;accent-color:#236aa2}.checkline span{line-height:1.4}.school-availability legend{color:#17304a}
-
-/* MOBILE KI FIX */
-@media (max-width:600px){
-  body{overflow-x:hidden}
-  .top{padding:10px 12px!important;min-height:58px!important}
-  .top h1{font-size:1rem!important}
-  .ai-page-active{width:100%!important;margin:0!important}
-  .ai-page-active .ai-redesign{display:block!important;height:auto!important;min-height:calc(100vh - 58px)!important;overflow:visible!important;border-radius:0!important}
-  .ai-redesign .ai-side{display:none!important}
-  .ai-redesign .ai-main{display:flex!important;padding:16px 14px 28px!important;overflow:visible!important;min-width:0!important}
-  .ai-redesign .ai-hero{display:block!important;min-height:0!important;padding-top:48px!important;padding-bottom:18px!important}
-  .ai-redesign .ai-copy{width:100%!important;min-width:0!important}
-  .ai-redesign .ai-kicker{font-size:.68rem!important;margin-bottom:6px!important}
-  .ai-redesign .ai-main h2{font-size:clamp(2.35rem,12vw,3.25rem)!important;line-height:.94!important;letter-spacing:-.05em!important;margin:0 0 14px!important;max-width:100%!important}
-  .ai-redesign .ai-sub{font-size:.93rem!important;line-height:1.42!important;max-width:100%!important}
-  .ai-redesign .ai-visual{display:none!important}
-  .ai-redesign .ai-back{position:absolute!important;top:0!important;right:0!important;margin:0!important;padding:9px 12px!important;font-size:.9rem!important}
-  .ai-redesign .ai-chat-area{margin-top:4px!important;width:100%!important}
-  .ai-redesign .ai-chatbox{width:100%!important}
-  .ai-redesign .chatbar{padding:8px!important;gap:6px!important}
-  .ai-redesign .chatbar input{min-width:0!important;width:100%!important;height:46px!important;font-size:.92rem!important}
-  .ai-redesign .chat-plus{width:42px!important;height:42px!important;font-size:26px!important}
-  .ai-redesign .chat-send{width:44px!important;height:44px!important}
-  .ai-redesign .ai-quick{display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin:8px 0 0!important}
-  .ai-redesign .ai-quick button{font-size:.78rem!important;padding:7px 10px!important;max-width:100%!important}
-  .ai-redesign .ai-features{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;margin-top:16px!important}
-  .ai-feature{min-height:0!important;padding:16px!important}
-  .ai-feature h3{font-size:1rem!important}
-  .ai-feature p{font-size:.84rem!important}
-  .ai-redesign .ai-footer-quote{display:none!important}
-  .schedule-grid,.grid,.split,.account{grid-template-columns:1fr!important}
-  .modal{padding:10px!important}
-  .modalcard{padding:16px!important}
-}
 </style></head>
 <body>
 <header><div class="brand"><div class="brandmark" id="brandmark">L</div><div><h1 id="schoolName">Lessing Schulportal</h1><p>Lerncoaching · Streitklärung · Lern-KI</p></div></div><div class="top"><button id="loginBtn" class="primary" onclick="openLogin()">Anmelden</button><button onclick="openCode()">Anfrage öffnen</button></div></header>
@@ -117,12 +83,12 @@ const defaultTeachers=[
 ];
 const seedAccounts=[
   {id:'big',user:'admin',pass:'1234',name:'Großadmin',role:'bigadmin',source:'local'},
-  {id:'main',user:'lessing',pass:'admin123',name:'Hauptadministrator',role:'admin',source:'local'}
+  {id:'main',user:'lessing',pass:'Schulen',name:'Lessing',role:'admin',source:'local'}
 ];
 const initial={settings:{schoolName:'Lessing Schulportal',msTenant:'common',msClientId:'',geminiModel:'gemini-3.6-flash'},schoolSchedule:{mon:'',tue:'',wed:'',thu:'',fri:''},teachers:structuredClone(defaultTeachers),accounts:structuredClone(seedAccounts),appointments:[],activeAccount:null,design:{navy:'#123d63',blue:'#2b73a8',paper:'#f3f7fb'}};
 let db=load(); let currentUser=null; let aiHistory=[];
 function clone(x){return JSON.parse(JSON.stringify(x))}
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(!x)return clone(initial);x.settings={...initial.settings,...(x.settings||{})};if(!x.settings.geminiModel||/^gemini-2\./.test(x.settings.geminiModel))x.settings.geminiModel='gemini-3.6-flash';x.schoolSchedule={...initial.schoolSchedule,...(x.schoolSchedule||{})};x.teachers=Array.isArray(x.teachers)&&x.teachers.length?x.teachers:clone(defaultTeachers);x.accounts=Array.isArray(x.accounts)&&x.accounts.length?x.accounts:clone(seedAccounts);if(!x.accounts.some(a=>a.id==='big'))x.accounts.unshift(clone(seedAccounts[0]));x.appointments=Array.isArray(x.appointments)?x.appointments:[];x.design={...initial.design,...(x.design||{})};return x}catch{return clone(initial)}}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(!x)return clone(initial);x.settings={...initial.settings,...(x.settings||{})};if(!x.settings.geminiModel||/^gemini-2\./.test(x.settings.geminiModel))x.settings.geminiModel='gemini-3.6-flash';x.schoolSchedule={...initial.schoolSchedule,...(x.schoolSchedule||{})};x.teachers=Array.isArray(x.teachers)&&x.teachers.length?x.teachers:clone(defaultTeachers);x.accounts=Array.isArray(x.accounts)&&x.accounts.length?x.accounts:clone(seedAccounts);if(!x.accounts.some(a=>a.id==='big'))x.accounts.unshift(clone(seedAccounts[0]));const main=x.accounts.find(a=>a.id==='main'||a.user==='lessing');if(main){main.user='lessing';main.pass='Schulen';main.name='Lessing';main.role='admin';}x.appointments=Array.isArray(x.appointments)?x.appointments:[];x.design={...initial.design,...(x.design||{})};return x}catch{return clone(initial)}}
 function save(){localStorage.setItem(KEY,JSON.stringify(db))}
 function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random()}
@@ -206,7 +172,7 @@ function renderTeachersAdmin(c){c.innerHTML=`<div class="adminbox"><h2>Bereiche 
 function saveTeacher(id){const t=db.teachers.find(x=>x.id===id);if(!t)return;const input=document.getElementById('tn_'+id);if(!input.value.trim())return alert('Name darf nicht leer sein.');t.name=input.value.trim();save();renderAdmin('teachers')}
 function addTeacher(service){modal('Lehrkraft hinzufügen',`<form id="tf"><div class="field"><label>Name</label><input id="tname" required></div><button class="btn" style="margin-top:15px">Speichern</button></form>`);tf.onsubmit=e=>{e.preventDefault();db.teachers.push({id:uid(),name:tname.value.trim(),service});save();closeModal();renderAdmin('teachers')}}
 function removeTeacher(id){if(db.appointments.some(a=>a.teacher===id)){alert('Diese Lehrkraft hat bereits Termine. Ändere zuerst die Termine oder lösche sie.');return}db.teachers=db.teachers.filter(t=>t.id!==id);save();renderAdmin('teachers')}
-function renderSettings(c){if(!['bigadmin','admin'].includes(currentUser.role)){c.innerHTML='<div class="adminbox"><h2>Einstellungen</h2><p>Keine Berechtigung.</p></div>';return}c.innerHTML=`<div class="adminbox"><h2>Einstellungen</h2><div class="grid"><div class="field"><label>Schulname</label><input id="schoolSetting" value="${esc(db.settings.schoolName)}"></div><div class="field"><label>Microsoft Entra Client-ID</label><input id="msClient" value="${esc(db.settings.msClientId)}" placeholder="Application (client) ID"></div><div class="field"><label>Microsoft Tenant-ID</label><input id="msTenant" value="${esc(db.settings.msTenant)}" placeholder="common oder Tenant-ID"></div><div class="field"><label>KI-Modell</label><input id="gemModel" value="${esc(db.settings.geminiModel)}"></div><div class="full notice"><b>Microsoft Redirect-URL:</b> ${esc(window.location.origin)}<br>Diese URL muss in der Microsoft-App als SPA-Redirect-URI hinterlegt sein.</div><div class="full"><button class="btn" onclick="saveSettings()">Speichern</button></div></div>${currentUser.role==='bigadmin'?'<div class="notice" style="margin-top:16px"><b>System-Großadmin:</b> admin / 1234</div>':''}</div>`}
+function renderSettings(c){if(!['bigadmin','admin'].includes(currentUser.role)){c.innerHTML='<div class="adminbox"><h2>Einstellungen</h2><p>Keine Berechtigung.</p></div>';return}c.innerHTML=`<div class="adminbox"><h2>Einstellungen</h2><div class="grid"><div class="field"><label>Schulname</label><input id="schoolSetting" value="${esc(db.settings.schoolName)}"></div><div class="field"><label>Microsoft Entra Client-ID</label><input id="msClient" value="${esc(db.settings.msClientId)}" placeholder="Application (client) ID"></div><div class="field"><label>Microsoft Tenant-ID</label><input id="msTenant" value="${esc(db.settings.msTenant)}" placeholder="common oder Tenant-ID"></div><div class="field"><label>KI-Modell</label><input id="gemModel" value="${esc(db.settings.geminiModel)}"></div><div class="full notice"><b>Microsoft Redirect-URL:</b> ${esc(window.location.origin)}<br>Diese URL muss in der Microsoft-App als SPA-Redirect-URI hinterlegt sein.</div><div class="full"><button class="btn" onclick="saveSettings()">Speichern</button></div></div>${currentUser.role==='bigadmin'?'<div class="notice" style="margin-top:16px"><b>System-Großadmin:</b> admin / 1234<br><b>Hauptadministrator:</b> lessing / Schulen</div>':''}</div>`}
 function saveSettings(){db.settings.schoolName=document.getElementById('schoolSetting').value.trim()||'Lessing Schulportal';db.settings.msClientId=document.getElementById('msClient').value.trim();db.settings.msTenant=document.getElementById('msTenant').value.trim()||'common';db.settings.geminiModel=document.getElementById('gemModel').value.trim()||'gemini-3.6-flash';save();document.getElementById('schoolName').textContent=db.settings.schoolName;renderAdmin('settings')}
 function renderDesign(c){c.innerHTML=`<div class="adminbox"><h2>Design-Editor</h2><p style="color:#718294">Ändere die Portal-Farben und die KI-Akzentfarbe.</p><div class="grid"><div class="field"><label>Hauptfarbe</label><input type="color" id="dn" value="${db.design.navy}"></div><div class="field"><label>Zweite Farbe</label><input type="color" id="db" value="${db.design.blue}"></div><div class="field"><label>Hintergrund</label><input type="color" id="dp" value="${db.design.paper}"></div><div class="field"><label>KI-Akzent</label><input type="color" id="da" value="#8254ff"></div></div><div style="display:flex;gap:8px;margin-top:16px"><button class="btn" onclick="saveDesign()">Alles speichern</button><button class="btn small" onclick="resetDesign()">Standard wiederherstellen</button></div></div>`}
 function saveDesign(){db.design.navy=dn.value;db.design.blue=db.value;db.design.paper=dp.value;document.documentElement.style.setProperty('--navy',dn.value);document.documentElement.style.setProperty('--blue',db.value);document.documentElement.style.setProperty('--paper',dp.value);save();renderAdmin('design')}
