@@ -28,3 +28,13 @@ In der KI gibt es jetzt "Mein Schultag". Montag bis Freitag können individuelle
 - KI-Chats werden ausschließlich für angemeldete Admin-Konten (`admin`/`bigadmin`) dauerhaft gespeichert.
 - Nicht angemeldete Nutzer und normale Schülerkonten erhalten einen nicht-persistenten Chat; beim Neuladen wird dieser nicht aus dem gemeinsamen Speicher geladen.
 - Dadurch wird verhindert, dass ein gemeinsamer Gast-Chat zwischen verschiedenen Nutzern angezeigt wird.
+
+
+## Finaler Stand
+- Hauptkonto: `lessing` / `Schulen`
+- Großadmin: `admin` / `1234`
+- Normale Admins sehen keinen Großadmin und können Admin-/Mitarbeiterkonten erstellen.
+- Schulschluss im Terminformular: 13:20 Uhr oder 15:50 Uhr.
+- KI-Chats werden nur für angemeldete Admin-/Großadmin-Konten gespeichert und nach Konto getrennt.
+- Die KI-Chatfläche passt ihre Höhe an den tatsächlichen Inhalt an; lange Verläufe werden innerhalb des Chatbereichs gescrollt.
+- Der übrige Portalaufbau wurde aus dem bestehenden Stand übernommen.
