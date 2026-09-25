@@ -56,20 +56,27 @@
     .illustration>span{position:absolute;left:22px;top:20px;width:62px;height:62px;border-radius:15px;background:rgba(255,255,255,.72);display:grid;place-items:center}
     .illus-calendar{font-size:118px;opacity:.8;filter:drop-shadow(0 10px 8px rgba(0,0,0,.08))}.illus-clock{position:absolute;right:45px;bottom:36px;font-size:70px}.illus-robot{font-size:105px;filter:drop-shadow(0 10px 10px rgba(0,0,0,.1))}
     .panel{max-width:1400px;margin:30px auto 0;padding:28px;border-radius:20px}
-    .ai-panel{min-height:0}.ai-identity{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;background:#f6f9fc;border:1px solid var(--line);border-radius:18px;padding:28px}.ai-identity h3{font-size:28px;margin:10px 0}.ai-identity-copy p{font-size:17px;line-height:1.5;color:var(--muted)}
+    .ai-panel{min-height:0}.ai-identity{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;background:#f6f9fc;border:1px solid var(--line);border-radius:18px;padding:24px}.ai-identity h3{font-size:28px;margin:10px 0}.ai-identity-copy p{font-size:17px;line-height:1.5;color:var(--muted)}
     .identity-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.identity-grid .full{grid-column:1/-1}
-    .ai-chat-area{border:1px solid var(--line);border-radius:18px;background:#fff;overflow:hidden}
-    .ai-chat-top{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:#f7fafd}
+    .ai-chat-area{border:1px solid var(--line);border-radius:18px;background:#fff;overflow:hidden;display:flex;flex-direction:column}
+    .ai-chat-top{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:#f7fafd;flex:0 0 auto}
     .ai-chat-top span{color:var(--muted)}
-    .ai-output{min-height:0;height:auto;max-height:none;border:0;border-radius:0;padding:18px;background:#fff;display:flex;flex-direction:column;gap:10px;overflow:auto}
-    .ai-welcome{padding:4px 0 10px}.ai-welcome h3{margin:0 0 7px}
-    .ai-output .message{margin:0;max-width:78%}
-    .ai-prompt{display:grid;grid-template-columns:190px 1fr auto;gap:8px;margin:0;padding:12px;border-top:1px solid var(--line);background:#fff}
+    .ai-output{height:390px;min-height:390px;max-height:390px;border:0;border-radius:0;padding:16px;background:#fff;display:flex;flex-direction:column;gap:10px;overflow-y:auto;overflow-x:hidden}
+    .ai-welcome{padding:2px 0 8px}.ai-welcome h3{margin:0 0 7px}
+    .ai-output .message{margin:0;max-width:78%;flex:0 0 auto}
+    .ai-prompt{display:grid;grid-template-columns:180px minmax(0,1fr) auto;gap:8px;margin:0;padding:10px;border-top:1px solid var(--line);background:#fff;flex:0 0 auto}
     .ai-prompt input,.ai-prompt select{min-width:0}
     .contact-chat{border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:18px}.contact-messages{height:420px}
     .help-steps{display:grid;gap:12px}.help-steps>div{padding:18px;border:1px solid var(--line);border-radius:14px;background:#f8fbfd}.help-steps b{display:block;margin-bottom:5px}.help-steps span{color:var(--muted);line-height:1.5}
     .simple-page p{font-size:17px;line-height:1.6}.contact-gate{max-width:700px}
     .admin-link{display:none!important}
+    /* Compact student views: no artificial full-page whitespace */
+    #aiView,#contactView,#helpView,#aboutView,#bookingView,#statusView{min-height:0}
+    #aiView{padding-bottom:22px}
+    #aiView .panel-head{margin-bottom:18px}
+    #aiView .ai-chat-area{margin-top:18px}
+    #aiView .ai-output:empty{display:none}
+    .contact-chat .messages{height:340px;min-height:0}
     @media(max-width:1050px){.app-sidebar{width:230px}.sidebar-brand{padding-left:8px}.sidebar-link{padding-left:10px}main{margin-left:230px;padding-left:25px;padding-right:25px}.home-tiles{grid-template-columns:1fr}.home-tile{min-height:0}.ai-identity{grid-template-columns:1fr}}
     @media(max-width:700px){.app-sidebar{position:relative;width:100%;height:auto;min-height:0}.sidebar-nav{display:grid;grid-template-columns:1fr 1fr}.sidebar-divider{grid-column:1/-1}main{margin-left:0;padding:0 14px 40px}.page-login{height:74px}.home-choice{margin-top:20px}.home-choice h2{font-size:3rem}.identity-grid,.ai-prompt{grid-template-columns:1fr}.identity-grid .full{grid-column:auto}.ai-prompt .btn{width:100%}}
 
