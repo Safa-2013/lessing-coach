@@ -1,0 +1,11 @@
+Lessing Coaching Korrektur
+
+Diese Version muss folgende Logik haben:
+- Keine Anmeldung für Schüler/Besucher beim Start
+- Admin Anmeldung nur oben rechts
+- Big Admin: admin / 1234
+- Normaler Admin: Lessing / Schulen
+- Termin erstellt erst Schülerprofil mit Name, Nachname, Klasse
+- KI ohne Anmeldung nutzbar
+
+Diese Datei ist nur die Korrektur-Notiz, nicht die vollständige App.
