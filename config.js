@@ -1,5 +1,2 @@
-/*
-  Für eine echte KI hier nur die URL deines sicheren KI-Backends eintragen.
-  NIEMALS einen Gemini/OpenAI API-Key hier eintragen.
-*/
+/* Optional: Set a secure backend URL here later. Leave empty for the built-in local learning mode. */
 window.LESSING_AI_ENDPOINT = "";
