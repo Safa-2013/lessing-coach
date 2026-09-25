@@ -1,10 +1,80 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Lessing Schulen Coaching</title><link rel="stylesheet" href="styles.css"></head><body>
-<header class="mobile-top"><button class="icon-btn menu-btn">☰</button><div class="mobile-brand"><span class="mini-logo">L</span><span>Lessing Schulen Coaching</span></div><button class="login-btn" onclick="openAdmin()">Anmelden</button></header>
-<aside class="sidebar" id="sidebar"><div class="brand"><div class="brand-mark">L</div><div><b>Lessing</b><br><b>Schulen</b><br><b>Coaching</b></div></div><nav><a class="active" href="index.html">⌂ <span>Startseite</span></a><a href="coaching.html">▣ <span>Termin &amp; Coaching</span></a><a href="termine.html">▦ <span>Termine</span></a><a href="chat.html">✦ <span>Lern-KI</span></a><hr><a href="about.html">ⓘ <span>Über Lessing</span></a><a href="help.html">? <span>Hilfe</span></a><a href="contact.html">⌕ <span>Kontakt</span></a></nav></aside>
-<main class="page"><header class="desktop-top"><button class="login-btn" onclick="openAdmin()">Anmelden</button></header>
-<section class="hero"><div class="eyebrow">LESSING SCHULEN COACHING</div><h1>Alles an einem <span>Ort.</span></h1><p>Termine erstellen, Lernunterstützung erhalten und mit der Lern-KI lernen – einfach, verständlich und ohne Schülerkonto.</p></section>
-<section class="cards">
-<article class="feature orange"><div class="art"><div class="art-icon people">●●</div><div class="art-chat">•••</div><div class="art-calendar"></div><div class="art-clock"></div></div><h2>Termin &amp; Coaching</h2><p>Termine erstellen, Unterstützung anfragen und eine passende Lehrkraft bzw. einen Bereich auswählen.</p><a class="cta" href="coaching.html">Jetzt öffnen <b>→</b></a></article>
-<article class="feature blue"><div class="art"><div class="art-calendar large blue-art"></div><div class="art-clock"></div><div class="check">✓</div></div><h2>Termine</h2><p>Mit deinem persönlichen Anfragecode kannst du erstellte Termine ansehen.</p><a class="cta" href="termine.html">Jetzt öffnen <b>→</b></a></article>
-<article class="feature green"><div class="art"><div class="robot-art"><span>✦</span><i></i><i></i></div><div class="art-book"></div></div><h2>Lern-KI</h2><p>Normal chatten, Aufgaben lösen, erklären lassen und Lernpläne erstellen.</p><a class="cta" href="chat.html">Jetzt öffnen <b>→</b></a></article>
-</section></main><div class="scrim" id="scrim"></div><script src="backend-config.js"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lessing Schulen Coaching – Lern-KI</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="brand-icon">L</div><div><b>Lessing</b><br><b>Schulen</b><br><b>Coaching</b></div></div>
+  <nav>
+    <a href="#home">⌂ <span>Startseite</span></a>
+    <a href="#coaching">▣ <span>Termin &amp; Coaching</span></a>
+    <a href="#termine">▦ <span>Termine</span></a>
+    <a class="active" href="#ki">✦ <span>Lern-KI</span></a>
+    <hr>
+    <a href="#about">ⓘ <span>Über Lessing</span></a>
+    <a href="#help">? <span>Hilfe</span></a>
+    <a href="#contact">⌕ <span>Kontakt</span></a>
+  </nav>
+</aside>
+
+<header class="mobilebar">
+  <button id="menuBtn">☰</button>
+  <strong>Lessing Schulen Coaching</strong>
+  <button class="login">Anmelden</button>
+</header>
+
+<main>
+<section id="home" class="page home">
+  <div class="top"><button class="login">Anmelden</button></div>
+  <div class="hero">
+    <div class="eyebrow">LESSING SCHULEN COACHING</div>
+    <h1>Alles an einem <span>Ort.</span></h1>
+    <p>Termine erstellen, Lernunterstützung erhalten und mit der Lern-KI lernen – einfach und verständlich.</p>
+  </div>
+  <div class="cards">
+    <article class="card orange"><div class="illustration">📅</div><h2>Termin &amp; Coaching</h2><p>Termine erstellen und Unterstützung anfragen.</p><button onclick="location.hash='coaching'">Jetzt öffnen →</button></article>
+    <article class="card green"><div class="illustration">🗓️</div><h2>Termine</h2><p>Mit deinem Anfragecode deine Termine ansehen.</p><button onclick="location.hash='termine'">Jetzt öffnen →</button></article>
+    <article class="card purple"><div class="illustration">🤖</div><h2>Lern-KI</h2><p>Fragen stellen, Aufgaben lösen und Lernpläne erstellen.</p><button onclick="location.hash='ki'">Jetzt öffnen →</button></article>
+  </div>
+</section>
+
+<section id="ki" class="page hidden">
+  <div class="top"><button class="login">Anmelden</button></div>
+  <div class="ki-layout">
+    <div class="ki-head"><div class="eyebrow">LESSING KI</div><h1>Deine <span>Lern-KI</span></h1><p>Stelle normale Fragen, lass dir Themen erklären oder erstelle einen Lernplan.</p></div>
+    <div class="chat-card">
+      <div class="chat-title"><div><b>Lern-KI</b><small id="studentLabel">Noch nicht gestartet</small></div><button id="newChat">↻ Neuer Chat</button></div>
+      <div id="messages" class="messages"></div>
+      <div class="quick">
+        <button data-q="Erkläre mir dieses Thema einfach.">Thema erklären</button>
+        <button data-q="Gib mir passende Übungsaufgaben.">Übungsaufgaben</button>
+        <button data-q="Erstelle mir einen Lernplan.">Lernplan</button>
+        <button data-q="Fasse das Thema kurz zusammen.">Zusammenfassung</button>
+      </div>
+      <div class="composer">
+        <input id="prompt" placeholder="Stelle deine Frage …" disabled>
+        <button id="send" disabled>↑</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="coaching" class="page hidden"><div class="top"><button class="login">Anmelden</button></div><div class="simple"><div class="eyebrow">TERMINE &amp; COACHING</div><h1>Termin erstellen</h1><p>Stelle eine Anfrage ohne Schülerkonto.</p><div class="form"><input placeholder="Vorname"><input placeholder="Nachname"><input placeholder="Klasse"><select><option>Lerncoaching</option><option>Beratung</option><option>Schulleitung</option></select><input type="date"><button>Termin anfragen</button></div></div></section>
+<section id="termine" class="page hidden"><div class="top"><button class="login">Anmelden</button></div><div class="simple"><div class="eyebrow">TERMINE</div><h1>Anfrage öffnen</h1><p>Gib deinen Anfragecode ein.</p><div class="lookup"><input placeholder="Anfragecode"><button>Anzeigen</button></div></div></section>
+<section id="about" class="page hidden"><div class="top"><button class="login">Anmelden</button></div><div class="simple"><div class="eyebrow">LESSING SCHULEN COACHING</div><h1>Über Lessing</h1><p>Lerncoaching, Beratung, Termine und Lern-KI an einem Ort.</p></div></section>
+<section id="help" class="page hidden"><div class="top"><button class="login">Anmelden</button></div><div class="simple"><div class="eyebrow">ANLEITUNG</div><h1>Hilfe</h1><div class="helpbox"><b>Lern-KI</b><p>Öffne Lern-KI, gib Vorname, Nachname und Klasse ein und starte anschließend den Chat.</p><b>Termine</b><p>Bei einer Terminanfrage erhältst du einen Anfragecode.</p><b>Kontakt</b><p>Über Kontakt kannst du das Team erreichen.</p></div></div></section>
+<section id="contact" class="page hidden"><div class="top"><button class="login">Anmelden</button></div><div class="simple"><div class="eyebrow">KONTAKT</div><h1>Kontakt</h1><p>Schreibe dem Team eine Nachricht.</p><div class="contactbox"><div class="contactmsg">Deine Nachricht wird an die zuständigen Admins weitergeleitet.</div><div class="contactrow"><input placeholder="Nachricht …"><button>➤</button></div></div></div></section>
+</main>
+
+<div id="profileModal" class="modal">
+ <div class="modalbox"><h2>Bevor wir starten</h2><p>Bitte gib Vorname, Nachname und Klasse ein. Es wird kein Schülerkonto erstellt.</p>
+ <input id="first" placeholder="Vorname"><input id="last" placeholder="Nachname"><input id="className" placeholder="Klasse">
+ <button id="start">Chat starten</button>
+ </div>
+</div>
+<div id="toast"></div>
+<script src="app.js"></script>
+</body></html>
