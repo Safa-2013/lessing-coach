@@ -31,7 +31,7 @@
     .lessing-ai-top h2{font-size:clamp(2rem,4vw,3.4rem);line-height:1.05;margin:7px 0 10px;color:#fff;letter-spacing:-.04em}
     .lessing-ai-top p{margin:0;color:#9da6bd;font-size:1rem}
     .lessing-ai-user{border:1px solid #303752;background:#11172a;border-radius:999px;padding:9px 14px;color:#b9c1d8;font-size:.82rem;white-space:nowrap}
-    .lessing-ai-grid{max-width:1250px;margin:auto;display:grid;grid-template-columns:255px minmax(0,1fr);gap:18px;height:calc(100vh - 260px);min-height:520px}
+    .lessing-ai-grid{max-width:1250px;margin:auto;display:grid;grid-template-columns:255px minmax(0,1fr);gap:18px;height:auto;min-height:0;align-items:start}
     .lessing-ai-tools{background:rgba(14,19,35,.9);border:1px solid #252c45;border-radius:20px;padding:14px;display:flex;flex-direction:column}
     .lessing-tool{border:0;background:transparent;color:#aeb7ce;text-align:left;border-radius:12px;padding:12px 13px;display:flex;align-items:center;gap:11px;margin:2px 0;font-weight:700}
     .lessing-tool:hover,.lessing-tool.active{background:#202743;color:#fff}
@@ -40,8 +40,8 @@
     .lessing-ai-grade-label{font-size:.75rem;color:#818ba5;margin:2px 4px 6px}
     .lessing-ai-small-input{background:#0a0f1c;border:1px solid #2d3550;color:#fff;border-radius:10px;padding:10px 11px;width:100%}
     .lessing-new-chat{margin-top:auto;border:1px solid #303954;background:#171d31;color:#fff;border-radius:12px;padding:11px;font-weight:800}
-    .lessing-ai-chat{min-width:0;display:flex;flex-direction:column;background:rgba(10,14,25,.82);border:1px solid #252c45;border-radius:20px;overflow:hidden}
-    .lessing-ai-messages{flex:1;overflow:auto;padding:30px;display:flex;flex-direction:column;gap:18px}
+    .lessing-ai-chat{min-width:0;display:flex;flex-direction:column;background:rgba(10,14,25,.82);border:1px solid #252c45;border-radius:20px;overflow:hidden;min-height:0}
+    .lessing-ai-messages{overflow:auto;padding:30px;display:flex;flex-direction:column;gap:18px;min-height:110px;max-height:calc(100vh - 390px)}
     .lessing-ai-empty{text-align:center;margin:auto;max-width:560px;color:#9da6bd}
     .lessing-ai-empty h3{color:#fff;font-size:1.35rem;margin:15px 0 7px}
     .lessing-ai-orb{width:62px;height:62px;margin:auto;border-radius:20px;display:grid;place-items:center;font-size:28px;color:#fff;background:linear-gradient(135deg,#755cff,#3ba8ff);box-shadow:0 12px 45px rgba(117,92,255,.35)}
@@ -54,16 +54,9 @@
     .lessing-attach,.lessing-send{border:0;width:43px;height:43px;border-radius:13px;color:#d9dded;background:#1b2237;font-size:22px}
     .lessing-send{background:linear-gradient(135deg,#755cff,#4a8cff);color:#fff;font-weight:900}
     .lessing-ai-note{text-align:center;color:#66708a;font-size:.68rem;padding:0 12px 12px}
-    @media(max-width:850px){.lessing-ai-grid{grid-template-columns:1fr;height:auto}.lessing-ai-tools{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}.lessing-new-chat{margin-top:4px}.lessing-ai-top{flex-direction:column}.lessing-ai-user{align-self:flex-start}.lessing-ai-chat{min-height:560px}}
+    @media(max-width:850px){.lessing-ai-grid{grid-template-columns:1fr;height:auto;min-height:0}.lessing-ai-tools{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}.lessing-new-chat{margin-top:4px}.lessing-ai-top{flex-direction:column}.lessing-ai-user{align-self:flex-start}.lessing-ai-chat{min-height:0}.lessing-ai-messages{min-height:110px;max-height:calc(100svh - 360px);padding:18px}}
 
     @media(max-width:800px){header{position:static}.welcome{grid-template-columns:1fr}.tiles{grid-template-columns:1fr}.grid,.design-controls{grid-template-columns:1fr}.field.full{grid-column:auto}.ai-layout{grid-template-columns:1fr}.ai-output{height:450px}.admin-shell{grid-template-columns:1fr}.admin-nav{position:static;display:flex;overflow:auto;gap:4px;min-height:auto}.admin-nav button{white-space:nowrap}.stats{grid-template-columns:repeat(2,1fr)}.slot-row{grid-template-columns:1fr 1fr}.slot-row button{grid-column:1/-1}.weekday-grid{grid-template-columns:repeat(2,1fr)}.appointment-head{flex-direction:column}.chat-send,.ai-prompt{flex-direction:column}}
-
-    /* KI-ANSICHT FIX: Kein riesiger leerer Antwortbereich */
-    .lessing-ai-grid{height:auto!important;min-height:0!important;align-items:start}
-    .lessing-ai-chat{height:auto!important;min-height:0!important}
-    .lessing-ai-messages{flex:0 1 auto!important;height:auto!important;min-height:110px!important;max-height:52vh!important;overflow:auto!important}
-    .lessing-ai-empty{margin:0 auto!important;padding:18px 0!important}
-    @media(max-width:850px){.lessing-ai-grid{height:auto!important;min-height:0!important}.lessing-ai-chat{min-height:0!important}.lessing-ai-messages{min-height:100px!important;max-height:52vh!important}}
   </style>
 </head>
 <body>
