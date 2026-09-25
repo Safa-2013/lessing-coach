@@ -56,6 +56,76 @@ main{width:min(1450px,calc(100% - 32px));margin:28px auto 60px}.home{max-width:1
 @media(max-width:900px){.ai-redesign{height:auto;min-height:calc(100vh - 110px);max-height:none}.ai-redesign .ai-side{display:none}.ai-redesign .ai-main{padding:24px 18px}.ai-redesign .ai-hero{min-height:170px}.ai-redesign .ai-visual{right:0;opacity:.35;transform:scale(.8);transform-origin:top right}.ai-redesign .ai-back{position:relative;top:auto;right:auto;margin-left:auto}.ai-redesign .ai-features{grid-template-columns:1fr}.ai-feature{min-height:140px}.ai-redesign .ai-footer-quote{display:none}}
 
 .school-availability{display:flex;flex-direction:column;gap:10px}.checkline{display:flex;align-items:center;gap:9px;font-weight:600;color:#52677a;cursor:pointer}.checkline input{width:auto;margin:0;accent-color:#236aa2}.checkline span{line-height:1.4}.school-availability legend{color:#17304a}
+
+/* MOBILE FINAL FIX */
+@media screen and (max-width: 768px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden;}
+  header{height:auto;min-height:68px;padding:10px 14px;gap:10px;}
+  .brand{min-width:0;gap:8px;}
+  .brandmark{width:40px;height:40px;min-width:40px;font-size:20px;border-radius:11px;}
+  .brand h1{font-size:15px;white-space:nowrap;}
+  .brand p{font-size:10px;white-space:nowrap;}
+  .top{flex:none;gap:6px;}
+  .top button{padding:9px 10px;font-size:12px;white-space:nowrap;}
+  main{width:100%;max-width:100%;margin:0 auto 35px;padding:0 14px;}
+  .home{width:100%;max-width:100%;margin:30px auto;}
+  .home h2{font-size:clamp(2.15rem,12vw,3.2rem);line-height:.98;letter-spacing:-.045em;overflow-wrap:anywhere;}
+  .home>p{font-size:1rem;line-height:1.5;max-width:100%;}
+  .homegrid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:24px;width:100%;}
+  .homecard{width:100%;min-width:0;min-height:0;padding:22px;border-radius:18px;}
+  .homecard h3{font-size:1.25rem;}
+  .panel{width:100%;padding:18px;border-radius:18px;}
+  .head{align-items:flex-start;flex-wrap:wrap;}
+  .head h2{font-size:1.5rem;}
+  .grid,.split,.account{grid-template-columns:1fr;width:100%;}
+  .full{grid-column:auto;}
+  .field,.field input,.field select,.field textarea{min-width:0;}
+  .top button:not(.primary){display:none;}
+
+  /* KI page: one clean mobile column, never the desktop 280px sidebar */
+  .ai-page-active{width:100%;max-width:100%;margin:0;padding:0;}
+  .ai-page-active .ai-redesign{display:block;width:100%;height:auto;min-height:calc(100svh - 68px);max-height:none;border-radius:0;overflow:hidden;grid-template-columns:1fr;}
+  .ai-page-active .ai-redesign .ai-side{display:none;}
+  .ai-page-active .ai-redesign .ai-main{display:flex;width:100%;min-width:0;padding:22px 14px 28px;overflow:visible;}
+  .ai-redesign .ai-hero{display:block;min-height:0;width:100%;padding-top:2px;}
+  .ai-redesign .ai-copy{width:100%;min-width:0;padding-right:0;}
+  .ai-redesign .ai-kicker{font-size:.68rem;margin-bottom:7px;}
+  .ai-redesign .ai-main h2{font-size:clamp(2.35rem,12vw,3.7rem);line-height:.98;letter-spacing:-.045em;margin-bottom:12px;max-width:100%;}
+  .ai-redesign .ai-sub{font-size:.98rem;line-height:1.45;max-width:100%;}
+  .ai-redesign .ai-visual{display:none;}
+  .ai-page-active .ai-redesign .ai-back{position:absolute;right:14px;top:14px;margin:0;padding:9px 11px;font-size:.82rem;z-index:3;}
+  .ai-redesign .ai-chat-area{width:100%;margin-top:18px;}
+  .ai-redesign .ai-chatbox{width:100%;border-radius:18px;}
+  .ai-redesign .chatbar{width:100%;padding:8px;gap:6px;}
+  .ai-redesign .chatbar input{min-width:0;width:100%;height:46px;font-size:.94rem;}
+  .ai-redesign .chat-plus{width:42px;height:42px;min-width:42px;}
+  .ai-redesign .chat-send{width:44px;height:44px;min-width:44px;}
+  .ai-redesign .ai-quick{width:100%;display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+  .ai-redesign .ai-quick button{max-width:100%;font-size:.82rem;padding:8px 11px;white-space:normal;}
+  .ai-redesign .ai-features{display:grid;width:100%;grid-template-columns:1fr;gap:12px;margin-top:18px;}
+  .ai-feature{width:100%;min-width:0;min-height:0;padding:18px;border-radius:18px;}
+  .ai-feature p{max-width:100%;}
+  .ai-redesign .ai-footer-quote{display:none;}
+
+  /* Admin and forms */
+  .admin{display:block;width:100%;}
+  .adminnav{width:100%;overflow-x:auto;display:flex;gap:4px;padding:8px;border-radius:14px;}
+  .adminnav button{white-space:nowrap;flex:none;}
+  .stats{grid-template-columns:1fr 1fr;}
+  .stat{padding:14px;}
+  .teacher{grid-template-columns:1fr;}
+  .week{grid-template-columns:1fr;}
+  .day{min-width:0;}
+}
+@media screen and (max-width:390px){
+  header{padding-left:10px;padding-right:10px;}
+  .brand h1{font-size:14px;}
+  .top button{font-size:11px;padding:8px;}
+  main{padding:0 10px;}
+  .ai-page-active .ai-redesign .ai-main{padding-left:10px;padding-right:10px;}
+  .ai-page-active .ai-redesign .ai-back{right:10px;}
+}
+
 </style></head>
 <body>
 <header><div class="brand"><div class="brandmark" id="brandmark">L</div><div><h1 id="schoolName">Lessing Schulportal</h1><p>Lerncoaching · Streitklärung · Lern-KI</p></div></div><div class="top"><button id="loginBtn" class="primary" onclick="openLogin()">Anmelden</button><button onclick="openCode()">Anfrage öffnen</button></div></header>
