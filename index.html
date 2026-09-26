@@ -1,50 +1,20 @@
 <!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lessing Coach Ansichten V8</title>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lessing Coach Ansichten</title>
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden}
-.view{display:none;width:100vw;height:100vh;position:relative}
-.view.active{display:block}
-.view img{width:100vw;height:100vh;object-fit:cover;display:block}
-.hotspot{position:absolute;z-index:10;cursor:pointer}
-.back{left:0;top:0;width:300px;height:100vh}
-.card1{left:18%;top:35%;width:25%;height:45%}
-.card2{left:43%;top:35%;width:25%;height:45%}
-.card3{left:68%;top:35%;width:25%;height:45%}
-.menuHome{left:0;top:140px;width:300px;height:80px}
-.menuChat{left:0;top:300px;width:300px;height:80px}
-.menuKI{left:0;top:320px;width:300px;height:80px}
-.menuContact{left:0;top:500px;width:300px;height:80px}
-.ki-sidebar{position:absolute;left:0;top:0;bottom:0;width:260px;background:#102945;color:white;z-index:20;padding:30px 20px;font-family:Arial}.ki-sidebar b{font-size:24px;display:block;margin-bottom:35px}.ki-sidebar a{display:block;color:white;text-decoration:none;padding:14px;border-radius:12px;margin-bottom:8px;cursor:pointer}.ki-sidebar .active{background:#1769e8}@media(max-width:700px){.ki-sidebar{width:220px}.ki-sidebar b{font-size:20px}}</style>
-</head>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+.view{display:none;width:100vw;height:100vh;position:relative}.view.active{display:block}
+.view img{width:100%;height:100%;object-fit:cover;display:block}
+.hotspot{position:absolute;z-index:30;cursor:pointer}
+.card3{right:0;top:25%;width:33%;height:55%}
+.sidebar{position:absolute;left:0;top:0;width:260px;height:100vh;background:#102945;color:#fff;z-index:20;padding:35px 18px;font-family:Arial}
+.sidebar h2{margin:0 0 40px;font-size:24px}.sidebar div{padding:14px;border-radius:12px;margin-bottom:8px;cursor:pointer}.sidebar .active{background:#1769e8}
+@media(max-width:700px){.sidebar{width:220px}}
+</style></head>
 <body>
-<div id="start" class="view active">
-<img src="assets/start.png">
-<div class="hotspot menuKI" onclick="show('ki')"></div>
-<div class="hotspot card3" onclick="show('ki')"></div>
-</div>
-<div id="ki" class="view">
-<div class="ki-sidebar"><b>Lessing<br>Schulen<br>Coaching</b><a onclick="show('start')">Startseite</a><a onclick="show('chat')">Kontakt</a><a class="active">Lern-KI</a></div>
-<img src="assets/ki.png">
-<div class="hotspot back" onclick="show('start')"></div>
-<div class="hotspot menuHome" onclick="show('start')"></div>
-<div class="hotspot menuContact" onclick="show('chat')"></div>
-</div>
-<div id="chat" class="view">
-<img src="assets/chat.png">
-<div class="hotspot back" onclick="show('start')"></div>
-<div class="hotspot menuHome" onclick="show('start')"></div>
-<div class="hotspot menuContact" onclick="show('chat')"></div>
-</div>
+<div id="start" class="view active"><img src="assets/start.png"><div class="hotspot card3" onclick="show('ki')"></div></div>
+<div id="ki" class="view"><img src="assets/ki.png"><div class="sidebar"><h2>Lessing<br>Schulen<br>Coaching</h2><div onclick="show('start')">Startseite</div><div onclick="show('chat')">Kontakt</div><div class="active">Lern-KI</div></div></div>
+<div id="chat" class="view"><img src="assets/chat.png"><div class="sidebar"><h2>Lessing<br>Schulen<br>Coaching</h2><div onclick="show('start')">Startseite</div><div class="active">Kontakt</div><div onclick="show('ki')">Lern-KI</div></div></div>
 <script>
-function show(p){
-document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-document.getElementById(p).classList.add('active');
-}
-</script>
-</body>
-</html>
+function show(p){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(p).classList.add('active')}
+</script></body></html>
