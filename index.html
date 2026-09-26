@@ -9,7 +9,7 @@
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden}
 .view{display:none;width:100vw;height:100vh;position:relative}
 .view.active{display:block}
-.view img{width:100vw;height:100vh;object-fit:fill;display:block}
+.view img{width:100vw;height:100vh;object-fit:cover;display:block}
 .hotspot{position:absolute;z-index:10;cursor:pointer}
 .back{left:0;top:0;width:300px;height:100vh}
 .card1{left:18%;top:35%;width:25%;height:45%}
@@ -19,12 +19,13 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden}
 .menuChat{left:0;top:300px;width:300px;height:80px}
 .menuKI{left:0;top:320px;width:300px;height:80px}
 .menuContact{left:0;top:500px;width:300px;height:80px}
-.ki-sidebar{position:absolute;left:0;top:0;bottom:0;width:260px;background:#102945;color:white;z-index:10;padding:30px 20px;font-family:Arial}.ki-sidebar b{font-size:24px;display:block;margin-bottom:35px}.ki-sidebar a{display:block;color:white;text-decoration:none;padding:14px;border-radius:12px;margin-bottom:8px;cursor:pointer}.ki-sidebar .active{background:#1769e8}@media(max-width:700px){.ki-sidebar{width:220px}.ki-sidebar b{font-size:20px}}</style>
+.ki-sidebar{position:absolute;left:0;top:0;bottom:0;width:260px;background:#102945;color:white;z-index:20;padding:30px 20px;font-family:Arial}.ki-sidebar b{font-size:24px;display:block;margin-bottom:35px}.ki-sidebar a{display:block;color:white;text-decoration:none;padding:14px;border-radius:12px;margin-bottom:8px;cursor:pointer}.ki-sidebar .active{background:#1769e8}@media(max-width:700px){.ki-sidebar{width:220px}.ki-sidebar b{font-size:20px}}</style>
 </head>
 <body>
 <div id="start" class="view active">
 <img src="assets/start.png">
 <div class="hotspot menuKI" onclick="show('ki')"></div>
+<div class="hotspot card3" onclick="show('ki')"></div>
 </div>
 <div id="ki" class="view">
 <div class="ki-sidebar"><b>Lessing<br>Schulen<br>Coaching</b><a onclick="show('start')">Startseite</a><a onclick="show('chat')">Kontakt</a><a class="active">Lern-KI</a></div>
