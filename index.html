@@ -9,12 +9,26 @@
 .card3{right:0;top:25%;width:33%;height:55%}
 .sidebar{position:absolute;left:0;top:0;width:260px;height:100vh;background:#102945;color:#fff;z-index:20;padding:35px 18px;font-family:Arial}
 .sidebar h2{margin:0 0 40px;font-size:24px}.sidebar div{padding:14px;border-radius:12px;margin-bottom:8px;cursor:pointer}.sidebar .active{background:#1769e8}
-@media(max-width:700px){.sidebar{width:220px}}
+.menuBtn{display:none;position:absolute;left:15px;top:15px;z-index:40;font-size:30px;color:white;cursor:pointer}
+@media(max-width:700px){
+.sidebar{width:260px;transform:translateX(-100%);transition:.3s}
+.sidebar.open{transform:translateX(0)}
+.menuBtn{display:block}
+}
 </style></head>
 <body>
-<div id="start" class="view active"><img src="assets/start.png"><div class="hotspot card3" onclick="show('ki')"></div></div>
-<div id="ki" class="view"><img src="assets/ki.png"><div class="sidebar"><h2>Lessing<br>Schulen<br>Coaching</h2><div onclick="show('start')">Startseite</div><div onclick="show('chat')">Kontakt</div><div class="active">Lern-KI</div></div></div>
-<div id="chat" class="view"><img src="assets/chat.png"><div class="sidebar"><h2>Lessing<br>Schulen<br>Coaching</h2><div onclick="show('start')">Startseite</div><div class="active">Kontakt</div><div onclick="show('ki')">Lern-KI</div></div></div>
+<div id="start" class="view active"><img src="assets/start.png">
+<div class="hotspot" style="left:18%;top:45%;width:25%;height:35%" onclick="show('chat')"></div>
+<div class="hotspot" style="left:68%;top:45%;width:25%;height:35%" onclick="show('ki')"></div>
+</div>
+<div id="ki" class="view"><img src="assets/ki.png"><div class="menuBtn" onclick="toggleMenu('ki')">☰</div><div class="sidebar"><h2>Lessing<br>Schulen<br>Coaching</h2><div onclick="show('start')">Startseite</div><div onclick="show('chat')">Kontakt</div><div class="active">Lern-KI</div></div></div>
+<div id="chat" class="view"><img src="assets/chat.png"><div class="menuBtn" onclick="toggleMenu('chat')">☰</div><div class="sidebar"><h2>Lessing<br>Schulen<br>Coaching</h2><div onclick="show('start')">Startseite</div><div class="active">Kontakt</div><div onclick="show('ki')">Lern-KI</div></div></div>
 <script>
-function show(p){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(p).classList.add('active')}
+function show(p){
+document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+document.getElementById(p).classList.add('active');
+}
+function toggleMenu(id){
+document.querySelector('#'+id+' .sidebar').classList.toggle('open');
+}
 </script></body></html>
