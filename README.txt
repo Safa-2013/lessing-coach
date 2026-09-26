@@ -1,8 +1,8 @@
-Lessing Coach FINAL Ansicht
+Lessing Coach - reine Ansichten
 
-Enthaltene Ansichten:
-1. Lern-KI Ansicht
-2. Startseite Lessing Schulen Coaching
-3. Chat Ansicht
+Enthalten:
+- KI Chat Ansicht
+- Startseite Ansicht
+- Kontakt Chat Ansicht
 
-Diese Version ist nur die Oberfläche/Ansicht.
+Nur Design/Ansicht. Keine Funktionen, keine Anmeldung, keine KI.
