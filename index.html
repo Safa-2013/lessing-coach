@@ -1,34 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lessing Coaching UI</title>
-<link rel="stylesheet" href="style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lessing Schulen Coaching</title><link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<div class="menu">
-<h2>🎓 Lessing Coach</h2>
-<button onclick="show('ki')">Lern-KI</button>
-<button onclick="show('start')">Startseite</button>
-<button onclick="show('chat')">Chat</button>
-</div>
-
-<div class="content">
-<h1>Lessing Schulen Coaching</h1>
-<div class="tabs">
-<button onclick="show('ki')">KI Ansicht</button>
-<button onclick="show('start')">Start Ansicht</button>
-<button onclick="show('chat')">Chat Ansicht</button>
-</div>
-
-<img id="screen" src="images/ki.png" alt="Ansicht">
-</div>
-
-<script>
-function show(page){
- document.getElementById('screen').src='images/'+page+'.png';
-}
-</script>
-</body>
-</html>
+<body data-page="home">
+<header class="mobile-top"><button class="icon-btn menu-btn" aria-label="Menü">☰</button><div class="mobile-title">Lessing Schulen Coaching</div><button class="login-btn" onclick="openAdmin()">Anmelden</button></header>
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="brand-mark">L</div><div><b>Lessing</b><br><b>Schulen</b><br><b>Coaching</b></div></div>
+  <nav>
+    <a class="active" href="index.html">⌂ <span>Startseite</span></a>
+    <a href="coaching.html">▣ <span>Termin &amp; Coaching</span></a>
+    <a href="termine.html">▦ <span>Termine</span></a>
+    <a href="chat.html">✦ <span>Lern-KI</span></a>
+    <hr>
+    <a href="about.html">ⓘ <span>Über Lessing</span></a>
+    <a href="help.html">? <span>Hilfe</span></a>
+    <a href="contact.html">⌕ <span>Kontakt</span></a>
+  </nav>
+</aside>
+<main class="page">
+<header class="desktop-top"><button class="login-btn" onclick="openAdmin()">Anmelden</button></header>
+<section class="hero">
+  <div class="eyebrow">LESSING SCHULEN COACHING</div>
+  <h1>Alles an einem <span>Ort.</span></h1>
+  <p>Termine erstellen, Lernunterstützung erhalten und mit der Lern-KI lernen – einfach, verständlich und ohne Schülerkonto.</p>
+</section>
+<section class="cards">
+  <article class="feature orange"><div class="art art-calendar">👥<div class="calendar-grid"></div><span>◷</span></div><h2>Termin &amp; Coaching</h2><p>Termine erstellen, Unterstützung anfragen und eine passende Lehrkraft bzw. einen Bereich auswählen.</p><a class="cta" href="coaching.html">Jetzt öffnen →</a></article>
+  <article class="feature green"><div class="art art-calendar">▣<div class="calendar-grid"></div><span>◷</span></div><h2>Termine</h2><p>Mit deinem persönlichen Anfragecode kannst du erstellte Termine ansehen.</p><a class="cta" href="termine.html">Jetzt öffnen →</a></article>
+  <article class="feature purple"><div class="art robot">✦ 🤖</div><h2>Lern-KI</h2><p>Normal chatten, Aufgaben lösen, erklären lassen und Lernpläne erstellen.</p><a class="cta" href="chat.html">Jetzt öffnen →</a></article>
+</section>
+</main>
+<div class="scrim" id="scrim"></div>
+<script src="app.js"></script>
+</body></html>

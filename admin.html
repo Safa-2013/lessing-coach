@@ -1,12 +1,10 @@
-<!doctype html><html><body>
-<h1>Admin Anmeldung</h1>
-<input id='u' placeholder='Benutzername'><input id='p' placeholder='Passwort' type='password'>
-<button onclick='login()'>Einloggen</button>
-<script>
-function login(){
-if(u.value=="admin"&&p.value=="1234")alert("Big Admin angemeldet");
-else if(u.value=="Lessing"&&p.value=="Schulen")alert("Admin angemeldet");
-else alert("Falsch");
-}
-</script>
-</body></html>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin – Lessing</title><link rel="stylesheet" href="styles.css"></head><body class="admin-body">
+<div class="admin-wrap"><aside class="admin-side"><div class="brand"><div class="brand-mark">L</div><div><b>Lessing</b><br><b>Admin</b></div></div><nav><a class="active" href="#overview">Übersicht</a><a href="#requests">Terminanfragen</a><a href="#chats">Alle Chats</a><a href="#errors">KI-Fehler</a><a href="#accounts">Konten verwalten</a><a href="#settings">Einstellungen</a></nav></aside>
+<main class="admin-main"><div class="admin-top"><h1>Admin-Kontrollzentrum</h1><button onclick="location.href='index.html'">Website</button></div>
+<section id="overview" class="admin-grid"><div class="stat"><span>Terminanfragen</span><b id="reqCount">0</b></div><div class="stat"><span>Kontakt-Chats</span><b id="chatCount">0</b></div><div class="stat"><span>KI-Fehler</span><b id="errorCount">0</b></div></section>
+<section id="requests" class="admin-panel"><h2>Terminanfragen</h2><div id="adminRequests">Keine Anfragen.</div></section>
+<section id="chats" class="admin-panel"><h2>Alle Chats</h2><div class="admin-chat" id="adminChats">Noch keine Nachrichten.</div></section>
+<section id="errors" class="admin-panel"><h2>KI-Fehler – nur Big Admin</h2><div id="adminErrors">Keine KI-Fehler gemeldet.</div></section>
+<section id="accounts" class="admin-panel"><h2>Konten verwalten</h2><p>Es werden <b>keine Schülerkonten</b> benötigt. Admins können hier künftig verwaltet werden.</p><button class="primary" onclick="alert('Demo: Admin-Verwaltung ist vorbereitet.')">Admin hinzufügen</button></section>
+<section id="settings" class="admin-panel"><h2>System</h2><p>Kontakt-Nachrichten gehen an alle Admins. KI-Fehler werden ausschließlich im Big-Admin-Bereich protokolliert.</p></section>
+</main></div><script src="admin.js"></script></body></html>
