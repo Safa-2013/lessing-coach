@@ -1,8 +1,4 @@
-Lessing Coach - reine Ansichten
-
-Enthalten:
-- KI Chat Ansicht
-- Startseite Ansicht
-- Kontakt Chat Ansicht
-
-Nur Design/Ansicht. Keine Funktionen, keine Anmeldung, keine KI.
+Nur Ansichten wie gewünscht.
+Kein Menü oben, keine extra Buttons.
+Bilder füllen den ganzen Bildschirm.
+Startseite Karten sind klickbar.
