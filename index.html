@@ -3,57 +3,39 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lessing Coach Ansicht</title>
+<title>Lessing Coach Ansichten V8</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;background:#fff}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden}
 .view{display:none;width:100vw;height:100vh;position:relative}
 .view.active{display:block}
-.view img{
- width:100%;
- height:100%;
- object-fit:contain;
- display:block;
-}
-/* genaue Klickflächen auf den Karten */
-.hotspot{
- position:absolute;
- cursor:pointer;
- z-index:5;
-}
-.ki-btn{
- right:4%;
- bottom:8%;
- width:28%;
- height:43%;
-}
-.chat-btn{
- left:4%;
- bottom:8%;
- width:28%;
- height:43%;
-}
-
-/* final layout fixes */
-html,body,#root{margin:0!important;padding:0!important;width:100vw!important;height:100vh!important;overflow:hidden!important;}
-.view{width:100vw!important;height:100vh!important;margin:0!important;padding:0!important;}
-.view img{width:100vw!important;height:100vh!important;display:block!important;object-fit:fill!important;}
+.view img{width:100vw;height:100vh;object-fit:fill;display:block}
+.hotspot{position:absolute;z-index:10;cursor:pointer}
+.back{left:0;top:0;width:300px;height:100vh}
+.card1{left:18%;top:35%;width:25%;height:45%}
+.card2{left:43%;top:35%;width:25%;height:45%}
+.card3{left:68%;top:35%;width:25%;height:45%}
 </style>
 </head>
 <body>
 <div id="start" class="view active">
 <img src="assets/start.png">
-<div class="hotspot chat-btn" onclick="show('chat')"></div>
-<div class="hotspot ki-btn" onclick="show('ki')"></div>
+<div class="hotspot card1" onclick="show('chat')"></div>
+<div class="hotspot card2" onclick="show('start')"></div>
+<div class="hotspot card3" onclick="show('ki')"></div>
 </div>
-
-<div id="ki" class="view"><img src="assets/ki.png"></div>
-<div id="chat" class="view"><img src="assets/chat.png"></div>
-
+<div id="ki" class="view">
+<img src="assets/ki.png">
+<div class="hotspot back" onclick="show('start')"></div>
+</div>
+<div id="chat" class="view">
+<img src="assets/chat.png">
+<div class="hotspot back" onclick="show('start')"></div>
+</div>
 <script>
-function show(page){
- document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
- document.getElementById(page).classList.add('active');
+function show(p){
+document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+document.getElementById(p).classList.add('active');
 }
 </script>
 </body>
