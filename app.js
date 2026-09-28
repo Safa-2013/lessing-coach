@@ -253,7 +253,7 @@ async function loadAccounts() {
 async function loadStaffManagement() {
   const [{teachers},{categories}] = await Promise.all([request('admin/teachers'),request('admin/categories')]);
   $('#teacherList').innerHTML = teachers.length ? teachers.map(t=>`<div class="list-item row"><input class="field teacher-name" data-id="${safe(t.id)}" value="${safe(t.name)}"><button class="primary" data-save-teacher="${safe(t.id)}">Speichern</button><button class="primary danger" data-delete-teacher="${safe(t.id)}">Entfernen</button></div>`).join('') : '<p class="muted">Noch keine Lehrkräfte.</p>';
-  $('#categoryList').innerHTML = categories.map(c=>`<div class="list-item row"><input class="field category-name" data-id="${safe(c.id)}" value="${safe(c.name)}"><input type="color" class="category-color" data-id="${safe(c.id)}" value="${safe(c.color)}" title="Farbe"><button class="primary" data-save-category="${safe(c.id)}">Speichern</button></div>`).join('');
+  $('#categoryList').innerHTML = categories.map(c=>`<div class="list-item row"><input class="field category-name" data-id="${safe(c.id)}" value="${safe(c.name)}"><input type="color" class="category-color" data-id="${safe(c.id)}" value="${safe(c.color)}" title="Farbe"><button class="primary" data-save-category="${safe(c.id)}">Speichern</button><button class="primary danger" type="button" data-delete-category="${safe(c.id)}">Deaktivieren</button></div>`).join('');
 }
 $('#reloadAdmin').onclick = loadAdmin;
 $('#appointmentList').onsubmit = async e => { if (!e.target.matches('.statusForm')) return; e.preventDefault(); const form=e.target; try { await send('admin/appointments', {id:form.dataset.id,...Object.fromEntries(new FormData(form))}, 'PATCH'); toast('Termin aktualisiert'); await loadAdmin(); } catch(err) { toast(err.message); } };
@@ -306,9 +306,12 @@ $('#adminAccounts').onclick = async e => {
   if (teacherId) { try { await request('admin/teachers/'+teacherId,{method:'DELETE'}); await loadStaffManagement(); await loadCatalog(); toast('Lehrkraft deaktiviert'); } catch(err){toast(err.message);} return; }
   const saveTeacher=e.target.dataset.saveTeacher;
   if (saveTeacher) { const input=document.querySelector(`.teacher-name[data-id="${CSS.escape(saveTeacher)}"]`); try { await send('admin/teachers/'+saveTeacher,{name:input.value},'PATCH'); await loadStaffManagement(); await loadCatalog(); toast('Lehrkraft gespeichert'); } catch(err){toast(err.message);} return; }
+  const deleteCategory=e.target.dataset.deleteCategory;
+  if (deleteCategory) { try { await request('admin/categories/'+deleteCategory,{method:'DELETE'}); await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Bereich deaktiviert'); } catch(err){toast(err.message);} return; }
   const saveCategory=e.target.dataset.saveCategory;
   if (saveCategory) { const name=document.querySelector(`.category-name[data-id="${CSS.escape(saveCategory)}"]`).value; const color=document.querySelector(`.category-color[data-id="${CSS.escape(saveCategory)}"]`).value; try { await send('admin/categories/'+saveCategory,{name,color},'PATCH'); await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Bereich gespeichert'); } catch(err){toast(err.message);} }
 };
 $('#teacherCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/teachers',{name:e.target.elements.name.value});e.target.reset();await loadStaffManagement();await loadCatalog();toast('Lehrkraft hinzugefügt');}catch(err){toast(err.message);}};
+$('#categoryCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/categories',{name:e.target.elements.name.value,color:e.target.elements.color.value});e.target.reset();e.target.elements.color.value='#3B82F6';await loadStaffManagement();await loadCatalog();adminSchedule.refresh();toast('Bereich hinzugefügt');}catch(err){toast(err.message);}};
 $('#passwordForm').onsubmit = async e => { e.preventDefault(); const form=e.target; try { await send('admin/password',Object.fromEntries(new FormData(form)),'PATCH'); form.reset(); toast('Passwort geändert'); }catch(err){toast(err.message);} };
 boot();

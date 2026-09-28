@@ -8,8 +8,8 @@ import { holidayOn } from '../holidays.js';
 
 process.chdir(mkdtempSync(join(tmpdir(), 'lessing-test-')));
 delete process.env.DATABASE_URL;
-process.env.INITIAL_ADMIN_PASSWORD = 'Test-Admin-Passwort-2026';
-process.env.INITIAL_BIG_ADMIN_PASSWORD = 'Test-Hauptadmin-Passwort-2026';
+process.env.INITIAL_ADMIN_PASSWORD = 'Schulen';
+process.env.INITIAL_BIG_ADMIN_PASSWORD = '1234';
 
 async function call(path, method='GET', data, cookie='') {
   const response = { headers:{}, setHeader(k,v) { this.headers[k.toLowerCase()]=v; }, end(text) { this.data=JSON.parse(text); }, get headersSent() { return false; } };
