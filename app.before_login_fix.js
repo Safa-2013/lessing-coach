@@ -36,7 +36,7 @@ function showAdminTab(tab) {
 }
 function navigate(page) {
   if (page === 'adminPanel' && state.session.role === 'visitor') page = 'login';
-  if (page === 'login' && !document.getElementById('login').classList.contains('active')) $('#loginForm').reset();
+  if (page === 'login') $('#loginForm').reset();
   document.body.dataset.page = page;
   document.body.classList.toggle('ai-mode', page === 'ki');
   $('.view.active')?.classList.remove('active');
@@ -189,6 +189,7 @@ $('#loginForm').onsubmit = async e => {
   catch(err) { toast(err.message); }
 };
 $('#logout').onclick = async () => { try { const data = await send('logout', {}); state.session = data.session; state.threadId = null; state.currentChat=null; $('#adminChatDetail').replaceChildren(); $('#loginForm').reset(); renderAuth(); navigate('start'); } catch(e) { toast(e.message); } };
+window.addEventListener('pageshow', () => { if (state.session.role === 'visitor') $('#loginForm').reset(); });
 async function loadThreads() {
   try { const {threads} = await request('ai/threads'); $('#threadList').innerHTML = threads.map(t => `<button data-thread="${safe(t.id)}">💬 ${safe(t.title)}</button>`).join(''); }
   catch(e) { toast(e.message); }
