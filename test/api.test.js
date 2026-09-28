@@ -20,10 +20,19 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   const first = await call('bootstrap');
   const second = await call('bootstrap');
   assert.notEqual(first.cookie, second.cookie);
-  const created = await call('appointments','POST',{first_name:'A',last_name:'B',class_name:'9a',subject:'Mathematik',topic:'Brüche',requested_at:'2026-10-01T14:00'},first.cookie);
+  const future = new Date(Date.now()+4*86400000).toISOString().slice(0,10);
+  const month = future.slice(0,7);
+  const form = {first_name:'A',last_name:'B',class_name:'9a',subject:'Mathematik',topic:'Brüche',requested_at:future,school_end:'15:50'};
+  assert.equal((await call('appointments','POST',{...form,requested_at:future+'T14:00'},first.cookie)).status,400);
+  assert.equal((await call('appointments','POST',{...form,school_end:''},first.cookie)).status,400);
+  const created = await call('appointments','POST',form,first.cookie);
   assert.equal(created.status,201);
   const lookup = await call('appointments?code='+created.data.code,'GET',null,second.cookie);
   assert.equal(lookup.data.appointment.status,'Anfrage eingegangen');
+  assert.equal(lookup.data.appointment.school_end,'15:50');
+  const anonymousCalendar=await call('appointments/calendar?month='+month,'GET',null,second.cookie);
+  assert.deepEqual(anonymousCalendar.data.days,[{date:future,hasAppointments:false,hasRequests:true}]);
+  assert.doesNotMatch(JSON.stringify(anonymousCalendar.data),/Brüche|LS-/);
   await call('messages','POST',{message:'Privat'},first.cookie);
   assert.equal((await call('messages','GET',null,second.cookie)).data.messages.length,0);
   const normal = await call('login','POST',{username:'Lessing',password:process.env.INITIAL_ADMIN_PASSWORD},second.cookie);
@@ -33,6 +42,7 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   assert.equal(staffAppointments.data.appointments.length,1);
   assert.equal((await call('admin/appointments','PATCH',{id:staffAppointments.data.appointments[0].id,status:'Bestätigt',note:'Donnerstag um 14 Uhr'},normal.cookie)).status,200);
   assert.equal((await call('appointments?code='+created.data.code,'GET',null,second.cookie)).data.appointment.note,'Donnerstag um 14 Uhr');
+  assert.deepEqual((await call('appointments/calendar?month='+month,'GET',null,second.cookie)).data.days,[{date:future,hasAppointments:true,hasRequests:false}]);
   const staffChats = await call('admin/chats','GET',null,normal.cookie);
   assert.equal(staffChats.data.chats.length,1);
   const visitorId = staffChats.data.chats[0].visitor_id;
