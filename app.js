@@ -237,7 +237,7 @@ async function loadAdmin() {
     if (can('chats')) { const {chats} = await request('admin/chats'); $('#chatList').innerHTML = chats.length ? chats.map((c,i) => `<button class="primary" data-chat="${safe(c.visitor_id)}" style="margin:4px">Chat ${i+1} · ${Number(c.count)} Nachrichten</button>`).join('') : '<p class="muted">Noch keine Nachrichten.</p>'; if (state.currentChat) await openAdminChat(state.currentChat); }
     if (can('content')) $('#contentEditor').innerHTML = ['hero','about','help'].map(key => `<form class="contentForm" data-key="${key}"><label class="field">${{hero:'Startseite',about:'Über Lessing',help:'Hilfe'}[key]}<textarea name="value" maxlength="3000">${safe(state.content[key] || '')}</textarea></label><button class="primary">Speichern</button></form>`).join('');
     if (isStaffForAccounts()) await loadAccounts();
-    if (can('appointments')) { await loadStaffManagement(); }
+    if (can('appointments')) { await loadStaffManagement(); await loadAppointmentNotes(); }
   } catch(e) { toast(e.message); }
 }
 function isStaffForAccounts(){ return state.session.role === 'admin' || state.session.role === 'big'; }
@@ -251,9 +251,41 @@ async function loadStaffManagement() {
   $('#teacherList').innerHTML=teachers.length?teachers.map(t=>`<div class="list-item teacher-card"><div class="row"><input class="field teacher-name" data-id="${safe(t.id)}" value="${safe(t.name)}"><button class="primary" data-save-teacher="${safe(t.id)}">Speichern</button><button class="primary danger" data-delete-teacher="${safe(t.id)}">Entfernen</button></div><div class="teacher-categories"><strong>Bereiche:</strong><div class="row">${categories.map(c=>`<label><input type="checkbox" class="teacher-category" data-teacher="${safe(t.id)}" data-category="${safe(c.id)}" ${(t.category_ids||[]).includes(c.id)?'checked':''}> ${safe(c.name)}</label>`).join('')}</div></div></div>`).join(''):'<p class="muted">Noch keine Lehrkräfte.</p>';
   $('#categoryList').innerHTML=categories.map(c=>`<div class="list-item row"><input class="field category-name" data-id="${safe(c.id)}" value="${safe(c.name)}"><input type="color" class="category-color" data-id="${safe(c.id)}" value="${safe(c.color)}" title="Farbe"><button class="primary" data-save-category="${safe(c.id)}">Speichern</button><button class="primary danger" type="button" data-delete-category="${safe(c.id)}">Deaktivieren</button></div>`).join('');
 }
+async function loadAppointmentNotes() {
+  const box=$('#appointmentNotesList'); if(!box) return;
+  const {notes}=await request('admin/appointment-notes');
+  box.innerHTML=notes.length?notes.map(n=>`<div class="list-item appointment-note-card"><div class="row"><strong>${safe(n.category_name)}</strong><span class="pill">${safe(n.reason)}</span><span class="small">${safe(dayLabel(n.requested_at))} · ${safe(n.appointment_time||'Uhrzeit offen')}</span></div><p class="small">${safe(n.first_name)} ${safe(n.last_name)} · ${safe(n.class_name)} · ${safe(n.teacher_name)}</p><p>${safe(n.note)}</p><div class="row"><button type="button" class="primary danger" data-delete-note="${safe(n.id)}">Notiz endgültig löschen</button></div></div>`).join(''):'<p class="muted">Keine archivierten Notizen.</p>';
+}
+function rejectChoiceModal(form){
+  return new Promise(resolve=>{
+    const wrap=document.createElement('div'); wrap.className='overlay'; wrap.style.cssText='position:fixed;inset:0;background:rgba(10,20,40,.55);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
+    wrap.innerHTML=`<div class="panel" style="max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)"><h2>Anfrage ablehnen</h2><p class="muted">Was soll mit der Anfrage passieren?</p><label class="field">Notiz (optional)<textarea id="rejectNote" maxlength="500" placeholder="Warum wurde die Anfrage abgelehnt?"></textarea></label><div class="row" style="flex-wrap:wrap"><button type="button" class="primary" data-choice="note">Ablehnen &amp; in Notizen speichern</button><button type="button" class="primary danger" data-choice="delete">Ablehnen &amp; komplett löschen</button><button type="button" data-choice="reject">Nur ablehnen</button><button type="button" data-choice="cancel">Abbrechen</button></div></div>`;
+    document.body.appendChild(wrap);
+    wrap.onclick=e=>{const b=e.target.closest('[data-choice]');if(!b)return;const choice=b.dataset.choice;const note=wrap.querySelector('#rejectNote').value.trim();wrap.remove();resolve({choice,note});};
+  });
+}
 $('#reloadAdmin').onclick = loadAdmin;
 $('#appointmentList').onsubmit=async e=>{if(!e.target.matches('.statusForm'))return;e.preventDefault();const form=e.target;try{await send('admin/appointments',{id:form.dataset.id,...Object.fromEntries(new FormData(form))},'PATCH');toast('Termin gespeichert');await loadAdmin();}catch(err){toast(err.message);}};
-$('#appointmentList').onclick=async e=>{const btn=e.target.closest('[data-accept],[data-reject],[data-reschedule]');if(!btn)return;const form=btn.closest('.statusForm');const data=Object.fromEntries(new FormData(form));data.id=form.dataset.id;if(btn.dataset.accept){data.status='Bestätigt';data.note=data.note||'Anfrage angenommen';}if(btn.dataset.reject){data.status='Abgelehnt';data.note=data.note||'Anfrage abgelehnt';}if(btn.dataset.reschedule){data.status='Bestätigt';data.note=data.note||'Termin verschoben';}try{await send('admin/appointments',data,'PATCH');toast(btn.dataset.reject?'Anfrage abgelehnt':btn.dataset.reschedule?'Termin verschoben':'Anfrage angenommen');await loadAdmin();}catch(err){toast(err.message);}};
+$('#appointmentList').onclick=async e=>{
+  const noteBtn=e.target.closest('[data-delete-note]');
+  if(noteBtn){try{await send('admin/appointment-notes/'+encodeURIComponent(noteBtn.dataset.deleteNote),{},'DELETE');toast('Notiz gelöscht');await loadAppointmentNotes();}catch(err){toast(err.message);}return;}
+  const btn=e.target.closest('[data-accept],[data-reject],[data-reschedule]');if(!btn)return;
+  const form=btn.closest('.statusForm'); const data=Object.fromEntries(new FormData(form)); data.id=form.dataset.id;
+  try{
+    if(btn.dataset.reject){
+      const result=await rejectChoiceModal(form); if(result.choice==='cancel')return;
+      await send('admin/appointments/'+encodeURIComponent(data.id)+'/reject',{action:result.choice,note:result.note});
+      toast(result.choice==='note'?'Anfrage abgelehnt und in Notizen gespeichert':result.choice==='delete'?'Anfrage vollständig gelöscht':'Anfrage abgelehnt');
+    } else {
+      if(btn.dataset.accept){data.status='Bestätigt';data.note=data.note||'Anfrage angenommen';}
+      if(btn.dataset.reschedule){data.status='Bestätigt';data.note=data.note||'Termin verschoben';}
+      await send('admin/appointments',data,'PATCH');
+      toast(btn.dataset.reschedule?'Termin verschoben':'Anfrage angenommen');
+    }
+    await loadAdmin();
+  }catch(err){toast(err.message);}
+};
+document.querySelector('[data-admin-section="notes"]')?.addEventListener('click', async e=>{const b=e.target.closest('[data-delete-note]');if(!b)return;try{await send('admin/appointment-notes/'+encodeURIComponent(b.dataset.deleteNote),{},'DELETE');toast('Notiz gelöscht');await loadAppointmentNotes();}catch(err){toast(err.message);}});
 $('#chatList').onclick = e => { const id=e.target.closest('[data-chat]')?.dataset.chat; if (id) openAdminChat(id); };
 async function openAdminChat(id) {
   const detail=$('#adminChatDetail');
