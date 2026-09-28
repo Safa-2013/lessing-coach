@@ -36,6 +36,7 @@ function showAdminTab(tab) {
 }
 function navigate(page) {
   if (page === 'adminPanel' && state.session.role === 'visitor') page = 'login';
+  if (page === 'login') $('#loginForm').reset();
   document.body.dataset.page = page;
   document.body.classList.toggle('ai-mode', page === 'ki');
   $('.view.active')?.classList.remove('active');
@@ -169,10 +170,13 @@ $('#contactFile').onchange = async e => {
 $('#contactEmoji').onclick = () => { const field = $('#contactForm').elements.message; field.value += ' 😊'; field.focus(); };
 $('#loginForm').onsubmit = async e => {
   e.preventDefault(); const form = e.currentTarget;
-  try { const data = await send('login', Object.fromEntries(new FormData(form))); state.session = data.session; form.reset(); renderAuth(); navigate('adminPanel'); }
+  const credentials = Object.fromEntries(new FormData(form));
+  form.reset();
+  try { const data = await send('login', credentials); state.session = data.session; renderAuth(); navigate('adminPanel'); }
   catch(err) { toast(err.message); }
 };
-$('#logout').onclick = async () => { try { const data = await send('logout', {}); state.session = data.session; state.threadId = null; renderAuth(); navigate('start'); } catch(e) { toast(e.message); } };
+$('#logout').onclick = async () => { try { const data = await send('logout', {}); state.session = data.session; state.threadId = null; state.currentChat=null; $('#adminChatDetail').replaceChildren(); $('#loginForm').reset(); renderAuth(); navigate('start'); } catch(e) { toast(e.message); } };
+window.addEventListener('pageshow', () => { if (state.session.role === 'visitor') $('#loginForm').reset(); });
 async function loadThreads() {
   try { const {threads} = await request('ai/threads'); $('#threadList').innerHTML = threads.map(t => `<button data-thread="${safe(t.id)}">💬 ${safe(t.title)}</button>`).join(''); }
   catch(e) { toast(e.message); }
@@ -225,8 +229,33 @@ async function loadAccounts() {
 $('#reloadAdmin').onclick = loadAdmin;
 $('#appointmentList').onsubmit = async e => { if (!e.target.matches('.statusForm')) return; e.preventDefault(); const form=e.target; try { await send('admin/appointments', {id:form.dataset.id,...Object.fromEntries(new FormData(form))}, 'PATCH'); toast('Termin aktualisiert'); await loadAdmin(); } catch(err) { toast(err.message); } };
 $('#chatList').onclick = e => { const id=e.target.closest('[data-chat]')?.dataset.chat; if (id) openAdminChat(id); };
-async function openAdminChat(id) { state.currentChat=id; try { const {messages} = await request('admin/chats/'+encodeURIComponent(id)); $('#adminChatDetail').innerHTML = `<div class="chat-area" style="height:350px;min-height:250px;margin-top:15px"><div class="chat-scroll" id="staffMessages"></div><form class="composer" id="staffForm"><input name="message" required maxlength="2000" placeholder="Antwort schreiben …"><button class="primary">➤</button></form></div>`; bubbles(messages.map(m=>({...m,author:m.author==='admin'?'visitor':'admin'})), $('#staffMessages')); } catch(e) { toast(e.message); } }
-$('#adminChatDetail').onsubmit = async e => { if (e.target.id!=='staffForm') return; e.preventDefault(); const form=e.target; try { await send('admin/chats/'+encodeURIComponent(state.currentChat), {message:form.elements.message.value}); await openAdminChat(state.currentChat); } catch(err) { toast(err.message); } };
+async function openAdminChat(id) {
+  const detail=$('#adminChatDetail');
+  if (state.currentChat !== id || !detail.querySelector('#staffForm')) {
+    detail.innerHTML = `<div class="chat-area" style="height:350px;min-height:250px;margin-top:15px"><div class="chat-scroll" id="staffMessages"></div><form class="composer" id="staffForm"><input name="message" required maxlength="2000" placeholder="Antwort schreiben …" autocomplete="off"><button class="primary">➤</button></form></div>`;
+  }
+  state.currentChat=id;
+  try {
+    const {messages} = await request('admin/chats/'+encodeURIComponent(id));
+    if (state.currentChat !== id) return;
+    bubbles(messages.map(m=>({...m,author:m.author==='admin'?'visitor':'admin'})), detail.querySelector('#staffMessages'));
+  } catch(e) { toast(e.message); }
+}
+$('#adminChatDetail').onsubmit = async e => {
+  if (e.target.id!=='staffForm') return;
+  e.preventDefault();
+  const form=e.target, target=state.currentChat, message=form.elements.message.value.trim(), button=form.querySelector('button');
+  if (!message || button.disabled) return;
+  button.disabled=true;
+  try {
+    await send('admin/chats/'+encodeURIComponent(target), {message});
+    if (state.currentChat === target) {
+      if (form.elements.message.value.trim() === message) form.elements.message.value='';
+      await openAdminChat(target);
+    }
+  } catch(err) { toast(err.message); }
+  finally { button.disabled=false; }
+};
 $('#contentEditor').onsubmit = async e => { if (!e.target.matches('.contentForm')) return; e.preventDefault(); const form=e.target,key=form.dataset.key,value=form.elements.value.value; try { await send('admin/content',{key,value},'PATCH'); state.content[key]=value; if (key==='hero') $('#heroText').textContent=value; else showManagedCopy(key,value); toast('Inhalt gespeichert'); } catch(err){toast(err.message);} };
 const permissions = form => ['appointments','chats','content'].filter(p=>form.elements[p]?.checked);
 $('#adminAccounts').onsubmit = async e => { const form=e.target; if (form.id==='createAdmin') { e.preventDefault(); try { await send('admin/accounts',{username:form.elements.username.value,password:form.elements.password.value,permissions:permissions(form)}); form.reset(); await loadAccounts(); toast('Admin erstellt'); } catch(err){toast(err.message);} } else if (form.matches('.accountForm')) { e.preventDefault(); try { await send('admin/accounts/'+form.dataset.id,{permissions:permissions(form),password:form.elements.password.value},'PATCH'); await loadAccounts(); toast('Admin aktualisiert'); } catch(err){toast(err.message);} } };

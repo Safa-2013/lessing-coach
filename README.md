@@ -13,3 +13,8 @@ Appointment requests use a calendar date (within six months), a free-text topic 
 The marked statewide Baden-Württemberg school holidays for 2026–2028 come from the [official Ministry of Education holiday list](https://km.baden-wuerttemberg.de/de/service/ferien). This list does not include school-specific movable days, and a holiday marking does not itself close coaching bookings.
 
 The user's Vercel environment already has `DATABASE_URL`, `GEMINI_API_KEY`, `INITIAL_ADMIN_PASSWORD` and `INITIAL_BIG_ADMIN_PASSWORD` configured for Production as of 28 September 2026. Deploying a new ZIP alone does not change a Vercel deployment connected to a GitHub repository; update the repository and redeploy the intended version. Credentials are not included in this ZIP.
+# Anmeldung und Lern-KI
+
+Mitarbeiter-Sitzungen enden serverseitig nach 15 Minuten und beim Abmelden sofort. Auf gemeinsam genutzten Geräten nach der Arbeit „Abmelden“ wählen. Falls der Browser das Admin-Kennwort selbst wieder einträgt, muss es zusätzlich im Passwortmanager dieses Browsers entfernt werden; die Website kann dort gespeicherte Kennwörter nicht löschen.
+
+Die Lern-KI benötigt einen gültigen `GEMINI_API_KEY` oder `OPENAI_API_KEY` mit Zugriff auf das eingestellte Modell und ausreichendem Kontingent. Anbieterfehler zeigen jetzt eine passende Meldung; in den Serverprotokollen wird nur Anbieter und HTTP-Status festgehalten. Nach Änderungen an Vercel-Umgebungsvariablen neu bereitstellen.

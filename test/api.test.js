@@ -14,7 +14,7 @@ process.env.INITIAL_BIG_ADMIN_PASSWORD = 'Test-Hauptadmin-Passwort-2026';
 async function call(path, method='GET', data, cookie='') {
   const response = { headers:{}, setHeader(k,v) { this.headers[k.toLowerCase()]=v; }, end(text) { this.data=JSON.parse(text); }, get headersSent() { return false; } };
   await api({url:'/api/'+path, method, body:data ? JSON.stringify(data) : undefined, headers:{cookie,host:'localhost'}},response);
-  return {status:response.statusCode, data:response.data, cookie: response.headers['set-cookie']?.split(';')[0] || cookie};
+  return {status:response.statusCode, data:response.data, cookie: response.headers['set-cookie']?.split(';')[0] || cookie, setCookie:response.headers['set-cookie']};
 }
 
 test('student requests, private contact chats, admin roles and AI setup', async () => {
@@ -40,6 +40,8 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   assert.equal((await call('messages','GET',null,second.cookie)).data.messages.length,0);
   const normal = await call('login','POST',{username:'Lessing',password:process.env.INITIAL_ADMIN_PASSWORD},second.cookie);
   assert.equal(normal.data.session.role,'admin');
+  assert.doesNotMatch(normal.setCookie,/Max-Age=/);
+  assert.equal((await call('admin/chats','GET',null,second.cookie)).status,403);
   assert.equal((await call('admin/accounts','GET',null,normal.cookie)).status,403);
   assert.equal((await call('admin/calendar?from='+future+'&to='+future,'GET',null,second.cookie)).status,403);
   const staffAppointments = await call('admin/appointments','GET',null,normal.cookie);
@@ -97,7 +99,19 @@ test('student requests, private contact chats, admin roles and AI setup', async 
     const gemini=await call('ai/ask','POST',{thread_id:threads.data.thread.id,message:'Nächster Lernschritt'},learner.cookie);
     assert.equal(gemini.status,200);
     assert.equal(gemini.data.answer,'Übe zuerst die Grundlagen.');
+    for (const [status, expected] of [[403,/Berechtigung/],[404,/Modell/],[429,/Kontingent/]]) {
+      globalThis.fetch=async()=>({ok:false,status});
+      const failed=await call('ai/ask','POST',{thread_id:threads.data.thread.id,message:'Weitere Frage'},learner.cookie);
+      assert.equal(failed.status,status===429?429:502);
+      assert.match(failed.data.error,expected);
+      assert.equal((await call('ai/threads/'+threads.data.thread.id,'GET',null,learner.cookie)).data.messages.length,4);
+    }
   } finally { globalThis.fetch=oldFetch; delete process.env.OPENAI_API_KEY; delete process.env.GEMINI_API_KEY; }
+  const loggedOut = await call('logout','POST',{},normal.cookie);
+  assert.equal(loggedOut.data.session.role,'visitor');
+  assert.match(loggedOut.setCookie,/Max-Age=2592000/);
+  assert.equal((await call('admin/chats','GET',null,normal.cookie)).status,403);
+  assert.equal((await call('admin/chats','GET',null,loggedOut.cookie)).status,403);
 });
 
 test('official BW holiday boundaries and individual school days',()=>{
