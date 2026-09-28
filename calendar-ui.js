@@ -58,7 +58,7 @@ export function makeSchedule(root, request, admin=false) {
     else content=month(from);
     if(detailDay) {
       const a=info(detailDay), list=appointmentList(detailDay);
-      const details=admin&&list.length?list.map(item=>`<div class="schedule-detail-row" style="border-left:4px solid ${esc(item.category_color||'#3B82F6')}"><span class="pill">${esc(item.status)}</span><strong>${esc(item.first_name)} ${esc(item.last_name)}</strong><span>${esc(item.category_name||item.topic)} · ${esc(item.teacher_name||'Lehrkraft')}</span><small>${esc(item.code)}</small></div>`).join(''):'';
+      const details=admin&&list.length?list.map(item=>`<div class="schedule-detail-row" style="border-left:4px solid ${esc(item.category_color||'#3B82F6')}"><span class="pill">${esc(item.status)}</span><strong>${esc(item.first_name)} ${esc(item.last_name)}</strong><span>${esc(item.category_name||item.topic)} · ${esc(item.teacher_name||'Lehrkraft')} · ${esc(item.appointment_time||'Uhrzeit offen')}</span><small>${esc(item.code)}</small></div>`).join(''):'';
       content+=`<div class="schedule-details"><h3>${longDate(detailDay)}</h3><p>${esc(a.text)}${admin&&list.length?` · ${list.length} ${list.length===1?'Eintrag':'Einträge'}`:''}</p>${details}</div>`;
     }
     body.innerHTML=content;
