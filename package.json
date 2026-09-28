@@ -1,5 +1,9 @@
 {
   "name": "lessing-schulen-coaching",
+  "version": "1.0.0",
   "private": true,
-  "version": "1.0.0"
+  "type": "module",
+  "scripts": {"start": "node server.js", "test": "node --test"},
+  "dependencies": {"pg": "^8.16.3"},
+  "engines": {"node": ">=22"}
 }
