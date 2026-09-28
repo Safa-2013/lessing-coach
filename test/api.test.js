@@ -4,6 +4,7 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import api from '../lib/api.js';
+import { holidayOn } from '../holidays.js';
 
 process.chdir(mkdtempSync(join(tmpdir(), 'lessing-test-')));
 delete process.env.DATABASE_URL;
@@ -27,9 +28,11 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   assert.equal((await call('appointments','POST',{...form,school_end:''},first.cookie)).status,400);
   const created = await call('appointments','POST',form,first.cookie);
   assert.equal(created.status,201);
+  assert.match(created.data.code,/^LC-[A-HJ-NP-Z2-9]{10}$/);
   const lookup = await call('appointments?code='+created.data.code,'GET',null,second.cookie);
   assert.equal(lookup.data.appointment.status,'Anfrage eingegangen');
   assert.equal(lookup.data.appointment.school_end,'15:50');
+  assert.equal(lookup.data.appointment.subject,'Coaching');
   const anonymousCalendar=await call('appointments/calendar?month='+month,'GET',null,second.cookie);
   assert.deepEqual(anonymousCalendar.data.days,[{date:future,hasAppointments:false,hasRequests:true}]);
   assert.doesNotMatch(JSON.stringify(anonymousCalendar.data),/Brüche|LS-/);
@@ -38,8 +41,12 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   const normal = await call('login','POST',{username:'Lessing',password:process.env.INITIAL_ADMIN_PASSWORD},second.cookie);
   assert.equal(normal.data.session.role,'admin');
   assert.equal((await call('admin/accounts','GET',null,normal.cookie)).status,403);
+  assert.equal((await call('admin/calendar?from='+future+'&to='+future,'GET',null,second.cookie)).status,403);
   const staffAppointments = await call('admin/appointments','GET',null,normal.cookie);
   assert.equal(staffAppointments.data.appointments.length,1);
+  const endDay=new Date(Date.parse(future+'T00:00:00Z')+86400000).toISOString().slice(0,10);
+  assert.equal((await call('admin/calendar?from='+future+'&to='+endDay,'GET',null,normal.cookie)).data.appointments[0].code,created.data.code);
+  assert.equal((await call('admin/overview','GET',null,normal.cookie)).data.byStatus[0].count,1);
   assert.equal((await call('admin/appointments','PATCH',{id:staffAppointments.data.appointments[0].id,status:'Bestätigt',note:'Donnerstag um 14 Uhr'},normal.cookie)).status,200);
   assert.equal((await call('appointments?code='+created.data.code,'GET',null,second.cookie)).data.appointment.note,'Donnerstag um 14 Uhr');
   assert.deepEqual((await call('appointments/calendar?month='+month,'GET',null,second.cookie)).data.days,[{date:future,hasAppointments:true,hasRequests:false}]);
@@ -91,4 +98,12 @@ test('student requests, private contact chats, admin roles and AI setup', async 
     assert.equal(gemini.status,200);
     assert.equal(gemini.data.answer,'Übe zuerst die Grundlagen.');
   } finally { globalThis.fetch=oldFetch; delete process.env.OPENAI_API_KEY; delete process.env.GEMINI_API_KEY; }
+});
+
+test('official BW holiday boundaries and individual school days',()=>{
+  assert.equal(holidayOn('2026-10-26'),'Herbstferien BW');
+  assert.equal(holidayOn('2026-10-30'),'Herbstferien BW');
+  assert.equal(holidayOn('2026-10-23'),null);
+  assert.equal(holidayOn('2026-12-31'),'Weihnachtsferien BW');
+  assert.equal(holidayOn('2027-03-25'),'Schulfrei (Gründonnerstag BW)');
 });

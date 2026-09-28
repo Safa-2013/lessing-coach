@@ -93,6 +93,7 @@ body[data-page="contact"] .topbar{display:none}
 @media(max-width:700px){#start .feature:before{width:48px;height:48px;font-size:27px;top:20px;left:20px}.ai-toolbar{top:2px;right:8px}.ai-toolbar button{width:36px;height:36px;font-size:22px}.ai-cap{right:-12px}.ai-main .ai-heading h1{max-width:78%}.subject-icon{width:29px;height:29px;flex-basis:29px;font-size:18px}.subjects button{gap:7px}.chat-attach,.chat-emoji{min-width:32px!important;font-size:19px}}
 /* Anfragekalender: vorhandenes Farbsystem, sieben gleich breite Tage auch auf Mobilgeräten. */
 .calendar-help{font-weight:400;color:#61758e;margin:0 0 12px;line-height:1.5}
+#coaching .grid2>.field:last-child:nth-child(odd){grid-column:1/-1}
 .booking-calendar{border:1px solid #dbe7f5;background:#f6faff;border-radius:16px;padding:16px;max-width:520px;width:100%}
 .calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
 .calendar-head strong{text-transform:capitalize;font-size:17px}
@@ -114,3 +115,66 @@ body[data-page="contact"] .topbar{display:none}
 .school-end label:has(input:checked){border-color:#0967e9;background:#eaf3ff}
 .school-end input{accent-color:#0967e9;width:18px;height:18px;margin:0}
 @media(max-width:700px){.booking-calendar{padding:10px}.calendar-grid{gap:3px}.calendar-day{min-height:36px}.calendar-head strong{font-size:15px}}
+/* Schulferien und anonyme Wochen-/Monatspläne. */
+.calendar-day.holiday{background:#eee5ff;color:#7046a8}
+.schedule-shell{background:#f2f5fa;border:1px solid #e5ebf4;border-radius:20px;padding:22px;margin:20px 0;min-width:0}
+.schedule-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:18px}
+.schedule-heading h2{margin:0 0 3px}.schedule-heading p{margin:0;color:#687b95;font-size:13px}
+.schedule-controls{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:7px}
+.schedule-controls>button,.schedule-modes button{min-height:36px;border:0;background:#e9eff7;color:#38526c;padding:7px 11px;border-radius:9px;font-weight:750}
+.schedule-controls>button:hover,.schedule-modes button:hover{background:#d9e8ff}
+.schedule-controls>button.schedule-prev,.schedule-controls>button.schedule-next{font-size:21px;padding:2px 13px}
+.schedule-period{margin:0 7px;font-size:14px;white-space:nowrap;min-width:120px;text-align:center}
+.schedule-modes{display:flex;background:#e7ecf4;padding:3px;border-radius:10px}
+.schedule-modes button{background:transparent;font-size:12px;min-height:30px}
+.schedule-modes button.active{background:#112442;color:white}
+.schedule-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:#dfe7f1;gap:1px;border:1px solid #dfe7f1;border-radius:15px;overflow:hidden}
+.schedule-weekday{background:#f9fbff;text-align:center;font-size:12px;font-weight:800;color:#6a7f99;padding:8px}
+.schedule-day{border:0;min-width:0;min-height:106px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:#fff;padding:9px;color:#172c4d;overflow:hidden}
+.schedule-day:hover,.schedule-day.is-selected{outline:2px solid #1d70f5;outline-offset:-2px;position:relative;z-index:1}
+.schedule-day strong{font-size:13px}
+.schedule-day-state{font-size:11px;line-height:1.2;font-weight:700;color:#7590aa}
+.schedule-day.available .schedule-day-state{color:#34805c}.schedule-day.confirmed{background:#e7f1ff}.schedule-day.confirmed .schedule-day-state{color:#185fc2}
+.schedule-day.requested{background:#fff3dc}.schedule-day.requested .schedule-day-state{color:#9b6420}
+.schedule-day.holiday{background:#efe9ff}.schedule-day.holiday .schedule-day-state{color:#7650a7}
+.schedule-day.holiday.confirmed{box-shadow:inset 4px 0 #1d70f5}.schedule-day.holiday.requested{box-shadow:inset 4px 0 #e6a033}
+.schedule-events{display:flex;flex-direction:column;gap:2px;max-width:100%;font-size:10px}
+.schedule-events span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;background:#f4f8ff;border-radius:5px;padding:2px 5px}
+.schedule-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:9px}
+.schedule-week-column{background:#fff;border:1px solid #e1e9f3;border-radius:13px;overflow:hidden;min-width:0}
+.schedule-week-column header{padding:11px;font-size:14px;font-weight:800;border-bottom:1px solid #e4eaf2}
+.schedule-week-column header small{display:block;color:#8496ac;font-size:11px;margin-top:3px;font-weight:500}
+.schedule-week-column .schedule-day{width:100%;min-height:210px}
+.schedule-year{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.schedule-year-month{background:white;border:1px solid #e0e8f2;border-radius:14px;padding:12px;min-width:0}
+.schedule-year-month h3{font-size:16px;text-transform:capitalize}
+.schedule-month-grid.compact{border:0;gap:2px;background:transparent;border-radius:0}
+.compact .schedule-weekday{padding:4px 0;font-size:10px}.compact .schedule-day{min-height:31px;justify-content:center;align-items:center;border-radius:5px;padding:2px}
+.compact .schedule-day strong{font-size:11px}
+.schedule-legend{color:#536983;font-size:12px;line-height:1.5;margin:15px 0 0}
+.schedule-details{margin-top:15px;border:1px solid #dbe5f1;border-radius:13px;background:white;padding:16px}
+.schedule-details h3{margin:0 0 6px}.schedule-details p{margin:0 0 10px;color:#61758e}
+.schedule-detail-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0;border-top:1px solid #e8eef6;font-size:13px}
+.schedule-detail-row small{color:#61758e}
+.schedule-loading{background:white;border-radius:12px;padding:30px;text-align:center;color:#61758e}
+/* Verwaltungsansichten nach den Referenzen, mit unverändertem globalen Menü. */
+#adminPanel{max-width:none;background:#f2f5fa;min-height:calc(100dvh - 64px);padding:28px clamp(18px,3vw,48px) 60px}
+.admin-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.admin-header h1{margin:2px 0 0}.admin-header .row{margin:0}
+.admin-tabs{display:flex;gap:6px;border-bottom:1px solid #dfe7f1;overflow:auto;padding:16px 0 10px;margin-bottom:17px}
+.admin-tabs button{border:0;background:#fff;color:#4d637e;font-size:13px;font-weight:700;padding:10px 14px;border-radius:10px;white-space:nowrap}
+.admin-tabs button.active{background:#122642;color:white}
+.admin-section{display:none;min-width:0}.admin-section.active{display:block}
+.admin-section>h2{margin-bottom:2px}.admin-section>.muted{margin:2px 0 20px}
+.admin-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.admin-stat{background:white;border:1px solid #e3eaf4;border-radius:15px;box-shadow:0 9px 20px #1029450a;padding:20px;color:#687f99;font-size:13px}
+.admin-stat strong{display:block;font-size:32px;color:#102945;margin-top:7px}
+.admin-overview-list .panel{min-height:150px}.admin-overview-item{padding:10px 4px;border-top:1px solid #e7edf4;display:flex;align-items:center;gap:15px;flex-wrap:wrap;font-size:13px}
+.admin-overview-item>span:first-child{color:#68809c}.admin-overview-item .pill{margin-left:auto}
+#adminPanel .panel{background:#fff}
+.admin-chat-layout{display:grid;grid-template-columns:minmax(180px,290px) minmax(0,1fr);gap:12px;min-height:460px}
+#chatList{border:1px solid #e1e9f3;border-radius:13px;overflow:auto}
+#chatList button.primary{width:calc(100% - 8px);text-align:left;background:#edf4fd;color:#174273}
+#adminChatDetail{min-width:0}#adminChatDetail .chat-area{min-height:430px}
+@media(max-width:1100px){.admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.schedule-year{grid-template-columns:repeat(2,minmax(0,1fr))}.schedule-week{overflow-x:auto;grid-template-columns:repeat(7,minmax(122px,1fr));padding-bottom:6px}}
+@media(max-width:700px){#adminPanel{padding:22px 14px 42px}.schedule-shell{padding:12px;margin:16px 0}.schedule-heading h2{font-size:22px}.schedule-controls{justify-content:flex-start}.schedule-period{min-width:0}.schedule-day{min-height:56px;padding:5px}.schedule-day-state,.schedule-events{display:none}.schedule-day strong{font-size:12px}.schedule-week-column .schedule-day{min-height:120px}.schedule-year{grid-template-columns:1fr}.admin-chat-layout{grid-template-columns:1fr}#chatList{max-height:180px}.schedule-weekday{font-size:10px;padding:6px 0}}

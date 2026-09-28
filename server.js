@@ -17,9 +17,9 @@ createServer(async (req, res) => {
   } else if (['/assets/feature-strip.png','/assets/hero-books.png','/assets/ai-cap.png'].includes(req.url)) {
     res.setHeader('Content-Type', 'image/png');
     res.end(await readFile(new URL('.' + req.url, import.meta.url)));
-  } else if (req.url === '/app.js') {
+  } else if (['/app.js','/holidays.js','/calendar-ui.js'].includes(req.url)) {
     res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
-    res.end(await readFile(new URL('./app.js', import.meta.url)));
+    res.end(await readFile(new URL('.' + req.url, import.meta.url)));
   } else if (req.url === '/' || req.url === '/index.html') {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.end(await readFile(new URL('./index.html', import.meta.url)));

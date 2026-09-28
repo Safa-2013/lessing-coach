@@ -1,3 +1,6 @@
+import { holidayOn } from './holidays.js';
+import { makeSchedule } from './calendar-ui.js';
+
 const $ = selector => document.querySelector(selector);
 function showManagedCopy(key, value) { const target = $('#' + key + 'Copy'); target.textContent = value || ''; target.classList.toggle('hidden', !value); }
 const aiSide = $('.ai-side');
@@ -20,6 +23,17 @@ async function request(path, options = {}) {
   return result;
 }
 const send = (path, data, method='POST') => request(path, { method, body:JSON.stringify(data) });
+const studentSchedule = makeSchedule($('#studentSchedule'),request);
+const adminSchedule = makeSchedule($('#adminSchedule'),request,true);
+let activeAdminTab = 'overview';
+function showAdminTab(tab) {
+  const selected=document.querySelector(`[data-admin-tab="${tab}"]`);
+  if (!selected || selected.classList.contains('hidden')) tab='overview';
+  activeAdminTab=tab;
+  document.querySelectorAll('[data-admin-tab]').forEach(button=>{button.classList.toggle('active',button.dataset.adminTab===tab);button.setAttribute('aria-current',button.dataset.adminTab===tab?'page':'false');});
+  document.querySelectorAll('[data-admin-section]').forEach(section=>section.classList.toggle('active',section.dataset.adminSection===tab));
+  if(tab==='calendar') adminSchedule.refresh();
+}
 function navigate(page) {
   if (page === 'adminPanel' && state.session.role === 'visitor') page = 'login';
   document.body.dataset.page = page;
@@ -31,8 +45,9 @@ function navigate(page) {
   window.scrollTo({ top:0, behavior:'instant' });
   if (page === 'contact') loadMessages();
   if (page === 'coaching') loadCalendar();
+  if (page === 'termine') studentSchedule.refresh();
   if (page === 'ki') loadThreads();
-  if (page === 'adminPanel') loadAdmin();
+  if (page === 'adminPanel') { showAdminTab(activeAdminTab); loadAdmin(); }
   history.replaceState(null, '', '#' + page);
 }
 function renderAuth() {
@@ -42,6 +57,7 @@ function renderAuth() {
   if (state.session.role === 'big' && !$('#accountList')) $('#adminAccounts').innerHTML = `<h2>Admin-Konten</h2><div id="accountList"></div><form id="createAdmin"><label class="field">Neuer Benutzername<input name="username" required minlength="3"></label><label class="field">Passwort (mindestens 10 Zeichen)<input name="password" type="password" required minlength="10"></label><label><input type="checkbox" name="appointments" checked> Termine</label> <label><input type="checkbox" name="chats" checked> Chats</label> <label><input type="checkbox" name="content" checked> Inhalte</label><p><button class="primary">Admin erstellen</button></p></form>`;
   $('#adminAccounts').classList.toggle('hidden', state.session.role !== 'big');
   for (const [permission, element] of [['appointments','#adminAppointments'],['chats','#adminChats'],['content','#adminContent']]) $(element).classList.toggle('hidden', !(state.session.role === 'big' || state.session.permissions.includes(permission)));
+  document.querySelectorAll('[data-admin-tab]').forEach(button=>button.classList.toggle('hidden',button.dataset.big==='true'?state.session.role!=='big':button.dataset.requires&&! (state.session.role==='big'||state.session.permissions.includes(button.dataset.requires))));
 }
 async function boot() {
   try {
@@ -65,6 +81,7 @@ document.addEventListener('click', e => {
   const subject = e.target.closest('[data-subject]')?.dataset.subject;
   if (subject) { $('#aiForm input[name="message"]').value = `Hilf mir beim Lernen für ${subject}. Frage zuerst, was ich üben möchte.`; $('#aiForm input[name="message"]').focus(); }
 });
+$('.admin-tabs').onclick=e=>{const tab=e.target.closest('[data-admin-tab]:not(.hidden)')?.dataset.adminTab;if(tab)showAdminTab(tab);};
 $('#menuToggle').onclick = () => { $('#sidebar').classList.toggle('open'); $('#scrim').classList.toggle('open'); };
 $('#scrim').onclick = () => { $('#sidebar').classList.remove('open'); $('#scrim').classList.remove('open'); };
 const berlinToday = () => {
@@ -88,13 +105,14 @@ function renderCalendar() {
   const selected = $('#appointmentForm').elements.requested_at.value;
   $('#calendarDays').innerHTML = weekdays + Array.from({length:spaces},()=>'<span></span>').join('') + Array.from({length:count},(_,i)=>{
     const date=`${month.getUTCFullYear()}-${String(month.getUTCMonth()+1).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
-    const info=calendarDays[date], status=info?.hasAppointments?'Bereits Termine':info?.hasRequests?'Anfragen vorhanden':'Noch keine Termine';
+    const info=calendarDays[date], holiday=holidayOn(date), availability=info?.hasAppointments?'Bereits Termine':info?.hasRequests?'Anfragen vorhanden':'Noch keine Termine';
+    const status=holiday?`${holiday} · ${availability}`:availability;
     const disabled=date<today||date>max.toISOString().slice(0,10);
-    return `<button type="button" data-date="${date}" class="calendar-day ${info?.hasAppointments?'busy':info?.hasRequests?'pending':'free'} ${selected===date?'selected':''}" aria-label="${dayLabel(date)}: ${status}" aria-pressed="${selected===date}" ${disabled?'disabled':''}><span>${i+1}</span><span class="calendar-dot" aria-hidden="true"></span></button>`;
+    return `<button type="button" data-date="${date}" class="calendar-day ${holiday?'holiday':info?.hasAppointments?'busy':info?.hasRequests?'pending':'free'} ${selected===date?'selected':''}" aria-label="${dayLabel(date)}: ${status}" aria-pressed="${selected===date}" ${disabled?'disabled':''}><span>${i+1}</span><span class="calendar-dot" aria-hidden="true"></span></button>`;
   }).join('');
   if (selected) {
     const info=calendarDays[selected];
-    $('#calendarStatus').textContent=`Gewählt: ${dayLabel(selected)} · ${info?.hasAppointments?'Bereits Termine vorhanden':info?.hasRequests?'Anfragen vorhanden':'Noch keine Termine eingetragen'}. Die Uhrzeit wird später abgestimmt.`;
+    $('#calendarStatus').textContent=`Gewählt: ${dayLabel(selected)} · ${holidayOn(selected)?holidayOn(selected)+' · ':''}${info?.hasAppointments?'Bereits Termine vorhanden':info?.hasRequests?'Anfragen vorhanden':'Noch keine Termine eingetragen'}. Die Uhrzeit wird später abgestimmt.`;
   }
 }
 async function loadCalendar() {
@@ -105,7 +123,7 @@ async function loadCalendar() {
     const {days}=await request('appointments/calendar?month='+month);
     if (current !== calendarRequest) return;
     calendarDays=Object.fromEntries(days.map(day=>[day.date,day])); renderCalendar();
-    if (!$('#appointmentForm').elements.requested_at.value) $('#calendarStatus').textContent='Grün: keine Termine · Orange: Anfragen · Blau: bereits Termine. Wähle einen Tag.';
+    if (!$('#appointmentForm').elements.requested_at.value) $('#calendarStatus').textContent='Grün: keine Termine · Orange: Anfragen · Blau: Termine · Lila: Ferien BW. Wähle einen Tag.';
   } catch(e) { if (current===calendarRequest) { renderCalendar(); $('#calendarStatus').textContent='Kalenderdaten konnten nicht geladen werden: '+e.message; } }
 }
 $('#calendarPrev').onclick=()=>{ if(calendarOffset>0){calendarOffset--;loadCalendar();} };
@@ -124,7 +142,7 @@ $('#appointmentForm').onsubmit = async e => {
 };
 $('#lookupForm').onsubmit = async e => {
   e.preventDefault(); const code = new FormData(e.currentTarget).get('code');
-  try { const {appointment:a} = await request('appointments?code=' + encodeURIComponent(code)); $('#lookupResult').innerHTML = `<div class="result"><strong>${safe(a.status)}</strong><p>${safe(a.subject)} · ${safe(a.topic)}</p><p>Gewählter Tag: ${safe(dayLabel(a.requested_at))}</p><p>Schule aus: ${safe(schoolEndLabel(a.school_end))}</p>${a.note ? `<p>Rückmeldung: ${safe(a.note)}</p>` : ''}<small>Zuletzt aktualisiert: ${new Date(Number(a.updated_at)).toLocaleString('de-DE')}</small></div>`; }
+  try { const {appointment:a} = await request('appointments?code=' + encodeURIComponent(code)); $('#lookupResult').innerHTML = `<div class="result"><strong>${safe(a.status)}</strong><p>${safe(a.subject==='Coaching'?'Coaching · ':a.subject+' · ')}${safe(a.topic)}</p><p>Gewählter Tag: ${safe(dayLabel(a.requested_at))}</p><p>Schule aus: ${safe(schoolEndLabel(a.school_end))}</p>${a.note ? `<p>Rückmeldung: ${safe(a.note)}</p>` : ''}<small>Zuletzt aktualisiert: ${new Date(Number(a.updated_at)).toLocaleString('de-DE')}</small></div>`; }
   catch(err) { $('#lookupResult').innerHTML = `<div class="result notice">${safe(err.message)}</div>`; }
 };
 function bubbles(messages, target) {
@@ -187,7 +205,14 @@ const can = permission => state.session.role === 'big' || state.session.permissi
 async function loadAdmin() {
   if (state.session.role === 'visitor') return;
   try {
-    if (can('appointments')) { const {appointments} = await request('admin/appointments'); $('#appointmentList').innerHTML = appointments.length ? appointments.map(a => `<div class="list-item"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong> <span class="pill">${safe(a.status)}</span><p class="small">${safe(a.class_name)} · ${safe(a.subject)} · ${safe(dayLabel(a.requested_at))} · Schule aus: ${safe(schoolEndLabel(a.school_end))}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="row"><select class="field" name="status">${['Anfrage eingegangen','In Bearbeitung','Bestätigt','Abgelehnt'].map(s => `<option ${s===a.status?'selected':''}>${s}</option>`).join('')}</select><input class="field" name="note" maxlength="500" placeholder="Änderung / Rückmeldung" value="${safe(a.note)}"><button class="primary">Speichern</button></div></form></div>`).join('') : '<p class="muted">Noch keine Anfragen.</p>'; }
+    if (can('appointments')) {
+      const [{appointments},{byStatus,upcoming}]=await Promise.all([request('admin/appointments'),request('admin/overview')]);
+      const totals=Object.fromEntries(byStatus.map(row=>[row.status,Number(row.count)]));
+      const total=Object.values(totals).reduce((sum,count)=>sum+count,0);
+      $('#adminStats').innerHTML=[['Alle Anfragen',total],['Kommende Termine',upcoming],['Offene Anfragen',(totals['Anfrage eingegangen']||0)+(totals['In Bearbeitung']||0)],['Bestätigt',totals['Bestätigt']||0]].map(([label,value])=>`<div class="admin-stat"><span>${label}</span><strong>${value}</strong></div>`).join('');
+      $('#adminOverviewList').innerHTML=`<div class="panel"><h3>Neueste Anfragen</h3>${appointments.length?appointments.slice(0,5).map(a=>`<div class="admin-overview-item"><span>${safe(dayLabel(a.requested_at))}</span><strong>${safe(a.topic)}</strong><span class="pill">${safe(a.status)}</span></div>`).join(''):'<p class="muted">Noch keine Anfragen vorhanden.</p>'}</div>`;
+      $('#appointmentList').innerHTML = appointments.length ? appointments.map(a => `<div class="list-item"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong> <span class="pill">${safe(a.status)}</span><p class="small">${safe(a.class_name)} · ${safe(a.subject)} · ${safe(dayLabel(a.requested_at))} · Schule aus: ${safe(schoolEndLabel(a.school_end))}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="row"><select class="field" name="status">${['Anfrage eingegangen','In Bearbeitung','Bestätigt','Abgelehnt'].map(s => `<option ${s===a.status?'selected':''}>${s}</option>`).join('')}</select><input class="field" name="note" maxlength="500" placeholder="Änderung / Rückmeldung" value="${safe(a.note)}"><button class="primary">Speichern</button></div></form></div>`).join('') : '<p class="muted">Noch keine Anfragen.</p>';
+    } else { $('#adminStats').innerHTML='<div class="admin-stat">Kein Zugriff auf Termine.</div>'; $('#adminOverviewList').innerHTML=''; }
     if (can('chats')) { const {chats} = await request('admin/chats'); $('#chatList').innerHTML = chats.length ? chats.map((c,i) => `<button class="primary" data-chat="${safe(c.visitor_id)}" style="margin:4px">Chat ${i+1} · ${Number(c.count)} Nachrichten</button>`).join('') : '<p class="muted">Noch keine Nachrichten.</p>'; if (state.currentChat) await openAdminChat(state.currentChat); }
     if (can('content')) $('#contentEditor').innerHTML = ['hero','about','help'].map(key => `<form class="contentForm" data-key="${key}"><label class="field">${{hero:'Startseite',about:'Über Lessing',help:'Hilfe'}[key]}<textarea name="value" maxlength="3000">${safe(state.content[key] || '')}</textarea></label><button class="primary">Speichern</button></form>`).join('');
     if (state.session.role === 'big') await loadAccounts();
