@@ -1,8 +1,5 @@
-// Place the screenshot theme after the base styles so its responsive rules win.
-if (!document.querySelector('style[data-preview-theme]')) {
-  const theme = document.createElement('link'); theme.rel = 'stylesheet'; theme.href = 'visual.css'; document.head.append(theme);
-}
 const $ = selector => document.querySelector(selector);
+function showManagedCopy(key, value) { const target = $('#' + key + 'Copy'); target.textContent = value || ''; target.classList.toggle('hidden', !value); }
 const aiSide = $('.ai-side');
 aiSide.insertAdjacentHTML('afterbegin', '<div class="ai-brand"><span class="cap-symbol">✦</span><span>Lessing Coach<small>Dein KI-Lernassistent</small></span></div><button class="ai-back" data-page="start">← Startseite</button>');
 const aiMain = $('.ai-main');
@@ -49,8 +46,8 @@ async function boot() {
   try {
     const data = await request('bootstrap'); state.session = data.session; state.content = data.content;
     $('#heroText').textContent = data.content.hero || $('#heroText').textContent;
-    $('#aboutText').textContent = data.content.about || $('#aboutText').textContent;
-    $('#helpText').textContent = data.content.help || $('#helpText').textContent;
+    showManagedCopy('about', data.content.about);
+    showManagedCopy('help', data.content.help);
     renderAuth();
     const target = location.hash.slice(1);
     if (target && $('#' + target)?.classList.contains('view')) navigate(target);
@@ -134,7 +131,7 @@ $('#appointmentList').onsubmit = async e => { if (!e.target.matches('.statusForm
 $('#chatList').onclick = e => { const id=e.target.closest('[data-chat]')?.dataset.chat; if (id) openAdminChat(id); };
 async function openAdminChat(id) { state.currentChat=id; try { const {messages} = await request('admin/chats/'+encodeURIComponent(id)); $('#adminChatDetail').innerHTML = `<div class="chat-area" style="height:350px;min-height:250px;margin-top:15px"><div class="chat-scroll" id="staffMessages"></div><form class="composer" id="staffForm"><input name="message" required maxlength="2000" placeholder="Antwort schreiben …"><button class="primary">➤</button></form></div>`; bubbles(messages.map(m=>({...m,author:m.author==='admin'?'visitor':'admin'})), $('#staffMessages')); } catch(e) { toast(e.message); } }
 $('#adminChatDetail').onsubmit = async e => { if (e.target.id!=='staffForm') return; e.preventDefault(); const form=e.target; try { await send('admin/chats/'+encodeURIComponent(state.currentChat), {message:form.elements.message.value}); await openAdminChat(state.currentChat); } catch(err) { toast(err.message); } };
-$('#contentEditor').onsubmit = async e => { if (!e.target.matches('.contentForm')) return; e.preventDefault(); const form=e.target,key=form.dataset.key,value=form.elements.value.value; try { await send('admin/content',{key,value},'PATCH'); state.content[key]=value; $('#'+({hero:'heroText',about:'aboutText',help:'helpText'}[key])).textContent=value; toast('Inhalt gespeichert'); } catch(err){toast(err.message);} };
+$('#contentEditor').onsubmit = async e => { if (!e.target.matches('.contentForm')) return; e.preventDefault(); const form=e.target,key=form.dataset.key,value=form.elements.value.value; try { await send('admin/content',{key,value},'PATCH'); state.content[key]=value; if (key==='hero') $('#heroText').textContent=value; else showManagedCopy(key,value); toast('Inhalt gespeichert'); } catch(err){toast(err.message);} };
 const permissions = form => ['appointments','chats','content'].filter(p=>form.elements[p]?.checked);
 $('#adminAccounts').onsubmit = async e => { const form=e.target; if (form.id==='createAdmin') { e.preventDefault(); try { await send('admin/accounts',{username:form.elements.username.value,password:form.elements.password.value,permissions:permissions(form)}); form.reset(); await loadAccounts(); toast('Admin erstellt'); } catch(err){toast(err.message);} } else if (form.matches('.accountForm')) { e.preventDefault(); try { await send('admin/accounts/'+form.dataset.id,{permissions:permissions(form),password:form.elements.password.value},'PATCH'); await loadAccounts(); toast('Admin aktualisiert'); } catch(err){toast(err.message);} } };
 $('#adminAccounts').onclick = async e => { const id=e.target.dataset.delete; if (!id || !confirm('Dieses Admin-Konto wirklich löschen?')) return; try { await request('admin/accounts/'+id,{method:'DELETE'}); await loadAccounts(); }catch(err){toast(err.message);} };
