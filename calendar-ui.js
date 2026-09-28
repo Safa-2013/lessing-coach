@@ -26,7 +26,7 @@ export function makeSchedule(root, request, admin=false) {
   };
   const info=day=>{
     const vacation=holidayOn(day), state=status(day);
-    const availability=state.confirmed?'Bereits Termine':state.pending?'Anfragen vorhanden':'Noch keine Termine';
+    const availability=admin?(state.confirmed?'Bereits Termine':state.pending?'Anfragen vorhanden':'Noch keine Termine'):(state.confirmed?'Nicht verfügbar':'Verfügbar');
     return { vacation, state, color:vacation?`holiday ${state.confirmed?'confirmed':state.pending?'requested':''}`:state.confirmed?'confirmed':state.pending?'requested':'available',
       text:vacation?`${vacation} · ${availability}`:availability };
   };
@@ -37,8 +37,9 @@ export function makeSchedule(root, request, admin=false) {
   }
   function button(day,small=false) {
     const a=info(day), count=appointmentList(day).length;
-    const events=admin&&count&&!small?`<span class="schedule-events">${appointmentList(day).slice(0,2).map(item=>`<span>${esc(item.status)} · ${esc(item.topic)}</span>`).join('')}${count>2?`<span>+ ${count-2} weitere</span>`:''}</span>`:'';
-    return `<button type="button" class="schedule-day ${a.color}${detailDay===day?' is-selected':''}" data-schedule-date="${day}" aria-label="${esc(longDate(day)+': '+a.text)}"><strong>${Number(day.slice(-2))}</strong>${small?'':`<span class="schedule-day-state">${esc(a.text)}</span>`}${events}</button>`;
+    const events=admin&&count&&!small?`<span class="schedule-events">${appointmentList(day).slice(0,2).map(item=>`<span class="schedule-event" style="--category-color:${esc(item.category_color||'#3B82F6')}"><i></i>${esc(item.category_name||item.topic)} · ${esc(item.teacher_name||'Lehrkraft')}</span>`).join('')}${count>2?`<span>+ ${count-2} weitere</span>`:''}</span>`:'';
+    const color=admin&&appointmentList(day)[0]?.category_color;
+    return `<button type="button" class="schedule-day ${a.color}${detailDay===day?' is-selected':''}" ${color?`style="--category-color:${esc(color)}"`:''} data-schedule-date="${day}" aria-label="${esc(longDate(day)+': '+a.text)}"><strong>${Number(day.slice(-2))}</strong>${small?'':`<span class="schedule-day-state">${esc(a.text)}</span>`}${events}</button>`;
   }
   function month(day,small=false) {
     const first=monthStart(day), count=utcDay(addMonths(first,1)); count.setUTCDate(0);
@@ -57,7 +58,7 @@ export function makeSchedule(root, request, admin=false) {
     else content=month(from);
     if(detailDay) {
       const a=info(detailDay), list=appointmentList(detailDay);
-      const details=admin&&list.length?list.map(item=>`<div class="schedule-detail-row"><span class="pill">${esc(item.status)}</span><strong>${esc(item.first_name)} ${esc(item.last_name)}</strong><span>${esc(item.topic)}</span><small>${esc(item.code)}</small></div>`).join(''):'';
+      const details=admin&&list.length?list.map(item=>`<div class="schedule-detail-row" style="border-left:4px solid ${esc(item.category_color||'#3B82F6')}"><span class="pill">${esc(item.status)}</span><strong>${esc(item.first_name)} ${esc(item.last_name)}</strong><span>${esc(item.category_name||item.topic)} · ${esc(item.teacher_name||'Lehrkraft')}</span><small>${esc(item.code)}</small></div>`).join(''):'';
       content+=`<div class="schedule-details"><h3>${longDate(detailDay)}</h3><p>${esc(a.text)}${admin&&list.length?` · ${list.length} ${list.length===1?'Eintrag':'Einträge'}`:''}</p>${details}</div>`;
     }
     body.innerHTML=content;

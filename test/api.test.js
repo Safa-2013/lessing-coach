@@ -23,7 +23,14 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   assert.notEqual(first.cookie, second.cookie);
   const future = new Date(Date.now()+4*86400000).toISOString().slice(0,10);
   const month = future.slice(0,7);
-  const form = {first_name:'A',last_name:'B',class_name:'9a',subject:'Mathematik',topic:'Brüche',requested_at:future,school_end:'15:50'};
+  const catalog = await call('catalog','GET',null,first.cookie);
+  assert.ok(catalog.data.categories.length);
+  const adminSetup = await call('login','POST',{username:'Lessing',password:process.env.INITIAL_ADMIN_PASSWORD},second.cookie);
+  const teacherCreate = await call('admin/teachers','POST',{name:'Test Lehrkraft'},adminSetup.cookie);
+  assert.equal(teacherCreate.status,201);
+  const catalog2 = await call('catalog','GET',null,first.cookie);
+  const categoryId=catalog2.data.categories[0].id, teacherId=catalog2.data.teachers.find(t=>t.name==='Test Lehrkraft').id;
+  const form = {first_name:'A',last_name:'B',class_name:'9a',subject:'Mathematik',topic:'Brüche',requested_at:future,school_end:'15:50',category_id:categoryId,teacher_id:teacherId};
   assert.equal((await call('appointments','POST',{...form,requested_at:future+'T14:00'},first.cookie)).status,400);
   assert.equal((await call('appointments','POST',{...form,school_end:''},first.cookie)).status,400);
   const created = await call('appointments','POST',form,first.cookie);
@@ -32,7 +39,7 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   const lookup = await call('appointments?code='+created.data.code,'GET',null,second.cookie);
   assert.equal(lookup.data.appointment.status,'Anfrage eingegangen');
   assert.equal(lookup.data.appointment.school_end,'15:50');
-  assert.equal(lookup.data.appointment.subject,'Coaching');
+  assert.equal(lookup.data.appointment.subject,'Beratung');
   const anonymousCalendar=await call('appointments/calendar?month='+month,'GET',null,second.cookie);
   assert.deepEqual(anonymousCalendar.data.days,[{date:future,hasAppointments:false,hasRequests:true}]);
   assert.doesNotMatch(JSON.stringify(anonymousCalendar.data),/Brüche|LS-/);
@@ -42,7 +49,7 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   assert.equal(normal.data.session.role,'admin');
   assert.doesNotMatch(normal.setCookie,/Max-Age=/);
   assert.equal((await call('admin/chats','GET',null,second.cookie)).status,403);
-  assert.equal((await call('admin/accounts','GET',null,normal.cookie)).status,403);
+  assert.equal((await call('admin/accounts','GET',null,normal.cookie)).status,200);
   assert.equal((await call('admin/calendar?from='+future+'&to='+future,'GET',null,second.cookie)).status,403);
   const staffAppointments = await call('admin/appointments','GET',null,normal.cookie);
   assert.equal(staffAppointments.data.appointments.length,1);
@@ -66,7 +73,7 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   const limited = await call('login','POST',{username:'KursAdmin',password:'sicheresPasswort123'});
   assert.equal((await call('admin/appointments','GET',null,limited.cookie)).status,200);
   assert.equal((await call('admin/chats','GET',null,limited.cookie)).status,403);
-  assert.equal((await call('admin/accounts','GET',null,limited.cookie)).status,403);
+  assert.equal((await call('admin/accounts','GET',null,limited.cookie)).status,200);
   const learner = await call('bootstrap');
   const threads = await call('ai/threads','POST',{title:'Mathe'},learner.cookie);
   assert.equal(threads.status,201);

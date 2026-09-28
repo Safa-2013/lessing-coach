@@ -51,18 +51,31 @@ function navigate(page) {
   if (page === 'adminPanel') { showAdminTab(activeAdminTab); loadAdmin(); }
   history.replaceState(null, '', '#' + page);
 }
+async function loadCatalog() {
+  try {
+    const {categories, teachers} = await request('catalog');
+    const categorySelect=$('#appointmentCategory'), teacherSelect=$('#appointmentTeacher'), legend=$('#categoryLegend');
+    if (categorySelect) categorySelect.innerHTML='<option value="">Bereich auswählen …</option>'+categories.map(c=>`<option value="${safe(c.id)}">${safe(c.name)}</option>`).join('');
+    if (teacherSelect) teacherSelect.innerHTML='<option value="">Lehrkraft auswählen …</option>'+teachers.map(t=>`<option value="${safe(t.id)}">${safe(t.name)}</option>`).join('');
+    if (legend) legend.innerHTML=categories.map(c=>`<span class="category-chip" style="--category-color:${safe(c.color)}"><i></i>${safe(c.name)}</span>`).join('');
+  } catch(e) { toast(e.message); }
+}
 function renderAuth() {
   const isStaff = state.session.role !== 'visitor';
   $('#topLogin').textContent = isStaff ? 'Verwaltung' : 'Anmelden';
   $('#topLogin').dataset.page = isStaff ? 'adminPanel' : 'login';
-  if (state.session.role === 'big' && !$('#accountList')) $('#adminAccounts').innerHTML = `<h2>Admin-Konten</h2><div id="accountList"></div><form id="createAdmin"><label class="field">Neuer Benutzername<input name="username" required minlength="3"></label><label class="field">Passwort (mindestens 10 Zeichen)<input name="password" type="password" required minlength="10"></label><label><input type="checkbox" name="appointments" checked> Termine</label> <label><input type="checkbox" name="chats" checked> Chats</label> <label><input type="checkbox" name="content" checked> Inhalte</label><p><button class="primary">Admin erstellen</button></p></form>`;
-  $('#adminAccounts').classList.toggle('hidden', state.session.role !== 'big');
-  for (const [permission, element] of [['appointments','#adminAppointments'],['chats','#adminChats'],['content','#adminContent']]) $(element).classList.toggle('hidden', !(state.session.role === 'big' || state.session.permissions.includes(permission)));
-  document.querySelectorAll('[data-admin-tab]').forEach(button=>button.classList.toggle('hidden',button.dataset.big==='true'?state.session.role!=='big':button.dataset.requires&&! (state.session.role==='big'||state.session.permissions.includes(button.dataset.requires))));
+  $('#adminAccounts').classList.toggle('hidden', !isStaff);
+  for (const [permission, element] of [['appointments','#adminAppointments'],['chats','#adminChats'],['content','#adminContent']]) {
+    $(element).classList.toggle('hidden', !(state.session.role === 'big' || state.session.permissions.includes(permission)));
+  }
+  document.querySelectorAll('[data-admin-tab]').forEach(button => {
+    const required = button.dataset.requires;
+    button.classList.toggle('hidden', !!required && !(state.session.role==='big' || state.session.permissions.includes(required)));
+  });
 }
 async function boot() {
   try {
-    const data = await request('bootstrap'); state.session = data.session; state.content = data.content;
+    const data = await request('bootstrap'); state.session = data.session; state.content = data.content; await loadCatalog();
     $('#heroText').textContent = data.content.hero || $('#heroText').textContent;
     showManagedCopy('about', data.content.about);
     showManagedCopy('help', data.content.help);
@@ -106,14 +119,14 @@ function renderCalendar() {
   const selected = $('#appointmentForm').elements.requested_at.value;
   $('#calendarDays').innerHTML = weekdays + Array.from({length:spaces},()=>'<span></span>').join('') + Array.from({length:count},(_,i)=>{
     const date=`${month.getUTCFullYear()}-${String(month.getUTCMonth()+1).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
-    const info=calendarDays[date], holiday=holidayOn(date), availability=info?.hasAppointments?'Bereits Termine':info?.hasRequests?'Anfragen vorhanden':'Noch keine Termine';
+    const info=calendarDays[date], holiday=holidayOn(date), availability=info?.hasAppointments||info?.hasRequests?'Nicht verfügbar':'Verfügbar';
     const status=holiday?`${holiday} · ${availability}`:availability;
-    const disabled=date<today||date>max.toISOString().slice(0,10);
+    const disabled=date<today||date>max.toISOString().slice(0,10)||Boolean(info?.hasAppointments);
     return `<button type="button" data-date="${date}" class="calendar-day ${holiday?'holiday':info?.hasAppointments?'busy':info?.hasRequests?'pending':'free'} ${selected===date?'selected':''}" aria-label="${dayLabel(date)}: ${status}" aria-pressed="${selected===date}" ${disabled?'disabled':''}><span>${i+1}</span><span class="calendar-dot" aria-hidden="true"></span></button>`;
   }).join('');
   if (selected) {
     const info=calendarDays[selected];
-    $('#calendarStatus').textContent=`Gewählt: ${dayLabel(selected)} · ${holidayOn(selected)?holidayOn(selected)+' · ':''}${info?.hasAppointments?'Bereits Termine vorhanden':info?.hasRequests?'Anfragen vorhanden':'Noch keine Termine eingetragen'}. Die Uhrzeit wird später abgestimmt.`;
+    $('#calendarStatus').textContent=`Gewählt: ${dayLabel(selected)} · ${holidayOn(selected)?holidayOn(selected)+' · ':''}Der Tag ist vorgemerkt. Die Uhrzeit wird später abgestimmt.`;
   }
 }
 async function loadCalendar() {
@@ -124,7 +137,7 @@ async function loadCalendar() {
     const {days}=await request('appointments/calendar?month='+month);
     if (current !== calendarRequest) return;
     calendarDays=Object.fromEntries(days.map(day=>[day.date,day])); renderCalendar();
-    if (!$('#appointmentForm').elements.requested_at.value) $('#calendarStatus').textContent='Grün: keine Termine · Orange: Anfragen · Blau: Termine · Lila: Ferien BW. Wähle einen Tag.';
+    if (!$('#appointmentForm').elements.requested_at.value) $('#calendarStatus').textContent='Grün: verfügbar · Grau: nicht verfügbar · Lila: Ferien BW. Wähle einen Tag.';
   } catch(e) { if (current===calendarRequest) { renderCalendar(); $('#calendarStatus').textContent='Kalenderdaten konnten nicht geladen werden: '+e.message; } }
 }
 $('#calendarPrev').onclick=()=>{ if(calendarOffset>0){calendarOffset--;loadCalendar();} };
@@ -214,17 +227,33 @@ async function loadAdmin() {
       const totals=Object.fromEntries(byStatus.map(row=>[row.status,Number(row.count)]));
       const total=Object.values(totals).reduce((sum,count)=>sum+count,0);
       $('#adminStats').innerHTML=[['Alle Anfragen',total],['Kommende Termine',upcoming],['Offene Anfragen',(totals['Anfrage eingegangen']||0)+(totals['In Bearbeitung']||0)],['Bestätigt',totals['Bestätigt']||0]].map(([label,value])=>`<div class="admin-stat"><span>${label}</span><strong>${value}</strong></div>`).join('');
-      $('#adminOverviewList').innerHTML=`<div class="panel"><h3>Neueste Anfragen</h3>${appointments.length?appointments.slice(0,5).map(a=>`<div class="admin-overview-item"><span>${safe(dayLabel(a.requested_at))}</span><strong>${safe(a.topic)}</strong><span class="pill">${safe(a.status)}</span></div>`).join(''):'<p class="muted">Noch keine Anfragen vorhanden.</p>'}</div>`;
-      $('#appointmentList').innerHTML = appointments.length ? appointments.map(a => `<div class="list-item"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong> <span class="pill">${safe(a.status)}</span><p class="small">${safe(a.class_name)} · ${safe(a.subject)} · ${safe(dayLabel(a.requested_at))} · Schule aus: ${safe(schoolEndLabel(a.school_end))}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="row"><select class="field" name="status">${['Anfrage eingegangen','In Bearbeitung','Bestätigt','Abgelehnt'].map(s => `<option ${s===a.status?'selected':''}>${s}</option>`).join('')}</select><input class="field" name="note" maxlength="500" placeholder="Änderung / Rückmeldung" value="${safe(a.note)}"><button class="primary">Speichern</button></div></form></div>`).join('') : '<p class="muted">Noch keine Anfragen.</p>';
+      $('#adminOverviewList').innerHTML=`<div class="panel"><h3>Neueste Anfragen</h3>${appointments.length?appointments.slice(0,5).map(a=>`<div class="admin-overview-item"><span>${safe(dayLabel(a.requested_at))}</span><strong>${safe(a.category_name||a.topic)}</strong><span class="pill">${safe(a.status)}</span></div>`).join(''):'<p class="muted">Noch keine Anfragen vorhanden.</p>'}</div>`;
+      $('#appointmentList').innerHTML = appointments.length ? appointments.map(a => `<div class="list-item">
+        <strong>${safe(a.first_name)} ${safe(a.last_name)}</strong> <span class="pill" style="border-left:4px solid ${safe(a.category_color||'#3B82F6')}">${safe(a.status)}</span>
+        <p class="small">${safe(a.class_name)} · ${safe(a.category_name||a.subject)} · ${safe(a.teacher_name||'Lehrkraft nicht gesetzt')} · ${safe(dayLabel(a.requested_at))} · Schule aus: ${safe(schoolEndLabel(a.school_end))}</p>
+        <p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p>
+        <form class="statusForm" data-id="${safe(a.id)}"><div class="row"><select class="field" name="status">${['Anfrage eingegangen','In Bearbeitung','Bestätigt','Abgelehnt'].map(s => `<option ${s===a.status?'selected':''}>${s}</option>`).join('')}</select><input class="field" name="note" maxlength="500" placeholder="Änderung / Rückmeldung" value="${safe(a.note)}"><button class="primary">Speichern</button></div></form>
+      </div>`).join('') : '<p class="muted">Noch keine Anfragen.</p>';
     } else { $('#adminStats').innerHTML='<div class="admin-stat">Kein Zugriff auf Termine.</div>'; $('#adminOverviewList').innerHTML=''; }
     if (can('chats')) { const {chats} = await request('admin/chats'); $('#chatList').innerHTML = chats.length ? chats.map((c,i) => `<button class="primary" data-chat="${safe(c.visitor_id)}" style="margin:4px">Chat ${i+1} · ${Number(c.count)} Nachrichten</button>`).join('') : '<p class="muted">Noch keine Nachrichten.</p>'; if (state.currentChat) await openAdminChat(state.currentChat); }
     if (can('content')) $('#contentEditor').innerHTML = ['hero','about','help'].map(key => `<form class="contentForm" data-key="${key}"><label class="field">${{hero:'Startseite',about:'Über Lessing',help:'Hilfe'}[key]}<textarea name="value" maxlength="3000">${safe(state.content[key] || '')}</textarea></label><button class="primary">Speichern</button></form>`).join('');
-    if (state.session.role === 'big') await loadAccounts();
+    if (isStaffForAccounts()) await loadAccounts();
+    if (can('appointments')) { await loadStaffManagement(); }
   } catch(e) { toast(e.message); }
 }
+function isStaffForAccounts(){ return state.session.role === 'admin' || state.session.role === 'big'; }
 async function loadAccounts() {
+  const box=$('#accountList'); if(!box) return;
   const {accounts} = await request('admin/accounts');
-  $('#accountList').innerHTML = accounts.map(a => { const permissions = JSON.parse(a.permissions); return `<div class="list-item"><strong>${safe(a.username)}</strong><form class="accountForm" data-id="${safe(a.id)}"><div class="row">${['appointments','chats','content'].map(p=>`<label><input type="checkbox" name="${p}" ${permissions.includes(p)?'checked':''}> ${{appointments:'Termine',chats:'Chats',content:'Inhalte'}[p]}</label>`).join('')}</div><label class="field">Neues Passwort (optional)<input type="password" name="password" minlength="10"></label><button class="primary">Rechte speichern</button> <button class="primary danger" type="button" data-delete="${safe(a.id)}">Löschen</button></form></div>`; }).join('');
+  box.innerHTML = accounts.length ? accounts.map(a => {
+    const permissions = JSON.parse(a.permissions);
+    return `<div class="list-item"><strong>${safe(a.username)}</strong><span class="pill">Admin</span><form class="accountForm" data-id="${safe(a.id)}"><div class="row">${['appointments','chats','content'].map(p=>`<label><input type="checkbox" name="${p}" ${permissions.includes(p)?'checked':''}> ${{appointments:'Termine',chats:'Chats',content:'Inhalte'}[p]}</label>`).join('')}</div><label class="field">Neues Passwort (optional)<input type="password" name="password" minlength="10"></label><button class="primary">Speichern</button> <button class="primary danger" type="button" data-delete="${safe(a.id)}">Löschen</button></form></div>`;
+  }).join('') : '<p class="muted">Noch keine normalen Admin-Konten vorhanden.</p>';
+}
+async function loadStaffManagement() {
+  const [{teachers},{categories}] = await Promise.all([request('admin/teachers'),request('admin/categories')]);
+  $('#teacherList').innerHTML = teachers.length ? teachers.map(t=>`<div class="list-item row"><input class="field teacher-name" data-id="${safe(t.id)}" value="${safe(t.name)}"><button class="primary" data-save-teacher="${safe(t.id)}">Speichern</button><button class="primary danger" data-delete-teacher="${safe(t.id)}">Entfernen</button></div>`).join('') : '<p class="muted">Noch keine Lehrkräfte.</p>';
+  $('#categoryList').innerHTML = categories.map(c=>`<div class="list-item row"><input class="field category-name" data-id="${safe(c.id)}" value="${safe(c.name)}"><input type="color" class="category-color" data-id="${safe(c.id)}" value="${safe(c.color)}" title="Farbe"><button class="primary" data-save-category="${safe(c.id)}">Speichern</button></div>`).join('');
 }
 $('#reloadAdmin').onclick = loadAdmin;
 $('#appointmentList').onsubmit = async e => { if (!e.target.matches('.statusForm')) return; e.preventDefault(); const form=e.target; try { await send('admin/appointments', {id:form.dataset.id,...Object.fromEntries(new FormData(form))}, 'PATCH'); toast('Termin aktualisiert'); await loadAdmin(); } catch(err) { toast(err.message); } };
@@ -258,7 +287,28 @@ $('#adminChatDetail').onsubmit = async e => {
 };
 $('#contentEditor').onsubmit = async e => { if (!e.target.matches('.contentForm')) return; e.preventDefault(); const form=e.target,key=form.dataset.key,value=form.elements.value.value; try { await send('admin/content',{key,value},'PATCH'); state.content[key]=value; if (key==='hero') $('#heroText').textContent=value; else showManagedCopy(key,value); toast('Inhalt gespeichert'); } catch(err){toast(err.message);} };
 const permissions = form => ['appointments','chats','content'].filter(p=>form.elements[p]?.checked);
-$('#adminAccounts').onsubmit = async e => { const form=e.target; if (form.id==='createAdmin') { e.preventDefault(); try { await send('admin/accounts',{username:form.elements.username.value,password:form.elements.password.value,permissions:permissions(form)}); form.reset(); await loadAccounts(); toast('Admin erstellt'); } catch(err){toast(err.message);} } else if (form.matches('.accountForm')) { e.preventDefault(); try { await send('admin/accounts/'+form.dataset.id,{permissions:permissions(form),password:form.elements.password.value},'PATCH'); await loadAccounts(); toast('Admin aktualisiert'); } catch(err){toast(err.message);} } };
-$('#adminAccounts').onclick = async e => { const id=e.target.dataset.delete; if (!id || !confirm('Dieses Admin-Konto wirklich löschen?')) return; try { await request('admin/accounts/'+id,{method:'DELETE'}); await loadAccounts(); }catch(err){toast(err.message);} };
+$('#adminAccounts').onsubmit = async e => {
+  const form=e.target;
+  if (form.id==='createAdmin') {
+    e.preventDefault();
+    try { await send('admin/accounts',{username:form.elements.username.value,password:form.elements.password.value,permissions:permissions(form)}); form.reset(); await loadAccounts(); toast('Admin erstellt'); }
+    catch(err){toast(err.message);}
+  } else if (form.matches('.accountForm')) {
+    e.preventDefault();
+    try { await send('admin/accounts/'+form.dataset.id,{permissions:permissions(form),password:form.elements.password.value},'PATCH'); await loadAccounts(); toast('Admin aktualisiert'); }
+    catch(err){toast(err.message);}
+  }
+};
+$('#adminAccounts').onclick = async e => {
+  const del=e.target.dataset.delete;
+  if (del) { if (!confirm('Dieses normale Admin-Konto wirklich löschen?')) return; try { await request('admin/accounts/'+del,{method:'DELETE'}); await loadAccounts(); } catch(err){toast(err.message);} return; }
+  const teacherId=e.target.dataset.deleteTeacher;
+  if (teacherId) { try { await request('admin/teachers/'+teacherId,{method:'DELETE'}); await loadStaffManagement(); await loadCatalog(); toast('Lehrkraft deaktiviert'); } catch(err){toast(err.message);} return; }
+  const saveTeacher=e.target.dataset.saveTeacher;
+  if (saveTeacher) { const input=document.querySelector(`.teacher-name[data-id="${CSS.escape(saveTeacher)}"]`); try { await send('admin/teachers/'+saveTeacher,{name:input.value},'PATCH'); await loadStaffManagement(); await loadCatalog(); toast('Lehrkraft gespeichert'); } catch(err){toast(err.message);} return; }
+  const saveCategory=e.target.dataset.saveCategory;
+  if (saveCategory) { const name=document.querySelector(`.category-name[data-id="${CSS.escape(saveCategory)}"]`).value; const color=document.querySelector(`.category-color[data-id="${CSS.escape(saveCategory)}"]`).value; try { await send('admin/categories/'+saveCategory,{name,color},'PATCH'); await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Bereich gespeichert'); } catch(err){toast(err.message);} }
+};
+$('#teacherCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/teachers',{name:e.target.elements.name.value});e.target.reset();await loadStaffManagement();await loadCatalog();toast('Lehrkraft hinzugefügt');}catch(err){toast(err.message);}};
 $('#passwordForm').onsubmit = async e => { e.preventDefault(); const form=e.target; try { await send('admin/password',Object.fromEntries(new FormData(form)),'PATCH'); form.reset(); toast('Passwort geändert'); }catch(err){toast(err.message);} };
 boot();
