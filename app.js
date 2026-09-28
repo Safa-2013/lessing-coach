@@ -1,7 +1,7 @@
 const $ = selector => document.querySelector(selector);
 function showManagedCopy(key, value) { const target = $('#' + key + 'Copy'); target.textContent = value || ''; target.classList.toggle('hidden', !value); }
 const aiSide = $('.ai-side');
-aiSide.insertAdjacentHTML('afterbegin', '<div class="ai-brand"><span class="cap-symbol">✦</span><span>Lessing Coach<small>Dein KI-Lernassistent</small></span></div><button class="ai-back" data-page="start">← Startseite</button>');
+aiSide.insertAdjacentHTML('afterbegin', '<button class="ai-back" data-page="start">← Zurück zur Startseite</button><div class="ai-brand"><span class="cap-symbol">✦</span><span>Lessing Coach<small>Dein KI-Lernassistent</small></span></div>');
 const aiMain = $('.ai-main');
 const heading = document.createElement('div'); heading.className = 'ai-heading';
 aiMain.insertBefore(heading, aiMain.firstChild);
@@ -22,6 +22,7 @@ async function request(path, options = {}) {
 const send = (path, data, method='POST') => request(path, { method, body:JSON.stringify(data) });
 function navigate(page) {
   if (page === 'adminPanel' && state.session.role === 'visitor') page = 'login';
+  document.body.dataset.page = page;
   document.body.classList.toggle('ai-mode', page === 'ki');
   $('.view.active')?.classList.remove('active');
   $('#' + page)?.classList.add('active');
@@ -37,7 +38,6 @@ function renderAuth() {
   const isStaff = state.session.role !== 'visitor';
   $('#topLogin').textContent = isStaff ? 'Verwaltung' : 'Anmelden';
   $('#topLogin').dataset.page = isStaff ? 'adminPanel' : 'login';
-  const nav = $('.login-nav'); nav.lastChild.textContent = isStaff ? 'Verwaltung' : 'Anmeldung'; nav.dataset.page = isStaff ? 'adminPanel' : 'login';
   if (state.session.role === 'big' && !$('#accountList')) $('#adminAccounts').innerHTML = `<h2>Admin-Konten</h2><div id="accountList"></div><form id="createAdmin"><label class="field">Neuer Benutzername<input name="username" required minlength="3"></label><label class="field">Passwort (mindestens 10 Zeichen)<input name="password" type="password" required minlength="10"></label><label><input type="checkbox" name="appointments" checked> Termine</label> <label><input type="checkbox" name="chats" checked> Chats</label> <label><input type="checkbox" name="content" checked> Inhalte</label><p><button class="primary">Admin erstellen</button></p></form>`;
   $('#adminAccounts').classList.toggle('hidden', state.session.role !== 'big');
   for (const [permission, element] of [['appointments','#adminAppointments'],['chats','#adminChats'],['content','#adminContent']]) $(element).classList.toggle('hidden', !(state.session.role === 'big' || state.session.permissions.includes(permission)));
@@ -53,16 +53,16 @@ async function boot() {
     renderAuth();
     const target = location.hash.slice(1);
     if (target && $('#' + target)?.classList.contains('view')) navigate(target);
-    else document.querySelector('.nav button[data-page="start"]').classList.add('active');
+    else { document.body.dataset.page = 'start'; document.querySelector('.nav button[data-page="start"]').classList.add('active'); }
   }
 }
 document.addEventListener('click', e => {
   const page = e.target.closest('[data-page]')?.dataset.page;
   if (page) navigate(page);
   const prompt = e.target.closest('[data-prompt]')?.dataset.prompt;
-  if (prompt) { navigate('ki'); $('#aiForm input').value = prompt; $('#aiForm input').focus(); }
+  if (prompt) { navigate('ki'); $('#aiForm input[name="message"]').value = prompt; $('#aiForm input[name="message"]').focus(); }
   const subject = e.target.closest('[data-subject]')?.dataset.subject;
-  if (subject) { $('#aiForm input').value = `Hilf mir beim Lernen für ${subject}. Frage zuerst, was ich üben möchte.`; $('#aiForm input').focus(); }
+  if (subject) { $('#aiForm input[name="message"]').value = `Hilf mir beim Lernen für ${subject}. Frage zuerst, was ich üben möchte.`; $('#aiForm input[name="message"]').focus(); }
 });
 $('#menuToggle').onclick = () => { $('#sidebar').classList.toggle('open'); $('#scrim').classList.toggle('open'); };
 $('#scrim').onclick = () => { $('#sidebar').classList.remove('open'); $('#scrim').classList.remove('open'); };
@@ -82,13 +82,22 @@ function bubbles(messages, target) {
 }
 async function loadMessages() {
   try { const {messages} = await request('messages'); bubbles(messages.length ? messages : [{author:'admin',body:'Hallo! 👋 Schreibe uns deine Frage oder Anfrage. Unser Team meldet sich so bald wie möglich.',created_at:Date.now()}], $('#contactMessages')); }
-  catch(e) { $('#contactMessages').innerHTML = `<div class="chat-error" role="alert">Der Chat kann gerade nicht geladen werden. ${safe(e.message)}</div>`; toast(e.message); }
+  catch(e) { bubbles([{author:'admin',body:'Hallo! 👋 Schreibe uns hier deine Frage oder Anfrage. Unser Team meldet sich so schnell wie möglich bei dir.',created_at:Date.now()}], $('#contactMessages')); $('#contactMessages').insertAdjacentHTML('beforeend', `<div class="chat-error" role="alert">Der Chat kann gerade nicht geladen werden. ${safe(e.message)}</div>`); toast(e.message); }
 }
 $('#contactForm').onsubmit = async e => {
   e.preventDefault(); const form = e.currentTarget, field = form.elements.message, message = field.value; form.querySelector('button').disabled = true;
   try { await send('messages', {message}); field.value = ''; await loadMessages(); }
   catch(err) { toast(err.message); } finally { form.querySelector('button').disabled = false; }
 };
+$('#contactAttach').onclick = () => $('#contactFile').click();
+$('#contactFile').onchange = async e => {
+  const file = e.target.files?.[0]; if (!file) return;
+  if (!/\.(txt|md)$/i.test(file.name) || file.size > 1500) { toast('Bitte eine Textdatei (.txt oder .md) bis 1,5 KB auswählen.'); e.target.value = ''; return; }
+  const input = $('#contactForm').elements.message;
+  input.value = (input.value + `\n[${file.name}]\n` + await file.text()).trim().slice(0,2000);
+  input.focus(); e.target.value = '';
+};
+$('#contactEmoji').onclick = () => { const field = $('#contactForm').elements.message; field.value += ' 😊'; field.focus(); };
 $('#loginForm').onsubmit = async e => {
   e.preventDefault(); const form = e.currentTarget;
   try { const data = await send('login', Object.fromEntries(new FormData(form))); state.session = data.session; form.reset(); renderAuth(); navigate('adminPanel'); }
@@ -104,8 +113,16 @@ async function openThread(id) {
   try { const {messages} = await request('ai/threads/' + encodeURIComponent(id)); state.threadId = id; bubbles(messages, $('#aiMessages')); }
   catch(e) { toast(e.message); }
 }
-$('#newThread').onclick = () => { state.threadId = null; $('#aiMessages').innerHTML = ''; $('#aiForm input').focus(); };
-$('#progressButton').onclick = async () => { try { const p = await request('ai/progress'); toast(`Dein Lernfortschritt in diesem Browser: ${p.chats} Chats und ${p.questions} Fragen.`); } catch(e) { toast(e.message); } };
+$('#newThread').onclick = () => { state.threadId = null; $('#aiMessages').innerHTML = ''; $('#aiUtility').classList.add('hidden'); $('#aiForm input[name="message"]').focus(); };
+function utility(html) { const panel=$('#aiUtility'); panel.innerHTML=html; panel.classList.remove('hidden'); panel.scrollIntoView({block:'nearest'}); }
+$('#notesButton').onclick = () => { utility('<h2>Notizen</h2><p>Deine Notizen werden nur in diesem Browser gespeichert.</p><textarea id="aiNotes" aria-label="Notizen" placeholder="Schreibe deine Notizen …"></textarea>'); const notes=$('#aiNotes'); notes.value=localStorage.getItem('lessing_notes') || ''; notes.oninput=()=>localStorage.setItem('lessing_notes',notes.value.slice(0,10000)); notes.focus(); };
+$('#toolsButton').onclick = async () => { utility('<h2>Tools</h2><p id="aiToolStatus">Lernfortschritt wird geladen …</p>'); try { const p=await request('ai/progress'); $('#aiToolStatus').textContent=`${p.chats} Chats und ${p.questions} Fragen in diesem Browser.`; } catch(e) { $('#aiToolStatus').textContent=e.message; } };
+$('#settingsButton').onclick = () => { utility('<h2>Einstellungen</h2><label><input type="checkbox" id="aiMotion"> Animationen reduzieren</label>'); $('#aiMotion').checked=document.body.classList.contains('reduced-motion'); $('#aiMotion').onchange=e=>{document.body.classList.toggle('reduced-motion',e.target.checked); localStorage.setItem('lessing_less_motion',String(e.target.checked));}; };
+document.body.classList.toggle('reduced-motion',localStorage.getItem('lessing_less_motion')==='true');
+$('#aiTheme').onclick = () => { document.body.classList.toggle('ai-light'); $('#aiTheme').textContent=document.body.classList.contains('ai-light')?'☾':'☼'; };
+$('#aiAttach').onclick = () => $('#aiFile').click();
+$('#aiFile').onchange = async e => { const file=e.target.files?.[0]; if (!file) return; if (!/\.(txt|md)$/i.test(file.name) || file.size>3000) { toast('Bitte eine Textdatei (.txt oder .md) bis 3 KB auswählen.'); e.target.value=''; return; } const input=$('#aiForm').elements.message; input.value=(input.value+`\n[${file.name}]\n`+await file.text()).trim().slice(0,4000); input.focus(); e.target.value=''; };
+$('#aiVoice').onclick = () => { const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition; if (!SpeechRecognition) { toast('Spracheingabe wird von diesem Browser nicht unterstützt.'); return; } const recognizer=new SpeechRecognition(); recognizer.lang='de-DE'; recognizer.onresult=e=>{const input=$('#aiForm').elements.message; input.value=(input.value+' '+e.results[0][0].transcript).trim().slice(0,4000);input.focus();}; recognizer.onerror=()=>toast('Spracheingabe konnte nicht gestartet werden.');recognizer.start(); };
 $('#aiForm').onsubmit = async e => {
   e.preventDefault(); const form = e.currentTarget, input = form.elements.message, question = input.value.trim(), button = form.querySelector('button');
   if (!question) return; button.disabled = true;

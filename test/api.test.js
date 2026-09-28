@@ -69,5 +69,16 @@ test('student requests, private contact chats, admin roles and AI setup', async 
     const history=await call('ai/threads/'+threads.data.thread.id,'GET',null,learner.cookie);
     assert.equal(history.data.messages.length,2);
     assert.equal((await call('ai/progress','GET',null,learner.cookie)).data.questions,1);
-  } finally { globalThis.fetch=oldFetch; delete process.env.OPENAI_API_KEY; }
+    process.env.GEMINI_API_KEY='test-gemini-key';
+    globalThis.fetch=async (url,options) => {
+      assert.match(url,/generativelanguage\.googleapis\.com/);
+      assert.equal(options.headers['x-goog-api-key'],'test-gemini-key');
+      const data=JSON.parse(options.body);
+      assert.equal(data.contents.at(-1).parts[0].text,'Nächster Lernschritt');
+      return {ok:true,json:async()=>({candidates:[{content:{parts:[{text:'Übe zuerst die Grundlagen.'}]}}]})};
+    };
+    const gemini=await call('ai/ask','POST',{thread_id:threads.data.thread.id,message:'Nächster Lernschritt'},learner.cookie);
+    assert.equal(gemini.status,200);
+    assert.equal(gemini.data.answer,'Übe zuerst die Grundlagen.');
+  } finally { globalThis.fetch=oldFetch; delete process.env.OPENAI_API_KEY; delete process.env.GEMINI_API_KEY; }
 });
