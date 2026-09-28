@@ -33,6 +33,11 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   const form = {first_name:'A',last_name:'B',class_name:'9a',subject:'Mathematik',topic:'Brüche',requested_at:future,requested_time:'10:00',school_end:'15:50',category_id:categoryId,teacher_id:teacherId};
   assert.equal((await call('appointments','POST',{...form,requested_at:future+'T14:00'},first.cookie)).status,400);
   assert.equal((await call('appointments','POST',{...form,school_end:''},first.cookie)).status,400);
+  assert.equal((await call('appointments','POST',form,first.cookie)).status,400, 'Nicht zugeordnete Lehrkraft darf nicht gebucht werden');
+  const assignment = await call('admin/teachers/'+teacherId,'PATCH',{name:'Test Lehrkraft',active:true,category_ids:[categoryId]},adminSetup.cookie);
+  assert.equal(assignment.status,200);
+  const assignedTeacher = (await call('admin/teachers','GET',null,adminSetup.cookie)).data.teachers.find(t=>t.id===teacherId);
+  assert.ok(assignedTeacher.category_ids.includes(categoryId), 'Bereichszuordnung bleibt gespeichert');
   const created = await call('appointments','POST',form,first.cookie);
   assert.equal(created.status,201);
   assert.match(created.data.code,/^[A-HJ-NP-Z2-9]{6}$/);

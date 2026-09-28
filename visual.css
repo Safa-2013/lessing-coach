@@ -190,3 +190,13 @@ body[data-page="contact"] .topbar{display:none}
 @media(max-width:700px){.category-legend{gap:5px}.category-chip{font-size:11px;padding:5px 8px}}
 
 .chat-chatbar{display:flex;justify-content:space-between;align-items:center;padding:0 2px 10px}.chat-chatbar .primary{padding:8px 12px;font-size:12px}.appointment-admin-card{border-left:4px solid var(--category-color);padding-left:14px}.appointment-admin-card .field{margin-bottom:8px}.category-chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;background:color-mix(in srgb,var(--category-color) 12%,white);font-size:12px;font-weight:700}.category-chip i{width:8px;height:8px;border-radius:50%;background:var(--category-color);display:inline-block}.teacher-categories{margin-top:8px;padding:10px;border-radius:10px;background:#f6f9fd}.teacher-categories label{font-size:12px}@media(max-width:700px){.appointment-admin-card .row .primary{flex:1}.chat-chatbar{gap:8px}}
+
+/* Zusatz-Designer: bestehendes Layout bleibt unberührt. */
+#designStage{position:relative;height:660px;overflow:auto;border:2px solid #d1d5db;border-radius:12px;margin-top:18px;background:white}
+#designFrame{width:1200px;height:2400px;border:0;pointer-events:none}
+#designLayer{position:absolute;left:0;top:0;width:1200px;height:2400px;pointer-events:none}
+.design-element{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;cursor:move;user-select:none;border:1px dashed #64748b;pointer-events:auto;touch-action:none;overflow:visible;white-space:pre-wrap}
+.design-element.chosen{outline:2px solid #2563eb}
+.design-resize{position:absolute;right:-5px;bottom:-5px;width:14px;height:14px;background:#2563eb;cursor:nwse-resize}
+.lessing-design-published{position:relative;max-width:100%;overflow:hidden;margin:12px auto;pointer-events:none}
+.lessing-design-item{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;white-space:pre-wrap;box-sizing:border-box;overflow:hidden;border-radius:5px}

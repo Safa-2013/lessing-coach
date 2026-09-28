@@ -48,6 +48,7 @@ function navigate(page) {
   if (page === 'coaching') loadCalendar();
   if (page === 'termine') studentSchedule.refresh();
   if (page === 'ki') loadThreads();
+  if (page === 'adminPanel' && state.session.role==='big') $('#bigDesignTab').hidden=false;
   if (page === 'adminPanel') { showAdminTab(activeAdminTab); loadAdmin(); }
   history.replaceState(null, '', '#' + page);
 }
@@ -80,6 +81,7 @@ async function boot() {
     $('#heroText').textContent = data.content.hero || $('#heroText').textContent;
     showManagedCopy('about', data.content.about);
     showManagedCopy('help', data.content.help);
+    renderPublishedDesign();
   } catch(e) { toast(e.message); }
   finally {
     renderAuth();
@@ -164,7 +166,12 @@ function bubbles(messages, target) {
   target.innerHTML = messages.map(m => `<div class="bubble ${m.author === 'visitor' || m.role === 'user' ? 'mine' : ''}">${target.id === 'contactMessages' && m.author !== 'visitor' ? '<span class="sender">Lessing Schulen Coaching</span>' : ''}${safe(m.body)}<small>${new Date(Number(m.created_at)).toLocaleString('de-DE')}</small></div>`).join('');
   target.scrollTop = target.scrollHeight;
 }
-async function initChat(){try{const me=await request('chat/me');$('#chatGate').classList.toggle('hidden',me.authenticated);$('#chatArea').classList.toggle('hidden',!me.authenticated);if(me.authenticated){$('#chatClassLabel').textContent=`Klasse ${me.class_name}`;await loadMessages();}}catch(e){toast(e.message);}}
+async function syncStudentPassword(){
+  const {enabled}=await request('student-settings');
+  const field=$('#studentPasswordField'), input=field.querySelector('input');
+  field.classList.toggle('hidden',!enabled); input.disabled=!enabled; input.required=enabled;
+}
+async function initChat(){try{await syncStudentPassword();const me=await request('chat/me');$('#chatGate').classList.toggle('hidden',me.authenticated);$('#chatArea').classList.toggle('hidden',!me.authenticated);if(me.authenticated){$('#chatClassLabel').textContent=`Klasse ${me.class_name}`;await loadMessages();}}catch(e){toast(e.message);}}
 $('#chatLoginForm').onsubmit=async e=>{e.preventDefault();try{const d=await send('chat/login',Object.fromEntries(new FormData(e.currentTarget)));$('#chatGate').classList.add('hidden');$('#chatArea').classList.remove('hidden');$('#chatClassLabel').textContent=`Klasse ${d.class_name}`;e.currentTarget.reset();await loadMessages();}catch(err){toast(err.message);}};
 $('#chatLogout').onclick=async()=>{try{await send('chat/logout',{});$('#chatArea').classList.add('hidden');$('#chatGate').classList.remove('hidden');$('#contactMessages').replaceChildren();}catch(e){toast(e.message);}};
 async function loadMessages() {
@@ -236,6 +243,11 @@ async function loadAdmin() {
       }
     if (can('chats')) { const {chats} = await request('admin/chats'); $('#chatList').innerHTML = chats.length ? chats.map((c,i) => `<button class="primary" data-chat="${safe(c.visitor_id)}" style="margin:4px">Chat ${i+1} · ${Number(c.count)} Nachrichten</button>`).join('') : '<p class="muted">Noch keine Nachrichten.</p>'; if (state.currentChat) await openAdminChat(state.currentChat); }
     if (can('content')) $('#contentEditor').innerHTML = ['hero','about','help'].map(key => `<form class="contentForm" data-key="${key}"><label class="field">${{hero:'Startseite',about:'Über Lessing',help:'Hilfe'}[key]}<textarea name="value" maxlength="3000">${safe(state.content[key] || '')}</textarea></label><button class="primary">Speichern</button></form>`).join('');
+    if(isStaffForAccounts()){
+      const settings=await request('student-settings');
+      $('#studentPasswordToggle').checked=settings.enabled;
+    }
+    if(state.session.role==='big') $('#bigDesignTab').hidden=false;
     if (isStaffForAccounts()) await loadAccounts();
     if (can('appointments')) { await loadStaffManagement(); await loadAppointmentNotes(); }
   } catch(e) { toast(e.message); }
@@ -366,3 +378,85 @@ $('#teacherCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/
 $('#categoryCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/categories',{name:e.target.elements.name.value,color:e.target.elements.color.value});e.target.reset();e.target.elements.color.value='#3B82F6';await loadStaffManagement();await loadCatalog();adminSchedule.refresh();toast('Bereich hinzugefügt');}catch(err){toast(err.message);}};
 $('#passwordForm').onsubmit = async e => { e.preventDefault(); const form=e.target; try { await send('admin/password',Object.fromEntries(new FormData(form)),'PATCH'); form.reset(); toast('Passwort geändert'); }catch(err){toast(err.message);} };
 boot();
+
+// Schüler-Passwortschalter: nur die Verwaltung kann den Modus ändern.
+$('#saveStudentPassword').onclick=async()=>{
+ try{
+   const result=await send('admin/student-settings',{enabled:$('#studentPasswordToggle').checked},'PATCH');
+   toast(result.enabled?'Schüler-Passwort aktiviert':'Schüler-Passwort deaktiviert');
+ }catch(e){toast(e.message);}
+};
+// Big-Admin-Designer. Änderungen werden erst nach "Ansicht speichern" veröffentlicht.
+const designPages=['start','termine','ki','contact'];
+let designItems=[],designSelected=null;
+function designFor(page){
+ try{const a=JSON.parse(state.content['design_'+page]||'[]');return Array.isArray(a)?a:[];}catch{return [];}
+}
+function renderPublishedDesign(){
+ designPages.forEach(page=>{
+  const view=document.getElementById(page);if(!view)return;
+  view.querySelectorAll('.lessing-design-published').forEach(el=>el.remove());
+  const items=designFor(page);if(!items.length)return;
+  const layer=document.createElement('div');layer.className='lessing-design-published';
+  layer.style.height=Math.max(100,...items.map(i=>i.y+i.h+15))+'px';
+  items.forEach(i=>{
+    const el=document.createElement('div');el.className='lessing-design-item';
+    el.style.cssText=`left:${i.x}px;top:${i.y}px;width:${i.w}px;height:${i.h}px;color:${i.color};background:${i.type==='text'?'transparent':i.bg};font-size:${i.size}px`;
+    el.textContent=i.text;layer.append(el);
+  });
+  view.append(layer);
+ });
+}
+function designPaint(){
+ const layer=$('#designLayer');layer.replaceChildren();
+ designItems.forEach(i=>{
+  const el=document.createElement('div');el.className='design-element'+(designSelected===i.id?' chosen':'');
+  el.style.cssText=`left:${i.x}px;top:${i.y}px;width:${i.w}px;height:${i.h}px;color:${i.color};background:${i.type==='text'?'transparent':i.bg};font-size:${i.size}px`;
+  el.textContent=i.text;
+  const handle=document.createElement('span');handle.className='design-resize';el.append(handle);
+  el.onpointerdown=e=>{
+    e.preventDefault();designSelected=i.id;designSyncInputs();designPaint();
+    const originX=e.clientX,originY=e.clientY,old={...i},resize=e.target.classList.contains('design-resize');
+    const move=ev=>{
+      if(resize){i.w=Math.max(50,Math.min(1200,old.w+ev.clientX-originX));i.h=Math.max(30,Math.min(900,old.h+ev.clientY-originY));}
+      else{i.x=Math.max(0,Math.min(1600,old.x+ev.clientX-originX));i.y=Math.max(0,Math.min(2400,old.y+ev.clientY-originY));}
+      designPaint();
+    };
+    const stop=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',stop);};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',stop,{once:true});
+  };
+  layer.append(el);
+ });
+}
+function designSyncInputs(){
+ const i=designItems.find(x=>x.id===designSelected);if(!i)return;
+ $('#designText').value=i.text;$('#designSize').value=i.size;$('#designColor').value=i.color;$('#designBg').value=i.bg;
+}
+function designLoad(){
+ if(state.session.role!=='big')return;
+ const page=$('#designPage').value;designItems=designFor(page).map(i=>({...i}));designSelected=null;
+ const frame=$('#designFrame');frame.src='/#'+page;
+ frame.onload=()=>{try{frame.contentWindow.document.querySelector('[data-page="'+page+'"]')?.click();}catch{}};
+ designPaint();
+}
+$('#designPage').onchange=designLoad;
+document.querySelector('[data-admin-tab="design"]').addEventListener('click',designLoad);
+function designAdd(type){
+ const i={id:crypto.randomUUID(),type,text:type==='text'?'Neuer Text':type==='box'?'Neues Feld':'Neuer Button',x:20,y:20+designItems.length*25,w:190,h:65,color:'#172554',bg:'#ffffff',size:20};
+ designItems.push(i);designSelected=i.id;designSyncInputs();designPaint();
+}
+$('#designAddText').onclick=()=>designAdd('text');
+$('#designAddBox').onclick=()=>designAdd('box');
+$('#designAddButton').onclick=()=>designAdd('button');
+for(const [selector,key,transform] of [['#designText','text',String],['#designSize','size',Number],['#designColor','color',String],['#designBg','bg',String]]){
+ $(selector).oninput=e=>{const i=designItems.find(x=>x.id===designSelected);if(!i)return;i[key]=transform(e.target.value);designPaint();};
+}
+$('#designDelete').onclick=()=>{designItems=designItems.filter(i=>i.id!==designSelected);designSelected=null;designPaint();};
+$('#designSave').onclick=async()=>{
+ try{
+  const page=$('#designPage').value;
+  await send('admin/design',{page,items:designItems},'PATCH');
+  state.content['design_'+page]=JSON.stringify(designItems);
+  renderPublishedDesign();toast('Ansicht gespeichert');
+ }catch(e){toast(e.message);}
+};
