@@ -48,11 +48,13 @@ async function boot() {
     $('#heroText').textContent = data.content.hero || $('#heroText').textContent;
     showManagedCopy('about', data.content.about);
     showManagedCopy('help', data.content.help);
+  } catch(e) { toast(e.message); }
+  finally {
     renderAuth();
     const target = location.hash.slice(1);
     if (target && $('#' + target)?.classList.contains('view')) navigate(target);
     else document.querySelector('.nav button[data-page="start"]').classList.add('active');
-  } catch(e) { toast(e.message); }
+  }
 }
 document.addEventListener('click', e => {
   const page = e.target.closest('[data-page]')?.dataset.page;
