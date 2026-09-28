@@ -31,3 +31,6 @@ Wichtig: Diese Version verwendet für Konten und lokale Einstellungen weiterhin 
 
 ## Vercel-Konfiguration
 Akzeptierte Datenbank-Variablen sind `DATABASE_URL`, `DATABASE_PRISMA_DATABASE_URL` oder `DATABASE_POSTGRES_URL`; `DATABASE_URL` hat Vorrang. Für die KI wird `GEMINI_API_KEY` oder alternativ `OPENAI_API_KEY` benötigt.
+
+## Admin-Login Hinweis
+Die beiden reservierten Konten werden beim API-Start aus den Vercel-Variablen `INITIAL_ADMIN_PASSWORD` (Benutzername `Lessing`) und `INITIAL_BIG_ADMIN_PASSWORD` (Benutzername `admin`) synchronisiert. Dadurch werden auch bereits vorhandene Konten mit einem alten Passwort/Rollennamen repariert. Nach Änderungen an Vercel Environment Variables muss ein neues Deployment erfolgen.
