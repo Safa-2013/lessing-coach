@@ -331,6 +331,8 @@ $('#adminAccounts').onsubmit = async e => {
 $('#adminAccounts').onclick = async e => {
   const del=e.target.dataset.delete;
   if (del) { if (!confirm('Dieses normale Admin-Konto wirklich löschen?')) return; try { await request('admin/accounts/'+del,{method:'DELETE'}); await loadAccounts(); } catch(err){toast(err.message);} return; }
+};
+document.querySelector('[data-admin-section="staff"]').onclick = async e => {
   const teacherId=e.target.dataset.deleteTeacher;
   if (teacherId) { try { await request('admin/teachers/'+teacherId,{method:'DELETE'}); await loadStaffManagement(); await loadCatalog(); toast('Lehrkraft deaktiviert'); } catch(err){toast(err.message);} return; }
   const saveTeacher=e.target.dataset.saveTeacher;
@@ -340,6 +342,26 @@ $('#adminAccounts').onclick = async e => {
   const saveCategory=e.target.dataset.saveCategory;
   if (saveCategory) { const name=document.querySelector(`.category-name[data-id="${CSS.escape(saveCategory)}"]`).value; const color=document.querySelector(`.category-color[data-id="${CSS.escape(saveCategory)}"]`).value; try { await send('admin/categories/'+saveCategory,{name,color},'PATCH'); await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Bereich gespeichert'); } catch(err){toast(err.message);} }
 };
+// Bereichszuordnungen beim Anklicken speichern, ohne die Ansicht neu aufzubauen.
+$('#teacherList').addEventListener('change', async e => {
+  if (!e.target.matches('.teacher-category')) return;
+  const checkbox=e.target, teacherId=checkbox.dataset.teacher;
+  const card=checkbox.closest('.teacher-card');
+  const name=card.querySelector('.teacher-name').value;
+  const category_ids=[...card.querySelectorAll('.teacher-category:checked')].map(x=>x.dataset.category);
+  const boxes=[...card.querySelectorAll('.teacher-category')];
+  boxes.forEach(x=>x.disabled=true);
+  try {
+    await send('admin/teachers/'+encodeURIComponent(teacherId),{name,category_ids},'PATCH');
+    await loadCatalog();
+    toast('Bereiche gespeichert');
+  } catch(err) {
+    checkbox.checked=!checkbox.checked;
+    toast(err.message);
+  } finally {
+    boxes.forEach(x=>x.disabled=false);
+  }
+});
 $('#teacherCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/teachers',{name:e.target.elements.name.value});e.target.reset();await loadStaffManagement();await loadCatalog();toast('Lehrkraft hinzugefügt');}catch(err){toast(err.message);}};
 $('#categoryCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/categories',{name:e.target.elements.name.value,color:e.target.elements.color.value});e.target.reset();e.target.elements.color.value='#3B82F6';await loadStaffManagement();await loadCatalog();adminSchedule.refresh();toast('Bereich hinzugefügt');}catch(err){toast(err.message);}};
 $('#passwordForm').onsubmit = async e => { e.preventDefault(); const form=e.target; try { await send('admin/password',Object.fromEntries(new FormData(form)),'PATCH'); form.reset(); toast('Passwort geändert'); }catch(err){toast(err.message);} };
