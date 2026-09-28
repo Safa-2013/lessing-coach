@@ -7,6 +7,8 @@ import api from '../lib/api.js';
 
 process.chdir(mkdtempSync(join(tmpdir(), 'lessing-test-')));
 delete process.env.DATABASE_URL;
+process.env.INITIAL_ADMIN_PASSWORD = 'Test-Admin-Passwort-2026';
+process.env.INITIAL_BIG_ADMIN_PASSWORD = 'Test-Hauptadmin-Passwort-2026';
 
 async function call(path, method='GET', data, cookie='') {
   const response = { headers:{}, setHeader(k,v) { this.headers[k.toLowerCase()]=v; }, end(text) { this.data=JSON.parse(text); }, get headersSent() { return false; } };
@@ -24,7 +26,7 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   assert.equal(lookup.data.appointment.status,'Anfrage eingegangen');
   await call('messages','POST',{message:'Privat'},first.cookie);
   assert.equal((await call('messages','GET',null,second.cookie)).data.messages.length,0);
-  const normal = await call('login','POST',{username:'Lessing',password:'Schulen'},second.cookie);
+  const normal = await call('login','POST',{username:'Lessing',password:process.env.INITIAL_ADMIN_PASSWORD},second.cookie);
   assert.equal(normal.data.session.role,'admin');
   assert.equal((await call('admin/accounts','GET',null,normal.cookie)).status,403);
   const staffAppointments = await call('admin/appointments','GET',null,normal.cookie);
@@ -38,7 +40,7 @@ test('student requests, private contact chats, admin roles and AI setup', async 
   assert.equal((await call('messages','GET',null,first.cookie)).data.messages.length,2);
   assert.equal((await call('admin/content','PATCH',{key:'about',value:'Unser Coaching-Konzept'},normal.cookie)).status,200);
   assert.equal((await call('bootstrap','GET',null,normal.cookie)).data.content.about,'Unser Coaching-Konzept');
-  const big = await call('login','POST',{username:'admin',password:'1234'},first.cookie);
+  const big = await call('login','POST',{username:'admin',password:process.env.INITIAL_BIG_ADMIN_PASSWORD},first.cookie);
   assert.equal(big.data.session.role,'big');
   assert.equal((await call('admin/accounts','GET',null,big.cookie)).data.accounts.length,1);
   assert.equal((await call('admin/accounts','POST',{username:'KursAdmin',password:'sicheresPasswort123',permissions:['appointments']},big.cookie)).status,201);

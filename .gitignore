@@ -1,0 +1,8 @@
+node_modules/
+.env
+.data/
+upload/
+generated_images/
+backups/
+inline-*.js
+Lessing_Index_Interaktive_Vorschau.html

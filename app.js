@@ -54,7 +54,7 @@ async function boot() {
     renderAuth();
     const target = location.hash.slice(1);
     if (target && $('#' + target)?.classList.contains('view')) navigate(target);
-  } catch(e) { toast(e.message + ' – prüfe die Server- und Datenbankkonfiguration.'); }
+  } catch(e) { toast(e.message); }
 }
 document.addEventListener('click', e => {
   const page = e.target.closest('[data-page]')?.dataset.page;
@@ -119,7 +119,7 @@ const can = permission => state.session.role === 'big' || state.session.permissi
 async function loadAdmin() {
   if (state.session.role === 'visitor') return;
   try {
-    if (can('appointments')) { const {appointments} = await request('admin/appointments'); $('#appointmentList').innerHTML = appointments.length ? appointments.map(a => `<div class="list-item"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong> <span class="pill">${safe(a.status)}</span><p class="small">${safe(a.class_name)} · ${safe(a.subject)} · ${safe(a.requested_at.replace('T',' '))}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="row"><select class="field" name="status">${['Anfrage eingegangen','In Bearbeitung','Bestätigt','Abgesagt'].map(s => `<option ${s===a.status?'selected':''}>${s}</option>`).join('')}</select><input class="field" name="note" maxlength="500" placeholder="Änderung / Rückmeldung" value="${safe(a.note)}"><button class="primary">Speichern</button></div></form></div>`).join('') : '<p class="muted">Noch keine Anfragen.</p>'; }
+    if (can('appointments')) { const {appointments} = await request('admin/appointments'); $('#appointmentList').innerHTML = appointments.length ? appointments.map(a => `<div class="list-item"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong> <span class="pill">${safe(a.status)}</span><p class="small">${safe(a.class_name)} · ${safe(a.subject)} · ${safe(a.requested_at.replace('T',' '))}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="row"><select class="field" name="status">${['Anfrage eingegangen','In Bearbeitung','Bestätigt','Abgelehnt'].map(s => `<option ${s===a.status?'selected':''}>${s}</option>`).join('')}</select><input class="field" name="note" maxlength="500" placeholder="Änderung / Rückmeldung" value="${safe(a.note)}"><button class="primary">Speichern</button></div></form></div>`).join('') : '<p class="muted">Noch keine Anfragen.</p>'; }
     if (can('chats')) { const {chats} = await request('admin/chats'); $('#chatList').innerHTML = chats.length ? chats.map((c,i) => `<button class="primary" data-chat="${safe(c.visitor_id)}" style="margin:4px">Chat ${i+1} · ${Number(c.count)} Nachrichten</button>`).join('') : '<p class="muted">Noch keine Nachrichten.</p>'; if (state.currentChat) await openAdminChat(state.currentChat); }
     if (can('content')) $('#contentEditor').innerHTML = ['hero','about','help'].map(key => `<form class="contentForm" data-key="${key}"><label class="field">${{hero:'Startseite',about:'Über Lessing',help:'Hilfe'}[key]}<textarea name="value" maxlength="3000">${safe(state.content[key] || '')}</textarea></label><button class="primary">Speichern</button></form>`).join('');
     if (state.session.role === 'big') await loadAccounts();
