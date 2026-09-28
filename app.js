@@ -51,6 +51,7 @@ async function boot() {
     renderAuth();
     const target = location.hash.slice(1);
     if (target && $('#' + target)?.classList.contains('view')) navigate(target);
+    else document.querySelector('.nav button[data-page="start"]').classList.add('active');
   } catch(e) { toast(e.message); }
 }
 document.addEventListener('click', e => {
@@ -79,7 +80,7 @@ function bubbles(messages, target) {
 }
 async function loadMessages() {
   try { const {messages} = await request('messages'); bubbles(messages.length ? messages : [{author:'admin',body:'Hallo! 👋 Schreibe uns deine Frage oder Anfrage. Unser Team meldet sich so bald wie möglich.',created_at:Date.now()}], $('#contactMessages')); }
-  catch(e) { toast(e.message); }
+  catch(e) { $('#contactMessages').innerHTML = `<div class="chat-error" role="alert">Der Chat kann gerade nicht geladen werden. ${safe(e.message)}</div>`; toast(e.message); }
 }
 $('#contactForm').onsubmit = async e => {
   e.preventDefault(); const form = e.currentTarget, field = form.elements.message, message = field.value; form.querySelector('button').disabled = true;
