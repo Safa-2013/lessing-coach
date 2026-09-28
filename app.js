@@ -23,7 +23,8 @@ async function request(path, options = {}) {
   return result;
 }
 const send = (path, data, method='POST') => request(path, { method, body:JSON.stringify(data) });
-const studentSchedule = makeSchedule($('#studentSchedule'),request);
+const studentSchedule = makeSchedule($('#studentSchedule'),request);async function loadMyAppointments(){const box=$('#myAppointments');if(!box)return;try{const {appointments}=await request('appointments/mine');box.innerHTML=appointments.length?appointments.map(a=>`<div class="list-item"><div class="row"><strong>${safe(a.subject)}</strong><span class="pill">${safe(a.status)}</span></div><p>${safe(dayLabel(a.requested_at))}${a.appointment_time?' · '+safe(a.appointment_time)+' Uhr':''}</p><p class="small">${safe(a.topic)}</p><small>Dein Code: ${safe(a.code)}</small></div>`).join(''):'<p class="muted">Du hast auf diesem Gerät noch keine eigenen Terminanfragen.</p>';}catch(e){box.innerHTML='<p class="muted">Eigene Termine konnten nicht geladen werden.</p>';}}
+
 const adminSchedule = makeSchedule($('#adminSchedule'),request,true);
 let activeAdminTab = 'overview';
 function showAdminTab(tab) {
@@ -34,23 +35,28 @@ function showAdminTab(tab) {
   document.querySelectorAll('[data-admin-section]').forEach(section=>section.classList.toggle('active',section.dataset.adminSection===tab));
   if(tab==='calendar') adminSchedule.refresh();
 }
-function navigate(page) {
+const pageScroll={};
+function closeMobileMenu(){ $('#sidebar').classList.remove('open');$('#scrim').classList.remove('open');document.body.classList.remove('menu-open');$('#menuToggle').setAttribute('aria-expanded','false'); }
+function navigate(page,options={}) {
   if (page === 'adminPanel' && state.session.role === 'visitor') page = 'login';
+  const previous=document.querySelector('.view.active')?.id;
+  if(previous===page){closeMobileMenu();return;}
+  if(previous)pageScroll[previous]=window.scrollY;
   if (page === 'login' && !document.getElementById('login').classList.contains('active')) $('#loginForm').reset();
   document.body.dataset.page = page;
   document.body.classList.toggle('ai-mode', page === 'ki');
   $('.view.active')?.classList.remove('active');
   $('#' + page)?.classList.add('active');
   document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.page === page));
-  $('#sidebar').classList.remove('open'); $('#scrim').classList.remove('open');
-  window.scrollTo({ top:0, behavior:'instant' });
+  closeMobileMenu();
+  requestAnimationFrame(()=>window.scrollTo({top:options.restore?(pageScroll[page]||0):0,behavior:'auto'}));
   if (page === 'contact') initChat();
   if (page === 'coaching') loadCalendar();
-  if (page === 'termine') studentSchedule.refresh();
+  if (page === 'termine') { studentSchedule.refresh(); loadMyAppointments(); }
   if (page === 'ki') loadThreads();
   if (page === 'adminPanel' && state.session.role==='big') $('#bigDesignTab').hidden=false;
   if (page === 'adminPanel') { showAdminTab(activeAdminTab); loadAdmin(); }
-  history.replaceState(null, '', '#' + page);
+  if(!options.history&&location.hash!=='#'+page)history.pushState({page},'','#'+page);
 }
 async function loadCatalog() {
   try {
@@ -86,7 +92,7 @@ async function boot() {
   finally {
     renderAuth();
     const target = location.hash.slice(1);
-    if (target && $('#' + target)?.classList.contains('view')) navigate(target);
+    if (target && $('#' + target)?.classList.contains('view')) navigate(target,{history:true,restore:true});
     else { document.body.dataset.page = 'start'; document.querySelector('.nav button[data-page="start"]').classList.add('active'); }
   }
 }
@@ -99,8 +105,9 @@ document.addEventListener('click', e => {
   if (subject) { $('#aiForm input[name="message"]').value = `Hilf mir beim Lernen für ${subject}. Frage zuerst, was ich üben möchte.`; $('#aiForm input[name="message"]').focus(); }
 });
 $('.admin-tabs').onclick=e=>{const tab=e.target.closest('[data-admin-tab]:not(.hidden)')?.dataset.adminTab;if(tab)showAdminTab(tab);};
-$('#menuToggle').onclick = () => { $('#sidebar').classList.toggle('open'); $('#scrim').classList.toggle('open'); };
-$('#scrim').onclick = () => { $('#sidebar').classList.remove('open'); $('#scrim').classList.remove('open'); };
+$('#menuToggle').onclick=e=>{e.stopPropagation();const open=!$('#sidebar').classList.contains('open');$('#sidebar').classList.toggle('open',open);$('#scrim').classList.toggle('open',open);document.body.classList.toggle('menu-open',open);$('#menuToggle').setAttribute('aria-expanded',String(open));};
+$('#scrim').onclick=closeMobileMenu;
+window.addEventListener('popstate',()=>{const p=location.hash.slice(1)||'start';if($('#'+p)?.classList.contains('view'))navigate(p,{history:true,restore:true});});
 const berlinToday = () => {
   const parts = new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
   const get = type => parts.find(p => p.type === type).value;
