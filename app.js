@@ -248,7 +248,11 @@ async function loadAdmin() {
             $('#appointmentList').innerHTML=appointments.length?appointments.map(a=>`<div class="list-item appointment-admin-card" style="--category-color:${safe(a.category_color||'#3B82F6')}"><div class="row"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong><span class="pill">${safe(a.status)}</span><span class="category-chip" style="--category-color:${safe(a.category_color||'#3B82F6')}"><i></i>${safe(a.category_name||a.subject)}</span></div><p class="small">${safe(a.class_name)} · ${safe(a.teacher_name||'Lehrkraft nicht gesetzt')} · ${safe(dayLabel(a.requested_at))} · ${safe(a.appointment_time||'Uhrzeit offen')} · Schule aus: ${safe(schoolEndLabel(a.school_end))}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="grid2"><label class="field">Datum<input type="date" name="requested_at" value="${safe(a.requested_at)}"></label><label class="field">Uhrzeit<input type="time" name="appointment_time" value="${safe(a.appointment_time||'')}"></label><label class="field">Bereich<select name="category_id" class="category-edit" data-current="${safe(a.category_id||'')}"></select></label><label class="field">Lehrkraft<select name="teacher_id" class="teacher-edit" data-current="${safe(a.teacher_id||'')}"></select></label></div><label class="field">Status<select name="status"><option ${a.status==='Anfrage eingegangen'?'selected':''}>Anfrage eingegangen</option><option ${a.status==='In Bearbeitung'?'selected':''}>In Bearbeitung</option><option ${a.status==='Bestätigt'?'selected':''}>Bestätigt</option><option ${a.status==='Abgelehnt'?'selected':''}>Abgelehnt</option><option ${a.status==='Erledigt'?'selected':''}>Erledigt</option><option ${a.status==='Nicht erschienen'?'selected':''}>Nicht erschienen</option></select></label><label class="field">Rückmeldung / Notiz<input name="note" maxlength="500" placeholder="z. B. Termin bestätigt / verschoben" value="${safe(a.note)}"></label><div class="row"><button type="button" class="primary" data-accept="${safe(a.id)}">Anfrage annehmen</button><button type="button" class="primary" data-reschedule="${safe(a.id)}">Termin verschieben</button><button type="button" class="primary danger" data-reject="${safe(a.id)}">Ablehnen</button><button class="primary">Speichern</button></div></form></div>`).join(''):'<p class="muted">Noch keine Anfragen.</p>';
       const catalog=window.lessingCatalog||{categories:[],teachers:[]}; document.querySelectorAll('.appointment-admin-card').forEach(card=>{const cf=card.querySelector('.category-edit'),tf=card.querySelector('.teacher-edit');if(!cf||!tf)return;const currentC=cf.dataset.current,currentT=tf.dataset.current;cf.innerHTML=catalog.categories.map(c=>`<option value="${safe(c.id)}" ${c.id===currentC?'selected':''}>${safe(c.name)}</option>`).join('');const fill=()=>{const cid=cf.value,ts=catalog.teachers.filter(t=>(t.category_ids||[]).includes(cid));tf.innerHTML=ts.map(t=>`<option value="${safe(t.id)}" ${t.id===currentT?'selected':''}>${safe(t.name)}</option>`).join('')||'<option value="">Keine Lehrkraft</option>';};cf.onchange=fill;fill();});
       }
-    if (can('chats')) { const {chats} = await request('admin/chats'); $('#chatList').innerHTML = chats.length ? chats.map((c,i) => `<button class="primary" data-chat="${safe(c.visitor_id)}" style="margin:4px">Chat ${i+1} · ${Number(c.count)} Nachrichten</button>`).join('') : '<p class="muted">Noch keine Nachrichten.</p>'; if (state.currentChat) await openAdminChat(state.currentChat); }
+    if (can('chats')) {
+      const {chats}=await request('admin/chats');state.staffChats=chats;
+      renderStaffChats();
+      if(state.currentChat) await openAdminChat(state.currentChat);
+    }
     if (can('content')) $('#contentEditor').innerHTML = ['hero','about','help'].map(key => `<form class="contentForm" data-key="${key}"><label class="field">${{hero:'Startseite',about:'Über Lessing',help:'Hilfe'}[key]}<textarea name="value" maxlength="3000">${safe(state.content[key] || '')}</textarea></label><button class="primary">Speichern</button></form>`).join('');
     if(isStaffForAccounts()){
       const settings=await request('student-settings');
@@ -305,14 +309,27 @@ $('#appointmentList').onclick=async e=>{
   }catch(err){toast(err.message);}
 };
 document.querySelector('[data-admin-section="notes"]')?.addEventListener('click', async e=>{const b=e.target.closest('[data-delete-note]');if(!b)return;try{await send('admin/appointment-notes/'+encodeURIComponent(b.dataset.deleteNote),{},'DELETE');toast('Notiz gelöscht');await loadAppointmentNotes();}catch(err){toast(err.message);}});
+function renderStaffChats(){
+ const term=($('#staffChatSearch')?.value||'').trim().toLocaleLowerCase('de');
+ const chats=(state.staffChats||[]).filter(c=>[c.display_name,c.class_name,c.last_message].join(' ').toLocaleLowerCase('de').includes(term));
+ $('#chatList').innerHTML=chats.length?chats.map(c=>`<button type="button" class="staff-chat-card ${state.currentChat===c.visitor_id?'selected':''}" data-chat="${safe(c.visitor_id)}"><strong>${safe(c.display_name)}</strong><span>${safe(c.class_name)} · ${Number(c.count)} Nachrichten</span><small>${safe(c.last_message||'')}</small></button>`).join(''):'<p class="muted">Keine passenden Chats.</p>';
+}
+$('#staffChatSearch').oninput=renderStaffChats;
 $('#chatList').onclick = e => { const id=e.target.closest('[data-chat]')?.dataset.chat; if (id) openAdminChat(id); };
 async function openAdminChat(id) {
   const detail=$('#adminChatDetail');
   if (state.currentChat !== id || !detail.querySelector('#staffForm')) {
-    detail.innerHTML = `<div class="chat-area" style="height:350px;min-height:250px;margin-top:15px"><div class="chat-scroll" id="staffMessages"></div><form class="composer" id="staffForm"><input name="message" required maxlength="2000" placeholder="Antwort schreiben …" autocomplete="off"><button class="primary">➤</button></form></div>`;
+    detail.innerHTML = `<div id="staffStudentHeader" class="panel nested"></div><div class="chat-area" style="height:350px;min-height:250px;margin-top:15px"><div class="chat-scroll" id="staffMessages"></div><form class="composer" id="staffForm"><input name="message" required maxlength="2000" placeholder="Antwort schreiben …" autocomplete="off"><button class="primary">➤</button></form></div>`;
   }
   state.currentChat=id;
   try {
+    const student=(state.staffChats||[]).find(c=>c.visitor_id===id);
+    const header=detail.querySelector('#staffStudentHeader');
+    if(header){
+      header.innerHTML=`<h3>${safe(student?.display_name||'Schüler (älteres Konto)')}</h3><p class="muted">${safe(student?.class_name||'Klasse unbekannt')} · Nur für das Schulteam sichtbar</p><label class="field">Interne Notiz (Schüler sehen diese nicht)<textarea id="staffInternalNote" maxlength="1000" rows="2">${safe(student?.internal_note||'')}</textarea></label><button class="primary" type="button" id="saveStaffNote">Notiz speichern</button><div id="staffStudentAppointments"></div>`;
+      header.querySelector('#saveStaffNote').onclick=async()=>{try{await send('admin/chats/'+encodeURIComponent(id)+'/note',{note:header.querySelector('#staffInternalNote').value},'PATCH');if(student)student.internal_note=header.querySelector('#staffInternalNote').value;toast('Interne Notiz gespeichert');}catch(e){toast(e.message);}};
+      try{const {appointments}=await request('admin/chats/'+encodeURIComponent(id)+'/appointments');header.querySelector('#staffStudentAppointments').innerHTML='<h4>Termine dieses Schülers</h4>'+(appointments.length?appointments.map(a=>`<p class="small">${safe(a.subject)} · ${safe(dayLabel(a.requested_at))} · ${safe(a.appointment_time||'Uhrzeit offen')} · ${safe(a.status)}</p>`).join(''):'<p class="muted">Keine Termine vorhanden.</p>');}catch{}
+    }
     const {messages} = await request('admin/chats/'+encodeURIComponent(id));
     if (state.currentChat !== id) return;
     bubbles(messages.map(m=>({...m,author:m.author==='admin'?'visitor':'admin'})), detail.querySelector('#staffMessages'));
