@@ -411,7 +411,7 @@ $('#categoryCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin
 $('#passwordForm').onsubmit = async e => { e.preventDefault(); const form=e.target; try { await send('admin/password',Object.fromEntries(new FormData(form)),'PATCH'); form.reset(); toast('Passwort geändert'); }catch(err){toast(err.message);} };
 
 let maintenance={};
-const maintenanceLabels={start:'Startseite',coaching:'Termin & Coaching',termine:'Termine',ki:'Lern-KI',contact:'Chat',planner:'Lernplaner'};
+const maintenanceLabels={start:'Startseite',coaching:'Termin & Coaching',termine:'Termine',ki:'Lern-KI',contact:'Chat',planner:'Lernplaner',stars:'Lessing Stars'};
 const gameLabels={math:'Mathe-Quiz',vocab:'Vokabeltrainer',memory:'Memory',reaction:'Reaktionsspiel',logic:'Logik-Quiz',dvd:'DVD-Video'};
 let gameCleanup=()=>{};
 let maintenanceOrigin='start';
@@ -565,3 +565,5 @@ function startMemory(root){
  gameCleanup=()=>{active=false;clearTimeout(timer);};
  restart.onclick=e=>{e.stopPropagation();gameCleanup();startMemory(root);};
 }
+
+const starsNavigation=document.querySelector('#starsNavigation');starsNavigation.onclick=()=>{if(maintenanceBlocked('stars'))showMaintenance('stars');else location.href='/lessing-stars/'};

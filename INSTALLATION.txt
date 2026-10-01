@@ -1,0 +1,36 @@
+LESSING TERMINPLANER + LESSING STARS
+
+Bestehende Website aktualisieren:
+1. ZIP entpacken.
+2. Den Inhalt (nicht nur index.html) in das bestehende Projekt übernehmen.
+3. Neu veröffentlichen. Bestehende DATABASE_URL und KI-Einstellungen beibehalten.
+4. Links auf „Lessing Stars“ klicken. Das Spiel liegt unter /lessing-stars/.
+
+Wartung:
+- Terminplaner: Big Admin → Wartung & Sperren → Lessing Stars oder gesamte Website sperren.
+- Spiel: anmelden mit admin / 1234 → ⚙ ADMIN → Verwaltung.
+- Der Stars-Admin kann Stars-Wartung und Kontosperren verwalten.
+- Eine Sperre der gesamten Website wird im Terminplaner vom Big Admin aufgehoben.
+- Geöffnete Spielseiten prüfen Wartung und Sperren alle 10 Sekunden.
+- Registrierte Stars-Konten und Spielstände liegen jetzt in der gemeinsamen Datenbank.
+- Der Gast-Spielstand bleibt auf dem Gerät. Registrierte Konten können sich auf anderen Geräten anmelden.
+- Admin: alle Brawler/Skins, Power 11, unbegrenzte Ressourcen. Neue Spieler: Lex, 0 Guthaben, 0 Trophäen.
+
+Server starten:
+Node.js 22 oder neuer installieren. Im entpackten Ordner:
+  npm install
+  npm start
+Dann http://localhost:3000 öffnen.
+Ohne DATABASE_URL nutzt der lokale Server SQLite. Auf Vercel wird DATABASE_URL benötigt.
+STARS_ADMIN_PASSWORD kann vor dem ersten Start den Stars-Admin-Startwert 1234 ersetzen.
+Die bestehenden INITIAL_ADMIN_PASSWORD / INITIAL_BIG_ADMIN_PASSWORD des Terminplaners bleiben unverändert.
+
+Diese ZIP enthält den kompletten Server und ist für das bestehende Vercel/Node-Projekt gedacht.
+Ein reiner GitHub-Pages-Upload führt die Serverfunktionen nicht aus.
+Die enthaltene index.html allein reicht nicht zum Hochladen.
+
+Prüfung:
+Terminplaner-API, private Chats, Kalender und bestehende Wartungstests bestanden.
+Stars: Server-Anmeldung, Registrierung, Startsituation, Admin-Rechte,
+geräteübergreifende Wartung, Kontosperre und Entsperren geprüft.
+JavaScript-Syntax geprüft. Veröffentlichung auf der echten Website nicht durchgeführt.
