@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID, createHash, pbkdf2Sync, timingSafeEqual } from 'node:crypto';
 import { database } from './db.js';
+import starsApi from './stars-api.js';
 
 const now = () => Date.now();
 const id = () => randomUUID();
@@ -74,9 +75,24 @@ export default async function api(req, res) {
       if (origin && new URL(origin).host !== req.headers.host) fail(403, 'Ungültige Herkunft');
     }
     const db = await database();
+    if(path.startsWith('/stars/'))return starsApi(req,res,db,path);
     await seed(db);
     let session = await sessionFor(req, res, db);
     const body = req.method === 'GET' ? {} : bodyOf(req);
+    const maintenanceRow=(await db.query('SELECT value FROM content WHERE key=$1',['maintenance']))[0];
+    let maintenance={}; try {maintenance=JSON.parse(maintenanceRow?.value||'{}');} catch {}
+    if(path==='/maintenance' && req.method==='GET') return json(res,200,{maintenance});
+    if(path==='/admin/maintenance' && req.method==='PATCH') {
+      if(session.role!=='big') fail(403,'Nur Big Admin');
+      const next={all:body.all===true,games:body.games!==false,title:clean(body.title,100),message:clean(body.message,700),sections:{},enabledGames:{}};
+      for(const key of ['start','coaching','termine','ki','contact','planner','stars']) next.sections[key]=body.sections?.[key]===true;
+      for(const key of ['math','vocab','memory','reaction','logic','dvd']) next.enabledGames[key]=body.enabledGames?.[key]!==false;
+      await db.query('INSERT INTO content(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=$2',['maintenance',JSON.stringify(next)]);
+      return json(res,200,{maintenance:next});
+    }
+    const area=path.startsWith('/ai/')?'ki':path.startsWith('/messages')||path.startsWith('/chat/')?'contact':path.startsWith('/appointments')?(req.method==='POST'?'coaching':'termine'):null;
+    const exempt=['/bootstrap','/login','/logout','/maintenance'];
+    if(session.role!=='big'&&!exempt.includes(path)&&(maintenance.all||(area&&maintenance.sections?.[area]))) fail(503,'Dieser Bereich ist derzeit wegen Wartungsarbeiten geschlossen.');
     if (path === '/bootstrap' && req.method === 'GET') {
       const rows = await db.query('SELECT key,value FROM content');
       return json(res, 200, { session: scope(session), content: Object.fromEntries(rows.map(r => [r.key, r.value])) });
@@ -205,11 +221,12 @@ export default async function api(req, res) {
       }
       if(!profile){
         const visitorId=id();
-        await db.query('INSERT INTO chat_profiles(chat_key,visitor_id,class_name,created_at,password_hash) VALUES($1,$2,$3,$4,$5)',[key,visitorId,className,now(),passwordEnabled?hashPassword(supplied):null]);
+        await db.query('INSERT INTO chat_profiles(chat_key,visitor_id,class_name,created_at,password_hash,display_name) VALUES($1,$2,$3,$4,$5,$6)',[key,visitorId,className,now(),passwordEnabled?hashPassword(supplied):null,displayName]);
         profile={visitor_id:visitorId,class_name:className};
       } else if(!passwordEnabled && supplied.length>=8 && !profile.password_hash) {
         await db.query('UPDATE chat_profiles SET password_hash=$1 WHERE chat_key=$2',[hashPassword(supplied),key]);
       }
+      await db.query('UPDATE chat_profiles SET display_name=$1,class_name=$2 WHERE visitor_id=$3',[displayName,className,profile.visitor_id]);
       const old=/(?:^|;\s*)lessing_session=([^;]+)/.exec(req.headers.cookie||'')?.[1];
       if(old) await db.query('DELETE FROM sessions WHERE token_hash=$1',[digest(old)]);
       session={visitor_id:profile.visitor_id,account_id:null,role:null,permissions:[]};
@@ -262,9 +279,14 @@ export default async function api(req, res) {
       const count = await db.query('SELECT id FROM ai_messages WHERE visitor_id=$1 AND role=$2 AND created_at>$3 LIMIT 11', [session.visitor_id, 'user', now() - 60000]);
       if (count.length >= 10) fail(429, 'Bitte eine Minute warten, bevor du weitere Fragen sendest.');
       const instructions = 'Du bist ein freundlicher deutschsprachiger Lerncoach für Schüler. Erkläre verständlich und altersgerecht. Unterstütze beim selbstständigen Lernen; bei Hausaufgaben erst den Lösungsweg erklären. Keine erfundenen Fakten. Gib bei Unsicherheit diese an. Verwende keine persönlichen Namen.';
-      const upstream = process.env.GEMINI_API_KEY
-        ? await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(process.env.GEMINI_MODEL || 'gemini-2.5-flash')}:generateContent`, { method:'POST', headers:{ 'x-goog-api-key':process.env.GEMINI_API_KEY, 'Content-Type':'application/json' }, body:JSON.stringify({ system_instruction:{parts:[{text:instructions}]}, contents:[...recent.reverse().map(r=>({role:r.role==='assistant'?'model':'user',parts:[{text:r.body}]})),{role:'user',parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:900} }), signal:AbortSignal.timeout(25000) })
+      let upstream = process.env.GEMINI_API_KEY
+        ? await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(process.env.GEMINI_MODEL || 'gemini-2.0-flash')}:generateContent`, { method:'POST', headers:{ 'x-goog-api-key':process.env.GEMINI_API_KEY, 'Content-Type':'application/json' }, body:JSON.stringify({ system_instruction:{parts:[{text:instructions}]}, contents:[...recent.reverse().map(r=>({role:r.role==='assistant'?'model':'user',parts:[{text:r.body}]})),{role:'user',parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:900} }), signal:AbortSignal.timeout(25000) })
         : await fetch('https://api.openai.com/v1/responses', { method: 'POST', headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4.1-mini', store: false, max_output_tokens: 900, instructions, input: [...recent.reverse().map(r => ({ role: r.role, content: r.body })), { role: 'user', content: prompt }] }), signal: AbortSignal.timeout(25000) });
+      if (!upstream.ok && process.env.GEMINI_API_KEY && upstream.status === 404 && (process.env.GEMINI_MODEL || 'gemini-2.0-flash') !== 'gemini-2.0-flash') {
+        // Retry once with a known fallback model if a custom model name is unavailable.
+        const retryModel = 'gemini-2.0-flash';
+        upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${retryModel}:generateContent`, { method:'POST', headers:{ 'x-goog-api-key':process.env.GEMINI_API_KEY, 'Content-Type':'application/json' }, body:JSON.stringify({ contents:[{role:'user',parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:900} }), signal:AbortSignal.timeout(25000) });
+      }
       if (!upstream.ok) {
         const provider = process.env.GEMINI_API_KEY ? 'Gemini' : 'OpenAI';
         // Record only the status; never log the API key, student question or provider response.
@@ -421,8 +443,37 @@ export default async function api(req, res) {
     }
     if (path === '/admin/chats' && req.method === 'GET') {
       requireAdmin(session, 'chats');
-      const chats = await db.query('SELECT visitor_id, MAX(created_at) AS last_at, COUNT(*) AS count FROM messages GROUP BY visitor_id ORDER BY last_at DESC LIMIT 100');
+      const chats = await db.query(`SELECT m.visitor_id,MAX(m.created_at) AS last_at,COUNT(*) AS count,
+        COALESCE(p.display_name,'Schüler (älteres Konto)') AS display_name,
+        COALESCE(p.class_name,'Klasse unbekannt') AS class_name,
+        (SELECT body FROM messages mm WHERE mm.visitor_id=m.visitor_id ORDER BY created_at DESC LIMIT 1) AS last_message,
+        COALESCE(n.note,'') AS internal_note
+        FROM messages m LEFT JOIN chat_profiles p ON p.visitor_id=m.visitor_id
+        LEFT JOIN chat_staff_notes n ON n.visitor_id=m.visitor_id
+        GROUP BY m.visitor_id,p.display_name,p.class_name,n.note ORDER BY last_at DESC LIMIT 100`);
       return json(res, 200, { chats });
+    }
+    if (path.startsWith('/admin/chats/') && path.endsWith('/delete') && req.method === 'DELETE') {
+      requireAdmin(session,'chats');
+      const target=path.split('/')[3];
+      await db.query('DELETE FROM messages WHERE visitor_id=$1',[target]);
+      await db.query('DELETE FROM chat_staff_notes WHERE visitor_id=$1',[target]);
+      await db.query('DELETE FROM chat_profiles WHERE visitor_id=$1',[target]);
+      return json(res,200,{ok:true});
+    }
+    if (path.startsWith('/admin/chats/') && path.endsWith('/note') && req.method === 'PATCH') {
+      requireAdmin(session,'chats');
+      const target=path.split('/')[3];
+      if(!(await db.query('SELECT id FROM messages WHERE visitor_id=$1 LIMIT 1',[target])).length) fail(404,'Chat nicht gefunden');
+      const note=clean(body.note,1000);
+      await db.query('INSERT INTO chat_staff_notes(visitor_id,note,updated_at) VALUES($1,$2,$3) ON CONFLICT(visitor_id) DO UPDATE SET note=$2,updated_at=$3',[target,note,now()]);
+      return json(res,200,{ok:true});
+    }
+    if (path.startsWith('/admin/chats/') && path.endsWith('/appointments') && req.method === 'GET') {
+      requireAdmin(session,'chats');
+      const target=path.split('/')[3];
+      const appointments=await db.query('SELECT subject,requested_at,appointment_time,status FROM appointments WHERE visitor_id=$1 ORDER BY requested_at DESC LIMIT 10',[target]);
+      return json(res,200,{appointments});
     }
     if (path.startsWith('/admin/chats/') && req.method === 'GET') {
       requireAdmin(session, 'chats');
