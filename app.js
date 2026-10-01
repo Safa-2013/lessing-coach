@@ -430,40 +430,9 @@ function showMaintenance(page){
  $('#gameArea').textContent='Wähle ein Spiel aus.';
 }
 function startGame(kind){
- gameCleanup();const level=Number($('#gameLevel')?.value||5);const area=$('#gameArea');let live=true,timer;gameCleanup=()=>{live=false;clearTimeout(timer);};area.innerHTML=`<h3>${gameLabels[kind]}</h3><p class="muted">${safe({math:'Rechne im Kopf oder auf Papier. Gib dein Ergebnis ein, drücke Prüfen und danach Weiter. Dezimalzahlen kannst du mit Komma schreiben.',vocab:'Übersetze das englische Wort ins Deutsche. Gib die Übersetzung ein und drücke Prüfen. Groß- und Kleinschreibung zählen nicht.',memory:'Du spielst allein. Finde alle Paare mit möglichst wenigen Zügen. Decke zwei Karten auf. Suche passende Aufgaben und Ergebnisse – beispielsweise 7 × 8 und 56. Gefundene Paare bleiben offen.',reaction:'Drücke Start. Nach 0,5 bis 1,5 Sekunden wird das Feld grün. Klicke dann möglichst schnell. Ein Klick vor Grün zählt als Fehlstart.',dvd:'Das DVD-Logo bewegt sich automatisch und prallt an den Rändern ab. Schau, ob es eine Ecke trifft.',logic:'Erkenne das Muster der Zahlenfolge und gib die nächste Zahl ein. Drücke Prüfen und danach Weiter.'}[kind])}</p><div id="gameBody"></div>`;const body=$('#gameBody');
+ gameCleanup();const level=Number($('#gameLevel')?.value||5);const area=$('#gameArea');let live=true,timer;gameCleanup=()=>{live=false;clearTimeout(timer);};area.innerHTML=`<h3>${gameLabels[kind]}</h3><p class="muted">${safe({math:'Rechne im Kopf oder auf Papier. Gib dein Ergebnis ein, drücke Prüfen und danach Weiter. Dezimalzahlen kannst du mit Komma schreiben.',vocab:'Übersetze das englische Wort ins Deutsche. Gib die Übersetzung ein und drücke Prüfen. Groß- und Kleinschreibung zählen nicht.',memory:'Decke zwei Karten auf und finde zweimal dasselbe Symbol. Du spielst allein. Ziel: alle acht Paare mit möglichst wenigen Zügen finden.',reaction:'Drücke Start. Nach 0,5 bis 1,5 Sekunden wird das Feld grün. Klicke dann möglichst schnell. Ein Klick vor Grün zählt als Fehlstart.',dvd:'Das DVD-Logo bewegt sich automatisch und prallt an den Rändern ab. Schau, ob es eine Ecke trifft.',logic:'Erkenne das Muster der Zahlenfolge und gib die nächste Zahl ein. Drücke Prüfen und danach Weiter.'}[kind])}</p><div id="gameBody"></div>`;const body=$('#gameBody');
  if(kind==='dvd'){startDvdGame(body);return;}
- if(kind==='memory'){
-  const pairsList=level===5?[['7 × 8','56'],['9 × 6','54'],['144 ÷ 12','12'],['3²','9'],['15 + 27','42'],['100 − 36','64']]:level===7?[['25 % von 80','20'],['−7 + 12','5'],['3³','27'],['0,5 × 18','9'],['√144','12'],['2x = 14: x?','7'],['⅔ von 24','16'],['−4 × −6','24']]:[['√225','15'],['2⁵','32'],['30 % von 90','27'],['x² = 49: x > 0?','7'],['3x + 2 = 20: x?','6'],['0,2²','0,04'],['(−3)³','−27'],['5!','120'],['√81 + 2','11'],['10³','1000']];
-  const deck=pairsList.flatMap((pair,id)=>pair.map(text=>({text,id})));for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
-  let first=null,busy=false,pairs=0,turns=0;
-  body.innerHTML='<p id="memoryScore"></p><p id="memoryHint" role="status">Decke eine Karte auf und suche die passende Aufgabe oder das Ergebnis.</p><div id="memoryCards" class="memory-grid"></div><p><button class="primary" id="memoryRestart" type="button">Neu starten</button></p>';
-  const cards=[];
-  const updateScore=()=>{$('#memoryScore').textContent=`${pairs} von ${pairsList.length} Paaren · ${turns} Züge`;};updateScore();
-  $('#memoryRestart').onclick=()=>startGame('memory');
-  deck.forEach(symbol=>{
-    const card={symbol,revealed:false,matched:false,button:document.createElement('button')};
-    const b=card.button;b.type='button';b.className='memory-card';b.textContent='?';b.setAttribute('aria-label','Verdeckte Karte');
-    const reveal=()=>{card.revealed=true;b.textContent=symbol.text;b.classList.add('revealed');b.setAttribute('aria-label',symbol.text);};
-    const hide=()=>{card.revealed=false;b.textContent='?';b.classList.remove('revealed');b.setAttribute('aria-label','Verdeckte Karte');};
-    card.hide=hide;
-    b.onclick=()=>{
-      if(!live||busy||card.matched||card.revealed)return;
-      reveal();
-      if(!first){first=card;$('#memoryHint').textContent='Wähle jetzt die passende zweite Karte.';return;}
-      const other=first;first=null;turns++;
-      if(other.symbol.id===symbol.id){
-        other.matched=card.matched=true;other.button.disabled=b.disabled=true;
-        other.button.classList.add('matched');b.classList.add('matched');pairs++;updateScore();
-        $('#memoryHint').textContent=pairs===pairsList.length?`Geschafft! Alle Paare in ${turns} Zügen gefunden.`:'Richtiges Paar! Suche das nächste.';
-      }else{
-        busy=true;updateScore();$('#memoryHint').textContent='Diese Karten passen nicht zusammen. Merke dir ihre Position.';
-        timer=setTimeout(()=>{if(!live)return;other.hide();hide();busy=false;$('#memoryHint').textContent='Versuche ein neues Paar.';},1400);
-      }
-    };
-    cards.push(card);$('#memoryCards').append(b);
-  });return;
-
- }
+ if(kind==='memory'){startMemory(body);return;}
  if(kind==='reaction'){
   body.innerHTML='<p id="reactionInfo">Drücke Start. Klicke erst, sobald das Feld grün wird.</p><button class="primary" id="reactionTarget">Start</button>';let phase='idle',start=0;const b=$('#reactionTarget');b.onclick=()=>{if(phase==='waiting'){clearTimeout(timer);phase='idle';b.textContent='Zu früh! Erneut starten';b.style.background='';return;}if(phase==='ready'){const ms=Math.round(performance.now()-start);phase='idle';b.textContent=`${ms} ms – erneut starten`;b.style.background='';return;}phase='waiting';b.textContent='Warten …';b.style.background='#b45309';timer=setTimeout(()=>{if(!live)return;phase='ready';start=performance.now();b.style.background='#15803d';b.textContent='JETZT klicken!';},500+Math.random()*1000);};return;
  }
@@ -570,4 +539,29 @@ function nextMaintenanceVideo(){
 function startDvdGame(body){
  body.innerHTML='<video id="dvdVideo" autoplay muted loop playsinline disablepictureinpicture disableremoteplayback preload="auto" poster="/assets/dvd-poster.jpg" style="width:100%;max-width:960px;display:block;background:black;border-radius:12px" aria-label="DVD-VIDEO-Bildschirmschoner"><source src="/assets/dvd-screensaver.mp4" type="video/mp4"></video>';
  const video=$('#dvdVideo');video.muted=true;video.defaultMuted=true;video.loop=true;video.autoplay=true;video.controls=false;video.play().catch(()=>{});video.addEventListener('canplay',()=>video.play().catch(()=>{}),{once:true});gameCleanup=()=>{video.pause();};
+}
+
+function startMemory(root){
+ root.replaceChildren();let active=true,first=null,locked=false,moves=0,found=0,timer;
+ const status=document.createElement('p');status.setAttribute('role','status');
+ const grid=document.createElement('div');grid.className='memory-grid';
+ const restart=document.createElement('button');restart.type='button';restart.className='primary';restart.textContent='Neu starten';
+ root.append(status,grid,restart);
+ const update=message=>{status.textContent=`${found}/8 Paare · ${moves} Züge${message?' · '+message:''}`;};update('Wähle zwei Karten.');
+ const deck=['🚀','🎧','🎮','⚽','🧩','🎨','🛰️','🧪'].flatMap((symbol,id)=>[{symbol,id},{symbol,id}]);
+ for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+ for(const [index,item] of deck.entries()){
+  const b=document.createElement('button');b.type='button';b.className='memory-card';b.textContent='?';b.setAttribute('aria-label',`Karte ${index+1}, verdeckt`);
+  const card={b,id:item.id,open:false,matched:false};
+  function close(){card.open=false;b.textContent='?';b.classList.remove('revealed');b.setAttribute('aria-label',`Karte ${index+1}, verdeckt`);}card.close=close;
+  b.onclick=e=>{e.stopPropagation();if(!active||locked||card.open||card.matched)return;
+   card.open=true;b.textContent=item.symbol;b.classList.add('revealed');b.setAttribute('aria-label',item.symbol);
+   if(!first){first=card;update('Wähle die zweite Karte.');return;}
+   const other=first;first=null;moves++;
+   if(other.id===card.id){other.matched=card.matched=true;other.b.disabled=b.disabled=true;other.b.classList.add('matched');b.classList.add('matched');found++;update(found===8?'Geschafft! Alle Paare gefunden.':'Paar gefunden!');}
+   else{locked=true;update('Kein Paar – merke dir die Karten.');timer=setTimeout(()=>{if(!active)return;other.close();card.close();locked=false;update('Wähle zwei Karten.');},1100);}
+  };grid.append(b);
+ }
+ gameCleanup=()=>{active=false;clearTimeout(timer);};
+ restart.onclick=e=>{e.stopPropagation();gameCleanup();startMemory(root);};
 }
