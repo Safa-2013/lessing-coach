@@ -11,7 +11,10 @@ createServer(async (req, res) => {
     }
     return api(req, res);
   }
-  if (req.url === '/visual.css') {
+  if (['/assets/maintenance-loop.mp4','/assets/maintenance-poster.jpg'].includes(req.url)) {
+    res.setHeader('Content-Type',req.url.endsWith('.mp4')?'video/mp4':'image/jpeg');
+    res.end(await readFile(new URL('.'+req.url,import.meta.url)));
+  } else if (req.url === '/visual.css') {
     res.setHeader('Content-Type', 'text/css; charset=utf-8');
     res.end(await readFile(new URL('./visual.css', import.meta.url)));
   } else if (['/assets/feature-strip.png','/assets/hero-books.png','/assets/ai-cap.png'].includes(req.url)) {

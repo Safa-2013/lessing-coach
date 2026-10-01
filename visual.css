@@ -206,3 +206,5 @@ body[data-page="contact"] .topbar{display:none}
 
 .danger{background:#b91c1c;color:white;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
 .admin-tabs button[hidden]{display:none!important}#maintenanceForm input[type=checkbox]{width:auto;margin-right:8px}#maintenanceGames .row{flex-wrap:wrap;gap:10px}#maintenanceGames button:disabled{cursor:default}#maintenancePage{max-width:1000px}#maintenanceForm>label{margin-right:10px}
+
+body[data-page="maintenancePage"] .main{background:#0b142b;min-height:100vh}#maintenancePage{position:relative;max-width:none;min-height:calc(100vh - 52px);isolation:isolate;padding-top:48px}#maintenancePage .maintenance-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;pointer-events:none}#maintenancePage .maintenance-card{max-width:920px;margin:0 auto;background:rgba(248,251,255,.94);border:1px solid #ffffff80;box-shadow:0 24px 80px #0005;backdrop-filter:blur(16px)}@media(prefers-reduced-motion:reduce){#maintenancePage .maintenance-video{display:none}#maintenancePage{background:#0b142b url('/assets/maintenance-poster.jpg') center/cover}}
