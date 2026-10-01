@@ -1,3 +1,7 @@
 {
-  "rewrites": [{"source": "/api/:path*", "destination": "/api/index.js?path=:path*"}]
+  "rewrites": [
+    {"source": "/", "destination": "/coach.html"},
+    {"source": "/index.html", "destination": "/coach.html"},
+    {"source": "/api/:path*", "destination": "/api/index.js?path=:path*"}
+  ]
 }
