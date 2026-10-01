@@ -434,8 +434,34 @@ function startGame(kind){
  if(kind==='memory'){
   const pairsList=level===5?[['7 × 8','56'],['9 × 6','54'],['144 ÷ 12','12'],['3²','9'],['15 + 27','42'],['100 − 36','64']]:level===7?[['25 % von 80','20'],['−7 + 12','5'],['3³','27'],['0,5 × 18','9'],['√144','12'],['2x = 14: x?','7'],['⅔ von 24','16'],['−4 × −6','24']]:[['√225','15'],['2⁵','32'],['30 % von 90','27'],['x² = 49: x > 0?','7'],['3x + 2 = 20: x?','6'],['0,2²','0,04'],['(−3)³','−27'],['5!','120'],['√81 + 2','11'],['10³','1000']];
   const deck=pairsList.flatMap((pair,id)=>pair.map(text=>({text,id})));for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
-  let first=null,busy=false,pairs=0,turns=0;body.innerHTML='<p id="memoryScore">0 Paare gefunden</p><div id="memoryCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:440px"></div>';
-  deck.forEach((symbol,i)=>{const b=document.createElement('button');b.className='primary';b.textContent='?';b.style.minHeight='65px';b.onclick=()=>{if(busy||b.disabled||first===b)return;b.textContent=symbol.text;b.pairId=symbol.id;if(!first){first=b;return;}turns++;const a=first;first=null;if(a.pairId===symbol.id){a.disabled=b.disabled=true;pairs++;$('#memoryScore').textContent=pairs===pairsList.length?`Geschafft! Alle Paare in ${turns} Zügen.`:`${pairs} von ${pairsList.length} Paaren · ${turns} Züge`;}else{busy=true;timer=setTimeout(()=>{if(!live)return;a.textContent=b.textContent='?';busy=false;},800);}};$('#memoryCards').append(b);});return;
+  let first=null,busy=false,pairs=0,turns=0;
+  body.innerHTML='<p id="memoryScore"></p><p id="memoryHint" role="status">Decke eine Karte auf und suche die passende Aufgabe oder das Ergebnis.</p><div id="memoryCards" class="memory-grid"></div><p><button class="primary" id="memoryRestart" type="button">Neu starten</button></p>';
+  const cards=[];
+  const updateScore=()=>{$('#memoryScore').textContent=`${pairs} von ${pairsList.length} Paaren · ${turns} Züge`;};updateScore();
+  $('#memoryRestart').onclick=()=>startGame('memory');
+  deck.forEach(symbol=>{
+    const card={symbol,revealed:false,matched:false,button:document.createElement('button')};
+    const b=card.button;b.type='button';b.className='memory-card';b.textContent='?';b.setAttribute('aria-label','Verdeckte Karte');
+    const reveal=()=>{card.revealed=true;b.textContent=symbol.text;b.classList.add('revealed');b.setAttribute('aria-label',symbol.text);};
+    const hide=()=>{card.revealed=false;b.textContent='?';b.classList.remove('revealed');b.setAttribute('aria-label','Verdeckte Karte');};
+    card.hide=hide;
+    b.onclick=()=>{
+      if(!live||busy||card.matched||card.revealed)return;
+      reveal();
+      if(!first){first=card;$('#memoryHint').textContent='Wähle jetzt die passende zweite Karte.';return;}
+      const other=first;first=null;turns++;
+      if(other.symbol.id===symbol.id){
+        other.matched=card.matched=true;other.button.disabled=b.disabled=true;
+        other.button.classList.add('matched');b.classList.add('matched');pairs++;updateScore();
+        $('#memoryHint').textContent=pairs===pairsList.length?`Geschafft! Alle Paare in ${turns} Zügen gefunden.`:'Richtiges Paar! Suche das nächste.';
+      }else{
+        busy=true;updateScore();$('#memoryHint').textContent='Diese Karten passen nicht zusammen. Merke dir ihre Position.';
+        timer=setTimeout(()=>{if(!live)return;other.hide();hide();busy=false;$('#memoryHint').textContent='Versuche ein neues Paar.';},1400);
+      }
+    };
+    cards.push(card);$('#memoryCards').append(b);
+  });return;
+
  }
  if(kind==='reaction'){
   body.innerHTML='<p id="reactionInfo">Drücke Start. Klicke erst, sobald das Feld grün wird.</p><button class="primary" id="reactionTarget">Start</button>';let phase='idle',start=0;const b=$('#reactionTarget');b.onclick=()=>{if(phase==='waiting'){clearTimeout(timer);phase='idle';b.textContent='Zu früh! Erneut starten';b.style.background='';return;}if(phase==='ready'){const ms=Math.round(performance.now()-start);phase='idle';b.textContent=`${ms} ms – erneut starten`;b.style.background='';return;}phase='waiting';b.textContent='Warten …';b.style.background='#b45309';timer=setTimeout(()=>{if(!live)return;phase='ready';start=performance.now();b.style.background='#15803d';b.textContent='JETZT klicken!';},500+Math.random()*1000);};return;
