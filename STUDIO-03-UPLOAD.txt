@@ -1,0 +1,50 @@
+LESSING STARS – STUDIO 03
+
+Dieses Update enthält die Spiel-index.html und vier Serverdateien.
+Anders als beim letzten Update reicht NUR index.html diesmal NICHT aus!
+
+1. ZIP in der iPhone-App Dateien entpacken.
+2. In GitHub den vorhandenen Ordner lessing-stars öffnen.
+   Dort index.html aus lessing-stars in diesem ZIP hochladen und ersetzen.
+   Commit changes bestätigen.
+3. In GitHub zurück zum Hauptverzeichnis und den Ordner lib öffnen.
+   Dort ALLE vier Dateien aus lib in diesem ZIP hochladen:
+   stars-api.js, stars-game.js, stars-services.js, stars-maps.js.
+   Die ersten drei werden ersetzt, stars-maps.js wird neu angelegt.
+   Commit changes bestätigen.
+4. Nach dem erfolgreichen Deployment das Spiel neu laden.
+   Oben muss STUDIO 03 stehen.
+
+Die index.html im Hauptverzeichnis gehört zum Terminplaner. NICHT ersetzen.
+Vorhandene assets, API-Einstiegspunkt, Datenbankkonfiguration und andere
+Dateien bleiben erhalten. Der Spielfeld-Editor braucht den Spielserver.
+Studio- und Release-Skripte sowie CSS sind direkt in der Spiel-index enthalten.
+
+NEU
+- Kostenloser Start-Brawler: Hamza.S. (interne ID lex bleibt für Spielstände).
+- Lobby scrollt bei wenig Platz, statt Buttons übereinander zu schieben.
+- Konto / Abmelden / + Brawler direkt über die Navigation.
+- Admin: + Brawler -> Outfit, Haare, Haut und Accessoire gestalten ->
+  DESIGN ÜBERNEHMEN -> Name und Kampfwerte -> BRAWLER SPEICHERN.
+- Vorhandene Brawler über BEARBEITEN ändern oder ein eigenes Bild hochladen.
+- Schaden, Reichweite, Tempo, Nachladen, Super-Schaden, Projektilanzahl und
+  Projektilfarbe werden in der Server-Kampfberechnung verwendet.
+- Spielfelder in der Verwaltung oder Werkstatt erstellen und ändern.
+  Wände blockieren Bewegung und Projektile. Lava verursacht Schaden.
+  Büsche sind Dekoration (noch kein Versteckmechanismus).
+  Startflächen und zentrale Zielzone bleiben frei, maximal 300 Felder.
+- Karten speichern, freigeben und beim Raum-Erstellen auswählen.
+  Entwürfe kann nur der Admin auswählen und testen.
+- Drops öffnen: sofort Vollbild; vier getrennte Tipps drehen den Drop.
+  Je nach serverseitig ausgewürfelter Seltenheit steigert sich die Anzeige
+  von Blau bis Grün/Lila/Rot/Gold. Nicht jeder Drop wird legendär.
+  Erst nach dem vierten Tipp erscheint die Belohnung.
+  Die Belohnung wird genau einmal vergeben, bereits beim Start der Öffnung;
+  Abbruch/Neuladen würfelt nichts neu und verliert keine vergebenen Gewinne.
+
+PRÜFUNG
+12 automatische Tests: Konten, Abmeldung, Adminrechte, Brawler-Editor,
+Kartenrechte/Freigabe, echte Kartennutzung/Lavaschaden, Projektilwerte,
+Vier-Tipp-Drops und bestehende Funktionen.
+Kompletter eingebetteter Client mit simulierter Oberfläche gestartet.
+Kein echter Safari/iPhone-Renderingtest; keine 100%-Perfektionszusage.
