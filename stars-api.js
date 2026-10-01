@@ -1,10 +1,11 @@
 import { randomBytes, randomUUID, createHash, pbkdf2Sync, timingSafeEqual } from 'node:crypto';
 import { fresh,normalize } from './stars-game.js';
 import { schema,catalog,action,fighterEdit,roomAction } from './stars-services.js';
+import {maps,editMap} from './stars-maps.js';
 const sha=x=>createHash('sha256').update(x).digest('hex');
 const passwordHash=p=>{const salt=randomBytes(16).toString('hex');return salt+':'+pbkdf2Sync(p,salt,120000,32,'sha256').toString('hex')};
 const verify=(p,h)=>{const [salt,digest]=h.split(':');return timingSafeEqual(Buffer.from(digest,'hex'),pbkdf2Sync(p,salt,120000,32,'sha256'))};
-const reply=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data))};
+const reply=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data))};
 export default async function starsApi(req,res,db,path){
  try{
  if(!['GET','POST','PATCH'].includes(req.method))return reply(res,405,{error:'Methode nicht erlaubt'});
@@ -20,6 +21,7 @@ export default async function starsApi(req,res,db,path){
  const user=token?(await db.query('SELECT u.* FROM stars_users u JOIN stars_sessions s ON s.username=u.username WHERE s.token=$1 AND s.expires_at>$2',[sha(token),Date.now()]))[0]:null;
  const readMaintenance=async()=>{const row=(await db.query('SELECT value FROM content WHERE key=$1',['maintenance']))[0];let m={};try{m=JSON.parse(row?.value||'{}')}catch{}return m};
  if(path==='/stars/catalog'&&req.method==='GET')return reply(res,200,{catalog:await catalog(db,user?.role==='admin')});
+ if(path==='/stars/maps'&&req.method==='GET')return reply(res,200,{maps:await maps(db,user?.role==='admin')});
  const m=await readMaintenance();const maintenance={maintenance:!!(m.all||m.sections?.stars),message:m.message||'Lessing Stars wird gerade gewartet.',all:!!m.all};
  if(path==='/stars/status'&&req.method==='GET')return reply(res,200,{...maintenance,user:user?{name:user.username,role:user.role,blocked:!!user.blocked,reason:user.reason}:null,progress:user?JSON.parse(user.progress):null});
  if(['/stars/login','/stars/register'].includes(path)&&req.method==='POST'){
@@ -44,6 +46,7 @@ export default async function starsApi(req,res,db,path){
  if(path==='/stars/password'&&req.method==='POST'){if(!verify(String(body.current||''),user.password_hash))return reply(res,403,{error:'Aktuelles Passwort falsch'});const next=String(body.next||'');if(next.length<6||next.length>200)return reply(res,400,{error:'Neues Passwort: mindestens 6 Zeichen'});await db.query('UPDATE stars_users SET password_hash=$1 WHERE username=$2',[passwordHash(next),user.username]);await db.query('DELETE FROM stars_sessions WHERE username=$1 AND token<>$2',[user.username,sha(token)]);return reply(res,200,{ok:true})}
  if(user.role!=='admin')return reply(res,403,{error:'Nur Admin'});
  if(path==='/stars/admin/fighter'&&req.method==='POST')return reply(res,200,await fighterEdit(db,user,body));
+ if(path==='/stars/admin/map'&&req.method==='POST')return reply(res,200,await editMap(db,user,body));
  if(path==='/stars/admin/audit'&&req.method==='GET')return reply(res,200,{events:await db.query('SELECT actor,action,created_at FROM stars_audit ORDER BY created_at DESC LIMIT 100')});
  if(path==='/stars/admin/accounts'&&req.method==='GET')return reply(res,200,{accounts:await db.query('SELECT username,role,blocked,reason FROM stars_users')});
  if(path==='/stars/admin/block'&&req.method==='PATCH'){if(body.username==='admin')return reply(res,400,{error:'Admin kann nicht gesperrt werden'});await db.query('UPDATE stars_users SET blocked=$1,reason=$2 WHERE username=$3',[body.blocked?1:0,String(body.reason||'').slice(0,150),String(body.username)]);return reply(res,200,{ok:true})}
