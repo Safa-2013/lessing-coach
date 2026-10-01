@@ -1,0 +1,9 @@
+Installation: ZIP entpacken und die enthaltenen Dateien inklusive api/, lib/ und assets/ in das bestehende GitHub-Projekt übernehmen. Anschließend bei Vercel neu deployen.
+
+Big Admin anmelden → Administration → Wartung & Sperren.
+Dort Website oder einzelne Bereiche sperren, Wartungstext ändern und Spiele auswählen. Speichern aktiviert die Einstellungen für alle Geräte. Geöffnete Seiten prüfen Änderungen alle 15 Sekunden.
+Nur der Big Admin darf die Einstellungen bearbeiten und gesperrte Bereiche weiter nutzen. Die Anmeldung bleibt erreichbar.
+
+Spiele: Mathe-Quiz, Vokabeltrainer, Memory, Reaktionsspiel, Logik-Quiz. Alle laufen lokal im Browser ohne externe Spieleanbieter.
+
+Prüfung: bestehende API-Tests, Wartungsrechte/API-Sperren, Spiellogik und JavaScript-Syntax bestanden. Vollständiger visueller Browsertest und Test auf dem echten Vercel-Projekt noch ausstehend. Gemini-Erreichbarkeit wurde nicht live getestet.

@@ -29,16 +29,19 @@ const adminSchedule = makeSchedule($('#adminSchedule'),request,true);
 let activeAdminTab = 'overview';
 function showAdminTab(tab) {
   const selected=document.querySelector(`[data-admin-tab="${tab}"]`);
-  if (!selected || selected.classList.contains('hidden')) tab='overview';
+  if (!selected || selected.hidden || selected.classList.contains('hidden') || (['maintenance','design'].includes(tab)&&state.session.role!=='big')) tab='overview';
   activeAdminTab=tab;
   document.querySelectorAll('[data-admin-tab]').forEach(button=>{button.classList.toggle('active',button.dataset.adminTab===tab);button.setAttribute('aria-current',button.dataset.adminTab===tab?'page':'false');});
   document.querySelectorAll('[data-admin-section]').forEach(section=>section.classList.toggle('active',section.dataset.adminSection===tab));
   if(tab==='calendar') adminSchedule.refresh();
+  if(tab==='maintenance')renderMaintenanceForm();
 }
 const pageScroll={};
 function closeMobileMenu(){ $('#sidebar').classList.remove('open');$('#scrim').classList.remove('open');document.body.classList.remove('menu-open');$('#menuToggle').setAttribute('aria-expanded','false'); }
 function navigate(page,options={}) {
   if (page === 'adminPanel' && state.session.role === 'visitor') page = 'login';
+  if(maintenanceBlocked(page)){showMaintenance(page);return;}
+  gameCleanup();
   const previous=document.querySelector('.view.active')?.id;
   if(previous===page){closeMobileMenu();return;}
   if(previous)pageScroll[previous]=window.scrollY;
@@ -70,6 +73,9 @@ async function loadCatalog() {
 }
 function renderAuth() {
   const isStaff = state.session.role !== 'visitor';
+  $('#maintenanceTab').hidden=state.session.role!=='big';
+  $('#bigDesignTab').hidden=state.session.role!=='big';
+  if(state.session.role==='big') renderMaintenanceForm();
   $('#topLogin').textContent = isStaff ? 'Verwaltung' : 'Anmelden';
   $('#topLogin').dataset.page = isStaff ? 'adminPanel' : 'login';
   $('#adminAccounts').classList.toggle('hidden', !isStaff);
@@ -83,7 +89,7 @@ function renderAuth() {
 }
 async function boot() {
   try {
-    const data = await request('bootstrap'); state.session = data.session; state.content = data.content; await loadCatalog();
+    const data = await request('bootstrap'); state.session = data.session; state.content = data.content; try { maintenance=JSON.parse(data.content.maintenance||'{}'); } catch {} await loadCatalog();
     $('#heroText').textContent = data.content.hero || $('#heroText').textContent;
     showManagedCopy('about', data.content.about);
     showManagedCopy('help', data.content.help);
@@ -93,14 +99,14 @@ async function boot() {
     renderAuth();
     const target = location.hash.slice(1);
     if (target && $('#' + target)?.classList.contains('view')) navigate(target,{history:true,restore:true});
-    else { document.body.dataset.page = 'start'; document.querySelector('.nav button[data-page="start"]').classList.add('active'); }
+    else navigate('start',{history:true});
   }
 }
 document.addEventListener('click', e => {
   const page = e.target.closest('[data-page]')?.dataset.page;
   if (page) navigate(page);
   const prompt = e.target.closest('[data-prompt]')?.dataset.prompt;
-  if (prompt) { navigate('ki'); $('#aiForm input[name="message"]').value = prompt; $('#aiForm input[name="message"]').focus(); }
+  if (prompt) { if(maintenanceBlocked('ki')||(/lernplan/i.test(prompt)&&maintenanceBlocked('planner'))){showMaintenance(/lernplan/i.test(prompt)?'planner':'ki');return;} navigate('ki'); $('#aiForm input[name="message"]').value = prompt; $('#aiForm input[name="message"]').focus(); }
   const subject = e.target.closest('[data-subject]')?.dataset.subject;
   if (subject) { $('#aiForm input[name="message"]').value = `Hilf mir beim Lernen für ${subject}. Frage zuerst, was ich üben möchte.`; $('#aiForm input[name="message"]').focus(); }
 });
@@ -402,6 +408,44 @@ $('#teacherList').addEventListener('change', async e => {
 $('#teacherCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/teachers',{name:e.target.elements.name.value});e.target.reset();await loadStaffManagement();await loadCatalog();toast('Lehrkraft hinzugefügt');}catch(err){toast(err.message);}};
 $('#categoryCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/categories',{name:e.target.elements.name.value,color:e.target.elements.color.value});e.target.reset();e.target.elements.color.value='#3B82F6';await loadStaffManagement();await loadCatalog();adminSchedule.refresh();toast('Bereich hinzugefügt');}catch(err){toast(err.message);}};
 $('#passwordForm').onsubmit = async e => { e.preventDefault(); const form=e.target; try { await send('admin/password',Object.fromEntries(new FormData(form)),'PATCH'); form.reset(); toast('Passwort geändert'); }catch(err){toast(err.message);} };
+
+let maintenance={};
+const maintenanceLabels={start:'Startseite',coaching:'Termin & Coaching',termine:'Termine',ki:'Lern-KI',contact:'Chat',planner:'Lernplaner'};
+const gameLabels={math:'Mathe-Quiz',vocab:'Vokabeltrainer',memory:'Memory',reaction:'Reaktionsspiel',logic:'Logik-Quiz'};
+let gameCleanup=()=>{};
+let maintenanceOrigin='start';
+function maintenanceBlocked(page){return state.session.role!=='big'&&!['login','maintenancePage'].includes(page)&&(maintenance.all||maintenance.sections?.[page]);}
+function renderMaintenanceForm(){
+ if(state.session.role!=='big')return;
+ const f=$('#maintenanceForm');f.innerHTML=`<label class="field"><span><input type="checkbox" name="all" ${maintenance.all?'checked':''}> Gesamte Website sperren (nur Big Admin hat Zugang)</span></label><h3>Einzelne Bereiche sperren</h3>${Object.entries(maintenanceLabels).map(([key,label])=>`<label class="field"><span><input type="checkbox" name="section_${key}" ${maintenance.sections?.[key]?'checked':''}> ${label}</span></label>`).join('')}<label class="field">Titel<input name="title" maxlength="100" value="${safe(maintenance.title||'Wartungsarbeiten')}"></label><label class="field">Nachricht<textarea name="message" maxlength="700">${safe(maintenance.message||'Wir verbessern gerade Lessing Coach. Bitte versuche es später erneut.')}</textarea></label><label class="field"><span><input type="checkbox" name="games" ${maintenance.games!==false?'checked':''}> Spiele während der Wartung erlauben</span></label>${Object.entries(gameLabels).map(([key,label])=>`<label><input type="checkbox" name="game_${key}" ${maintenance.enabledGames?.[key]!==false?'checked':''}> ${label}</label> `).join('')}<p><button class="primary">Wartung speichern</button></p>`;
+ f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button');b.disabled=true;try{const data={all:f.elements.all.checked,games:f.elements.games.checked,title:f.elements.title.value,message:f.elements.message.value,sections:{},enabledGames:{}};for(const k of Object.keys(maintenanceLabels))data.sections[k]=f.elements['section_'+k].checked;for(const k of Object.keys(gameLabels))data.enabledGames[k]=f.elements['game_'+k].checked;maintenance=(await send('admin/maintenance',data,'PATCH')).maintenance;toast('Wartung gespeichert – gilt für alle Geräte.');}catch(err){toast(err.message);}finally{b.disabled=false;}};
+}
+function showMaintenance(page){
+ maintenanceOrigin=page;gameCleanup();document.body.classList.remove('ai-mode');closeMobileMenu();$('.view.active')?.classList.remove('active');$('#maintenancePage').classList.add('active');document.body.dataset.page='maintenancePage';
+ $('#maintenanceTitle').textContent=maintenance.title||'Wartungsarbeiten';$('#maintenanceMessage').textContent=maintenance.message||(page==='coaching'||page==='termine'?'Derzeit sind keine Terminerstellungen möglich, da Wartungsarbeiten durchgeführt werden.':'Dieser Bereich wird gerade gewartet. Bitte versuche es später erneut.');
+ const box=$('#maintenanceGames');box.replaceChildren();if(maintenance.games===false)return;
+ box.innerHTML='<h2 style="margin-top:24px">Lernspiele für die Wartezeit</h2><div class="row" id="gameChoices"></div><div class="panel" id="gameArea"></div>';
+ for(const [key,label] of Object.entries(gameLabels)){if(maintenance.enabledGames?.[key]===false)continue;const b=document.createElement('button');b.className='primary';b.textContent=label;b.onclick=()=>startGame(key);$('#gameChoices').append(b);}
+ $('#gameArea').textContent='Wähle ein Spiel aus.';
+}
+function startGame(kind){
+ gameCleanup();const area=$('#gameArea');let live=true,timer;gameCleanup=()=>{live=false;clearTimeout(timer);};area.innerHTML=`<h3>${gameLabels[kind]}</h3><div id="gameBody"></div>`;const body=$('#gameBody');
+ if(kind==='memory'){
+  const deck=['🍎','📚','⭐','🌻','🎵','⚽'].flatMap(x=>[x,x]);for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  let first=null,busy=false,pairs=0,turns=0;body.innerHTML='<p id="memoryScore">0 von 6 Paaren</p><div id="memoryCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:440px"></div>';
+  deck.forEach((symbol,i)=>{const b=document.createElement('button');b.className='primary';b.textContent='?';b.style.minHeight='65px';b.onclick=()=>{if(busy||b.disabled||first===b)return;b.textContent=symbol;if(!first){first=b;return;}turns++;const a=first;first=null;if(a.textContent===symbol){a.disabled=b.disabled=true;pairs++;$('#memoryScore').textContent=pairs===6?`Geschafft! Alle Paare in ${turns} Zügen.`:`${pairs} von 6 Paaren · ${turns} Züge`;}else{busy=true;timer=setTimeout(()=>{if(!live)return;a.textContent=b.textContent='?';busy=false;},800);}};$('#memoryCards').append(b);});return;
+ }
+ if(kind==='reaction'){
+  body.innerHTML='<p id="reactionInfo">Drücke Start. Klicke erst, sobald das Feld grün wird.</p><button class="primary" id="reactionTarget">Start</button>';let phase='idle',start=0;const b=$('#reactionTarget');b.onclick=()=>{if(phase==='waiting'){clearTimeout(timer);phase='idle';b.textContent='Zu früh! Erneut starten';b.style.background='';return;}if(phase==='ready'){const ms=Math.round(performance.now()-start);phase='idle';b.textContent=`${ms} ms – erneut starten`;b.style.background='';return;}phase='waiting';b.textContent='Warten …';b.style.background='#b45309';timer=setTimeout(()=>{if(!live)return;phase='ready';start=performance.now();b.style.background='#15803d';b.textContent='JETZT klicken!';},1500+Math.random()*2500);};return;
+ }
+ const vocab=[['house','Haus'],['school','Schule'],['apple','Apfel'],['water','Wasser'],['book','Buch'],['friend','Freund'],['sun','Sonne'],['tree','Baum'],['dog','Hund'],['cat','Katze']];
+ const logic=[['2, 4, 8, 16, …','32'],['3, 6, 9, 12, …','15'],['1, 4, 9, 16, …','25'],['10, 20, 30, …','40'],['20, 18, 16, …','14'],['1, 1, 2, 3, 5, …','8'],['5, 10, 20, …','40'],['100, 50, 25, …','12,5'],['7, 14, 21, …','28'],['1, 3, 5, 7, …','9']];
+ let n=0,score=0;const questions=(kind==='vocab'?vocab:logic).map(x=>[...x]);for(let i=questions.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[questions[i],questions[j]]=[questions[j],questions[i]];}
+ function next(){if(n===10){body.innerHTML=`<p>Fertig! ${score} von 10 richtig.</p><button class="primary">Noch einmal</button>`;body.querySelector('button').onclick=()=>startGame(kind);return;}let q,answer;if(kind==='math'){const a=Math.floor(Math.random()*12)+1,b=Math.floor(Math.random()*12)+1;q=`${a} × ${b}`;answer=String(a*b);}else{[q,answer]=questions[n];q=kind==='vocab'?`Übersetze ins Deutsche: ${q}`:`Welche Zahl folgt? ${q}`;}
+ body.innerHTML=`<p>Aufgabe ${n+1}/10 · Punkte ${score}</p><p><strong>${safe(q)}</strong></p><form id="gameAnswer"><label class="field">Deine Antwort<input required autocomplete="off" aria-label="Deine Antwort"></label><button class="primary">Prüfen</button></form><p id="gameFeedback" role="status"></p>`;
+ const f=$('#gameAnswer');f.onsubmit=e=>{e.preventDefault();if(f.querySelector('button').disabled)return;const norm=x=>x.trim().toLowerCase().replace(/^(der|die|das) /,'').replace(',', '.');const correct=norm(f.querySelector('input').value)===norm(answer);if(correct)score++;n++;f.querySelector('button').disabled=true;f.querySelector('input').disabled=true;$('#gameFeedback').textContent=correct?'Richtig!':`Richtige Antwort: ${answer}`;const b=document.createElement('button');b.className='primary';b.textContent='Weiter';b.onclick=next;body.append(b);};}next();
+}
+setInterval(async()=>{try{maintenance=(await request('maintenance')).maintenance;const page=document.querySelector('.view.active')?.id;if(page&&maintenanceBlocked(page))showMaintenance(page);else if(page==='maintenancePage'&&!maintenanceBlocked(maintenanceOrigin))navigate(maintenanceOrigin==='planner'?'ki':maintenanceOrigin);}catch{}},15000);
 boot();
 
 // Schüler-Passwortschalter: nur die Verwaltung kann den Modus ändern.

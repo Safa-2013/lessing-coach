@@ -205,3 +205,4 @@ body[data-page="contact"] .topbar{display:none}
 @media(max-width:700px){.admin-chat-layout{display:flex;flex-direction:column!important}.staff-chat-list{width:100%;max-height:320px}#adminChatDetail{width:100%;min-width:0}}
 
 .danger{background:#b91c1c;color:white;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
+.admin-tabs button[hidden]{display:none!important}#maintenanceForm input[type=checkbox]{width:auto;margin-right:8px}#maintenanceGames .row{flex-wrap:wrap;gap:10px}#maintenanceGames button:disabled{cursor:default}#maintenancePage{max-width:1000px}#maintenanceForm>label{margin-right:10px}
