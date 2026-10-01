@@ -568,6 +568,6 @@ function nextMaintenanceVideo(){
  const next=(last+1)%clips.length;try{localStorage.setItem('lessing_background_clip',String(next));}catch{}return clips[next];
 }
 function startDvdGame(body){
- body.innerHTML='<video id="dvdVideo" autoplay muted loop playsinline controls preload="auto" poster="/assets/dvd-poster.jpg" style="width:100%;max-width:960px;display:block;background:black;border-radius:12px" aria-label="DVD-VIDEO-Bildschirmschoner"><source src="/assets/dvd-screensaver.mp4" type="video/mp4"></video>';
- const video=$('#dvdVideo');video.play().catch(()=>{});gameCleanup=()=>{video.pause();};
+ body.innerHTML='<video id="dvdVideo" autoplay muted loop playsinline disablepictureinpicture disableremoteplayback preload="auto" poster="/assets/dvd-poster.jpg" style="width:100%;max-width:960px;display:block;background:black;border-radius:12px" aria-label="DVD-VIDEO-Bildschirmschoner"><source src="/assets/dvd-screensaver.mp4" type="video/mp4"></video>';
+ const video=$('#dvdVideo');video.muted=true;video.defaultMuted=true;video.loop=true;video.autoplay=true;video.controls=false;video.play().catch(()=>{});video.addEventListener('canplay',()=>video.play().catch(()=>{}),{once:true});gameCleanup=()=>{video.pause();};
 }
