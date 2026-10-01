@@ -100,6 +100,7 @@ async function boot() {
     const target = location.hash.slice(1);
     if (target && $('#' + target)?.classList.contains('view')) navigate(target,{history:true,restore:true});
     else navigate('start',{history:true});
+    document.documentElement.removeAttribute('data-loading');
   }
 }
 document.addEventListener('click', e => {
