@@ -568,13 +568,6 @@ function nextMaintenanceVideo(){
  const next=(last+1)%clips.length;try{localStorage.setItem('lessing_background_clip',String(next));}catch{}return clips[next];
 }
 function startDvdGame(body){
- body.innerHTML='<canvas id="dvdCanvas" width="720" height="400" style="width:100%;max-width:720px;background:#080c16;border-radius:14px;display:block" aria-label="Automatische Animation eines DVD-Logos"></canvas>';
- const canvas=$('#dvdCanvas'),ctx=canvas.getContext('2d');if(!ctx){body.textContent='Die Animation wird von diesem Browser nicht unterstützt.';return;}
- const W=720,H=400,w=96,h=48;let x=100,y=90,vx=170,vy=115,color='#60a5fa',last=0,raf=0,alive=true;
- function tick(t){if(!alive)return;const dt=Math.min((t-(last||t))/1000,.04);last=t;x+=vx*dt;y+=vy*dt;
- const hitX=x<=0||x>=W-w,hitY=y<=0||y>=H-h;
- if(hitX){x=Math.max(0,Math.min(W-w,x));vx=-vx;}if(hitY){y=Math.max(0,Math.min(H-h,y));vy=-vy;}
- if(hitX||hitY)color=['#60a5fa','#a78bfa','#f472b6','#34d399','#fbbf24'][Math.floor(Math.random()*5)];
- ctx.fillStyle='#080c16';ctx.fillRect(0,0,W,H);ctx.fillStyle=color;ctx.font='italic bold 36px Arial';ctx.textAlign='center';ctx.fillText('DVD',x+w/2,y+34);ctx.beginPath();ctx.ellipse(x+w/2,y+42,35,4,0,0,Math.PI*2);ctx.fill();raf=requestAnimationFrame(tick);}
- gameCleanup=()=>{alive=false;cancelAnimationFrame(raf);};raf=requestAnimationFrame(tick);
+ body.innerHTML='<video id="dvdVideo" autoplay muted loop playsinline controls preload="auto" poster="/assets/dvd-poster.jpg" style="width:100%;max-width:960px;display:block;background:black;border-radius:12px" aria-label="DVD-VIDEO-Bildschirmschoner"><source src="/assets/dvd-screensaver.mp4" type="video/mp4"></video>';
+ const video=$('#dvdVideo');video.play().catch(()=>{});gameCleanup=()=>{video.pause();};
 }
