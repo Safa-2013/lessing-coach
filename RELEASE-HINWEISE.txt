@@ -1,0 +1,61 @@
+LESSING STARS – ONLINE-RELEASE
+
+Enthalten:
+- Registrierung, Anmeldung, Passwortänderung, serverseitige Spielstände.
+- Start mit Lex, null Guthaben, null Trophäen.
+- Brawler auswählen, freischalten, verbessern; Auswahl in der Lobby.
+- Shop, Skins, tägliche Belohnung, Drops, Match-Quests und Trophäen-Pass.
+- Vier Modi: Showdown, Juwelenjagd, Kontrolle, Ball.
+- Öffentliche/private Räume für bis zu sechs Spieler, Einladungscode/-link.
+- Fehlende Spieler werden ausdrücklich als Bots gekennzeichnet.
+- Server berechnet Bewegung, Treffer, Schaden, Munition, Super und Match-Ergebnis.
+- Belohnungen werden nur einmal pro Match vergeben.
+- Admin: Figurenbild, Name, HP, Schaden, Reichweite, Tempo, Nachladen,
+  Super-Schaden, Seltenheit, Preis und Veröffentlichung bearbeiten.
+- Admin-Test-Raum, Kontosperren, Wartung, Verwaltungsprotokoll.
+- Terminplaner-Navigation und gemeinsame Wartung bleiben enthalten.
+
+START:
+ZIP entpacken; alle Dateien übernehmen. Node.js >=22 verwenden.
+npm install
+npm start
+http://localhost:3000
+
+VERÖFFENTLICHUNG:
+Bestehenden Node/Vercel-Server und DATABASE_URL verwenden.
+Nicht nur index.html hochladen. GitHub Pages allein betreibt keine API.
+Bestehende Datenbank und Umgebungsvariablen beibehalten.
+Keine .data-Dateien aus einer Testinstallation hochladen.
+
+ADMIN:
+Spiel: admin / 1234 beim ersten Start.
+Admin-Verwaltung -> KONTO / PASSWORT / ABMELDEN -> PASSWORT ÄNDERN.
+STARS_ADMIN_PASSWORD setzt alternativ das Passwort vor der ersten Erstellung.
+Eine bereits vorhandene Admin-Anmeldung wird dadurch nicht überschrieben.
+Terminplaner-Admin-Zugang bleibt separat unverändert.
+
+ONLINE-SPIEL:
+Anmelden -> ONLINE SPIELEN -> Modus -> Raum erstellen.
+Code/Link an Mitspieler geben; sie treten mit ihrem eigenen Konto bei.
+Gastgeber startet. Server ergänzt freie Plätze mit Bots.
+WASD/Pfeile oder Joystick bewegen; Leertaste/Angriffstaste schießen;
+E oder Stern lösen bei 100% Ladung den Super aus.
+Die Angriffstaste kann zum Zielen gezogen werden; sonst automatische Zielrichtung.
+
+PRÜFSTATUS UND GRENZEN:
+Fünf automatisierte Tests prüfen Terminplaner, Wartung, Stars-Konten,
+Brawler-Veröffentlichung, Eingabebegrenzung, geschützte Währung,
+Kampfberechnung und einmalige Match-Belohnungen.
+Client-Initialisierung zusätzlich mit simuliertem DOM/API geprüft.
+Ein echter Browser- und Handy-Test sowie ein Test auf der veröffentlichten
+Website mit mehreren Geräten stehen aus (Browser-Download hier fehlgeschlagen).
+Die Figuren sind vorhandene stilisierte 2D-Grafiken mit Bewegungseffekten;
+keine realistischen 3D-Modelle oder vollständigen individuellen Animationen.
+Super-Angriffe verwenden aktuell dieselbe Drei-Projektil-Mechanik mit
+individuell einstellbarem Schaden, keine neun völlig verschiedenen Fähigkeiten.
+Freunde/Club führen derzeit zu gemeinsamen Spielräumen; separate dauerhafte
+Freundeslisten und Clubverwaltung sind nicht implementiert.
+Online-Synchronisierung nutzt HTTP-Polling statt WebSockets. Für eine kleine
+Spielgruppe gedacht; Belastung, Latenz und Balance müssen im Echtbetrieb geprüft werden.
+Diese Version ist ein erweiterter spielbarer Release-Kandidat, keine Zusage
+"100% perfekt" und keine getestete große Multiplayer-Produktion.

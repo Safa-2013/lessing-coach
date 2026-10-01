@@ -13,7 +13,7 @@ Wartung:
 - Eine Sperre der gesamten Website wird im Terminplaner vom Big Admin aufgehoben.
 - Geöffnete Spielseiten prüfen Wartung und Sperren alle 10 Sekunden.
 - Registrierte Stars-Konten und Spielstände liegen jetzt in der gemeinsamen Datenbank.
-- Der Gast-Spielstand bleibt auf dem Gerät. Registrierte Konten können sich auf anderen Geräten anmelden.
+- Gäste können die Lobby ansehen. Für gespeicherten Fortschritt und Online-Matches ist eine Anmeldung nötig.
 - Admin: alle Brawler/Skins, Power 11, unbegrenzte Ressourcen. Neue Spieler: Lex, 0 Guthaben, 0 Trophäen.
 
 Server starten:

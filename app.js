@@ -1,5 +1,6 @@
 import { holidayOn } from './holidays.js';
 import { makeSchedule } from './calendar-ui.js';
+import { createDvdScreensaver } from './waiting-games.js';
 
 const $ = selector => document.querySelector(selector);
 function showManagedCopy(key, value) { const target = $('#' + key + 'Copy'); target.textContent = value || ''; target.classList.toggle('hidden', !value); }
@@ -425,7 +426,7 @@ function showMaintenance(page){
  maintenanceOrigin=page;gameCleanup();const video=$('#maintenancePage video');if(video){video.src=nextMaintenanceVideo();video.load();video.play().catch(()=>{});}document.body.classList.remove('ai-mode');closeMobileMenu();$('.view.active')?.classList.remove('active');$('#maintenancePage').classList.add('active');document.body.dataset.page='maintenancePage';
  $('#maintenanceTitle').textContent=maintenance.title||'Wartungsarbeiten';$('#maintenanceMessage').textContent=maintenance.message||(page==='coaching'||page==='termine'?'Derzeit sind keine Terminerstellungen möglich, da Wartungsarbeiten durchgeführt werden.':'Dieser Bereich wird gerade gewartet. Bitte versuche es später erneut.');
  const box=$('#maintenanceGames');box.replaceChildren();if(maintenance.games===false)return;
- box.innerHTML='<h2 style="margin-top:24px">Lernspiele ab Klasse 5</h2><p>Wähle ein Lernspiel oder schau dir das DVD-Video an.</p><div class="row" id="gameChoices"></div><div class="panel" id="gameArea"></div>';
+ box.innerHTML='<h2 style="margin-top:24px">Lernspiele ab Klasse 5</h2><p>Wähle ein Lernspiel oder schau dir den DVD-Bildschirmschoner an.</p><label class="field">Schwierigkeit<select id="gameLevel"><option value="5">Klasse 5–6</option><option value="7">Klasse 7–8</option><option value="9">Klasse 9+</option></select></label><div class="row" id="gameChoices"></div><div class="panel" id="gameArea"></div>';
  for(const [key,label] of Object.entries(gameLabels)){if(maintenance.enabledGames?.[key]===false)continue;const b=document.createElement('button');b.className='primary';b.textContent=label;b.onclick=()=>startGame(key);$('#gameChoices').append(b);}
  $('#gameArea').textContent='Wähle ein Spiel aus.';
 }
@@ -537,8 +538,7 @@ function nextMaintenanceVideo(){
  const next=(last+1)%clips.length;try{localStorage.setItem('lessing_background_clip',String(next));}catch{}return clips[next];
 }
 function startDvdGame(body){
- body.innerHTML='<video id="dvdVideo" autoplay muted loop playsinline disablepictureinpicture disableremoteplayback preload="auto" poster="/assets/dvd-poster.jpg" style="width:100%;max-width:960px;display:block;background:black;border-radius:12px" aria-label="DVD-VIDEO-Bildschirmschoner"><source src="/assets/dvd-screensaver.mp4" type="video/mp4"></video>';
- const video=$('#dvdVideo');video.muted=true;video.defaultMuted=true;video.loop=true;video.autoplay=true;video.controls=false;video.play().catch(()=>{});video.addEventListener('canplay',()=>video.play().catch(()=>{}),{once:true});gameCleanup=()=>{video.pause();};
+ body.replaceChildren();gameCleanup=createDvdScreensaver(body);
 }
 
 function startMemory(root){

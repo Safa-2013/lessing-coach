@@ -1,0 +1,72 @@
+MOBILE FIX – 01.10.2026
+
+Was geändert wurde:
+- Eigene Hochformat-Lobby mit großen, sichtbaren Schaltflächen.
+- Anmeldung/Registrierung ohne den abgeschnittenen Querformat-Rahmen.
+- Verwaltung, Editor und Online-Räume passen ins Hochformat und können scrollen.
+- Brawler-Auswahl und Shop haben eine Handy-Ansicht.
+- Online-Arena nutzt die verfügbare Bildschirmgröße; Steuerung bleibt erreichbar.
+- DVD läuft automatisch in einer Schleife. Wenn Safari das Video blockiert,
+  läuft stattdessen eine unbegrenzt animierte DVD-Anzeige, ohne Startknopf.
+- Schwierigkeitswahl Klasse 5–6 / 7–8 / 9+ bei den Wartungsquizzen.
+- Memory, Reaktion und Quiz-Abläufe mit automatisierten Tests geprüft.
+- Versionskennungen für neue Skripte und Styles verhindern die Wiederverwendung
+  der vorherigen Dateiversion unter derselben Cache-Adresse.
+
+Wichtig: Auf deinen Bildern ist die vorherige lokale/60-Sekunden-Arena zu sehen.
+Die aktuelle Version zeigt in der Lobby „MOBILE FIX · 01.10.2026“ und verwendet
+Online-Räume. Nur eine neue index.html reicht für dieses Update NICHT aus.
+
+SO LÄDST DU ES AUF DEM IPHONE HOCH (GITHUB -> VERCEL):
+1. ZIP herunterladen -> Teilen -> In Dateien sichern.
+2. In der Dateien-App auf die ZIP tippen. Ein entpackter Ordner erscheint.
+3. In Safari github.com öffnen, anmelden und das Repository öffnen, das
+   mit deinem Vercel-Projekt verbunden ist. Falls nötig Desktop-Website anfordern.
+4. Add file -> Upload files -> Choose your files -> Durchsuchen.
+   Die Dateien aus dem entpackten Hauptordner auswählen, nicht die ZIP selbst.
+   Danach Commit changes. Die Ordnerstruktur muss erhalten bleiben.
+5. Auf dem iPhone können die Unterordner separat hochgeladen werden:
+   In GitHub den jeweiligen Ordner öffnen, dann Upload files und die Dateien
+   aus genau demselben Unterordner der entpackten ZIP auswählen.
+
+   Entpackte ZIP                   Ziel im GitHub-Repository
+   Hauptordner-Dateien             Hauptordner
+   api/*.js                       api/
+   lib/*.js                       lib/
+   lessing-stars/index.html        lessing-stars/
+   lessing-stars/release.js        lessing-stars/
+   lessing-stars/release.css       lessing-stars/
+   lessing-stars/assets/*          lessing-stars/assets/
+   assets/*                       assets/
+   test/*                         test/ (optional zum Ausführen der Tests)
+
+   KEINE Dateien aus lib/ oder lessing-stars/ im Hauptordner ablegen!
+   Falls ein Unterordner fehlt, über Add file -> Create new file zunächst eine
+   Datei mit Pfad wie lessing-stars/.keep erstellen und committen; dann den
+   erstellten Ordner öffnen und die richtigen Dateien dort hochladen.
+   Keine Datenbankdateien, Passwörter oder API-Schlüssel ins Repository hochladen.
+
+6. Bei aktivierter GitHub-Verknüpfung veröffentlicht Vercel Änderungen auf
+   der Production Branch automatisch. Auf vercel.com im Projekt unter
+   Deployments prüfen, dass die letzte Veröffentlichung erfolgreich/Ready ist.
+   Bestehende DATABASE_URL und andere Umgebungsvariablen NICHT löschen.
+7. Website erneut öffnen. In der Stars-Lobby muss stehen:
+   MOBILE FIX · 01.10.2026
+   Fehlt diese Kennung, ist noch nicht die neue Version veröffentlicht.
+
+Die ZIP als einzige Datei ins Repository zu laden entpackt sie NICHT und
+aktualisiert die Website NICHT. GitHub Pages allein betreibt den Spielserver nicht.
+Am iPhone ist der vollständige Upload mehrerer Unterordner umständlich.
+Wenn du im Upload-Dialog nicht weiterkommst, schicke einen Screenshot davon.
+
+Prüfstatus:
+9 automatisierte Tests bestanden; Client-Initialisierung simuliert geprüft.
+HTTP-Auslieferung inklusive neuem Modul und Versionsparametern geprüft.
+Ein echter Safari/iPhone-Test und Test auf der veröffentlichten Website sind
+hier nicht erfolgt. Deshalb bitte nach dem Upload im Hochformat anmelden,
+Verwaltung öffnen und einen Online-Raum mit Bots starten.
+
+Quellen zur Bedienung:
+https://support.apple.com/de-de/102532
+https://docs.github.com/de/repositories/working-with-files/managing-files/adding-a-file-to-a-repository
+https://vercel.com/docs/git/vercel-for-github
