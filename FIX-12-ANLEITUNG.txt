@@ -1,0 +1,18 @@
+LESSING COACH – FIX 12 (technische Nachprüfung)
+
+Behebt: Nach Ablauf einer Spielanmeldung blieben alte Admin-/Konto-Schaltflächen und Guthaben sichtbar. Die Ansicht wird jetzt vollständig auf Gast zurückgesetzt; kein erzwungenes Anmeldefenster. Gastspielen bleibt möglich. Auch Kontowechsel in einem anderen Tab werden erkannt.
+Ein veralteter Test für die Versionsnummer wurde ebenfalls korrigiert.
+
+Das Spiel-Design wurde in diesem Update NICHT erneut umgestaltet. Die aktuelle Lobby weicht noch von den Bildvorlagen ab (Logo, Icon-Menüs, Größe der Bedienelemente, Platzierung des Brawlers).
+Terminplaner-Design unverändert.
+
+GITHUB-UPLOAD:
+1. ZIP entpacken.
+2. index.html im Hauptordner ersetzen.
+3. lib/stars-api.js im GitHub-Ordner lib ersetzen. Diese Datei entspricht FIX 11 und ist für Gastspielen nötig.
+4. Änderungen speichern. Vercel-Deployment abwarten, Seite neu laden.
+Keine anderen Dateien/Konten löschen.
+
+22 automatische Tests bestanden. Browserprüfungen: Gast-Match, Anmeldung/Admin, Designer/Spielfelder, vier Drop-Tipps, Abmelden, Coach-Rückweg, Desktop/Querformat, API-Fehler. Nach Ablauf einer Admin-Sitzung: keine Adminschaltflächen/∞, kein Anmeldezwang, Gastspiel möglich.
+Live-Seite war bei Prüfung noch FIX 11; öffentliche Startseite und Status/Catalog lieferten HTTP 200. FIX 12 ist nicht automatisch veröffentlicht.
+Kein Test auf einem echten iPhone/Safari.
