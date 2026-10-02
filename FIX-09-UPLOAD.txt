@@ -1,0 +1,43 @@
+LESSING COACH – FIX 09 – STARTFEHLER – 02.10.2026
+
+URSACHE
+Die veröffentlichte Website nutzt bereits die eingebettete FIX-08-Index.
+Die Live-Prüfung ergab: /api/stars/status antwortet mit 200, aber
+/api/stars/catalog mit 401 (Bitte anmelden). Die neuere Spieloberfläche
+wartete auf diese Liste und zeigte dadurch fälschlich Server nicht erreichbar.
+Die bisherigen zwei Dateien aktualisierten den älteren Server nicht.
+
+KORREKTUR
+Nach der erfolgreichen Zugangs- und Wartungsprüfung öffnet sich die Lobby.
+Ein Fehler der Brawler-Liste blockiert weder Lobby noch Anmeldung.
+Die enthaltene Serverversion liefert veröffentlichte Brawler ohne Anmeldung.
+Unveröffentlichte Brawler bleiben dem angemeldeten Spiel-Admin vorbehalten.
+Anmeldungen, Kämpfe, Belohnungen und Änderungen bleiben servergeschützt.
+Coach bleibt die Startseite, das Spiel bleibt vollständig in der Index.
+Die Terminplaner-Ansicht wird nicht geändert.
+
+UPLOAD – DIESES MAL AUCH DIE SERVERDATEIEN ERSETZEN
+1. ZIP herunterladen und entpacken.
+2. Im GitHub-Hauptverzeichnis index.html und vercel.json ersetzen.
+3. Den vorhandenen GitHub-Ordner lib öffnen. Alle sechs Dateien aus dem
+   entpackten lib-Ordner dort hochladen und ersetzen:
+   api.js, db.js, stars-api.js, stars-game.js, stars-maps.js, stars-services.js
+4. Den vorhandenen GitHub-Ordner api öffnen. Dort index.js ersetzen.
+5. Änderungen speichern (Commit changes) und erfolgreichen Vercel-Build
+   abwarten. Danach https://lessing-coaching.vercel.app/ neu laden.
+
+Keine vollständigen Ordner im iPhone-Dateidialog auswählen. Zuerst auf GitHub
+den passenden Zielordner öffnen und dann dessen einzelne Dateien hochladen.
+Die lib-Dateien gehören NICHT ins Hauptverzeichnis. api/index.js gehört
+NICHT ins Hauptverzeichnis und ist nicht die HTML-Startseite.
+Bestehende assets, visual.css, holidays.js, calendar-ui.js und andere
+Projektdateien behalten. Keine Datenbank oder Konten löschen.
+Vercel-Umgebungsvariablen und vorhandene Datenbank bleiben bestehen.
+Nur index.html zu ersetzen behebt die veraltete Serverversion nicht.
+
+PRÜFUNG
+20 automatisierte Tests erfolgreich. Gast-Katalog enthält den Start-Brawler
+und keine unveröffentlichten Figuren. Browserprüfung mit absichtlich
+simuliertem 401 beim Katalog: Lobby und Anmeldung bleiben erreichbar.
+Desktop/Mobil, Querformat und Zurück auch bei API-Ausfall geprüft.
+Kein physischer iPhone-Safari-Test; nicht automatisch live veröffentlicht.
