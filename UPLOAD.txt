@@ -1,0 +1,14 @@
+DESIGN 13 – NEUE LOBBY
+
+Bei bereits installiertem FIX 12 nur die index.html aus diesem Update im Hauptordner des GitHub-Repositories ersetzen. Nicht in lessing-stars hochladen.
+
+1. index.html herunterladen.
+2. GitHub-Repository öffnen: Add file > Upload files.
+3. index.html auswählen und Commit changes anklicken.
+4. Nach dem Vercel-Deployment die Website neu laden.
+
+Die Terminplaner-Ansicht wurde nicht geändert. Die Startseite bleibt Lessing Coach. Lessing Stars wird über den Menübutton geöffnet. Gastspiel ist möglich.
+
+Neue Lobby: gestaltetes Logo, Bildsymbole, größerer Brawler auf dem Podest, tägliche Belohnung, Modusauswahl, Spielen und direkter Rückweg zu Lessing Coach.
+
+Prüfung: 22 automatisierte Tests und Chromium-Browserprüfungen für Gastspiel, Anmeldung/Abmeldung, Designer, Spielfelder, Drops mit vier Tipps und unterschiedliche Desktop-/Querformatgrößen. Kein Test auf einem echten iPhone.
