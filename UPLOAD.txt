@@ -1,28 +1,31 @@
-LESSING COACH + LESSING STARS – LOBBY 18
+LESSING COACH + LESSING STARS – ADMIN 19
 
-UPDATE AUF GITHUB / VERCEL
+HOCHLADEN
 1. UPDATE.zip entpacken.
-2. index.html im Hauptverzeichnis des bestehenden GitHub-Projekts ersetzen.
-3. Die acht Dateien im Ordner lib durch die Dateien aus diesem Update ersetzen. Ordnerstruktur beibehalten.
-4. Änderungen committen und die erfolgreiche Vercel-Bereitstellung abwarten. Erst danach die Seite neu laden.
-Keine zusätzlichen Bildordner nötig: Spielbilder, CSS und Browser-JavaScript sind in index.html eingebettet.
-Nur index.html zu ersetzen reicht für die neuen Startwerte und Spielmodi nicht aus; lib/stars-game.js muss ebenfalls aktualisiert sein.
-Die öffentliche Website wurde hier nicht bereitgestellt.
+2. index.html im Hauptverzeichnis des bestehenden Projekts ersetzen.
+3. Die acht enthaltenen lib/*.js-Dateien im bestehenden lib-Ordner ersetzen. Ordnerstruktur beibehalten.
+4. Auf GitHub speichern/committen und die erfolgreiche Vercel-Bereitstellung abwarten.
+Nur die Index-Datei reicht für die neuen Admin-Funktionen nicht.
+Bilder und Browsercode sind eingebettet. Keine zusätzlichen Bilderordner nötig.
+Die Live-Website wurde nicht aktualisiert.
 
-ÄNDERUNGEN
-– Kleinere Shop-/Brawler-/Pass- und Events-/Freunde-/Club-Buttons.
-– Hamza. S. behält das Aussehen der gezeigten gelben Figur mit Roboter.
-– Neue Spieler und neue Gäste: 1500 Münzen, 1000 Powerpunkte, 100 Gems, 100 Credits, 2 L-Drops, nur Hamza freigeschaltet und 0 Trophäen.
-– Grün: Gems. Lila: Powerpunkte, statt blauer Sterne in der Lobby.
-– Bestehende Spielstände werden nicht zurückgesetzt oder automatisch mit Startboni überschrieben.
-– Modi: Showdown, Juwelenjagd, Kontrolle, Brawlball, Kopfgeld (10 Abschüsse), Knockout (Team ausscheiden, keine Wiederbelebung). Auswahl im Spielmodus-Menü.
-– Ganzes Spielfeld im Map-Editor sichtbar, Vergrößerung zum präzisen Zeichnen, Testmodus auswählbar.
-– Alle Starts werden auf Wandkollision geprüft. Bei Knockout erscheint Zuschauen statt eines Respawn-Timers.
-– Brawler-/Map-/Skin-Editoren und KI-Werkstatt weiter über Admin → Menü erreichbar.
+BEDIENUNG
+Als Spiel-Admin anmelden → oben links auf das Admin-Profil klicken → KONTEN ERSTELLEN / RESSOURCEN VERTEILEN.
+Links neues Spielerkonto mit Namen und Passwort (mindestens 6 Zeichen) erstellen oder ein bestehendes Spieler-/Gastkonto wählen.
+Rechts zusätzliche Münzen, Powerpunkte, Gems, Credits, L-Drops und Mega-Drops eingeben und optional einen Brawler auswählen. Mit AN DIESES KONTO VERTEILEN speichern.
+Es werden normale Spielerkonten erstellt, keine weiteren Admins. Der Admin bleibt dabei angemeldet.
+Brawler müssen in der Brawler-Werkstatt für Spieler freigegeben sein, bevor sie verteilt werden können.
+Der Spielstand des Empfängers bleibt erhalten; Geschenke werden hinzugefügt. Admins haben bereits unbegrenzte Ressourcen und benötigen kein Geschenk.
+Andere angemeldete Sitzungen laden den neuen Spielstand spätestens beim nächsten Statusabruf (normal alle 10 Sekunden), sofern sie eine Verbindung zum Server haben.
+Brawler und Maps bearbeiten: zurück zur Verwaltung → Brawler-/Spielfeld-Werkstatt.
 
-GEPRÜFT
-37 automatisierte Tests erfolgreich. Browserprüfung bei sechs Lobby-Bildschirmgrößen, vier Map-Vorschaugrößen, Gaststart aller sechs Modi, Brawler erstellen/ändern/löschen, Map speichern/testen, Tastatur/Joystick/Zoom, vier erforderliche Drop-Tipps, Abmelden, Registrierung und Rückkehr zur Coach-Startseite.
-Terminplaner-HTML außerhalb des eingebetteten Spieldokuments bytegleich mit LOBBY 17.
-Browserprüfung mit Chromium; kein Test auf einem echten iPhone. Echte externe KI-Ausgaben nicht live erzeugt: Anbieterzugang in Tests simuliert. Ohne eingerichteten API-Schlüssel zeigt die Werkstatt einen Fehler und keinen erfundenen Entwurf.
-Freunde/Club öffnen gemeinsame Räume; kein vollständiges dauerhaftes Freundes-/Clubverwaltungssystem.
-Foto-KI erstellt transparente 2D-Bilder mit 3D-Look, keine beweglichen 3D-Modelle.
+KORREKTUREN UND PRÜFUNG
+Konten werden serverseitig erstellt, Passwörter gehasht, bestehende Namen nicht überschrieben.
+Verteilungen sind nur für Admins zugelassen, validiert, transaktional gespeichert und protokolliert. Wiederholte identische Vorgänge erhalten keine zweite Gutschrift.
+Admin-Profil öffnet jetzt die Verwaltung statt der Kontoeinstellungen.
+Spieler synchronisieren auch geschenkte Ressourcen und neue Brawler, nicht nur einen gelöschten ausgewählten Brawler.
+Neue Verwaltungsansicht: volle Bildschirmhöhe, keine überlagernde Seitenleiste; Formbereiche separat scrollbar.
+39 automatisierte Tests bestanden. Zusätzlich mit getrennten Admin-/Spielersitzungen geprüft: Konto erstellen, anmelden, schenken, synchronisieren, geschenkten Brawler auswählen und spielen, Rückkehr zur Coach-Startseite. Desktop und Handy-Querformat im Browser geprüft.
+Bestehende Brawler-/Map-Editoren, Bewegung, vier erforderliche Drop-Tipps, Abmelden, Registrierung und sechs Spielmodi geprüft.
+Terminplaner außerhalb des eingebetteten Spiels bytegleich mit Version 18.
+Kein Test auf einem echten iPhone oder in der Live-Vercel-Bereitstellung. Echte externe KI-Generierung benötigt weiterhin einen eingerichteten API-Schlüssel; kein bewegliches 3D-Modell.
