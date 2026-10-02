@@ -1,0 +1,39 @@
+LESSING COACH – FIX 08 – SPIEL IN DER INDEX – 02.10.2026
+
+Die index.html enthält jetzt die Coach-Anwendung und das komplette Spiel.
+Die Startseite bleibt Lessing Coach. Lessing Stars öffnet sich über den
+vorhandenen linken Menübutton in derselben Seite, ohne URL-Wechsel.
+Zurück aus dem Spiel führt direkt zur Coach-Startseite, auch im Hochformat
+und bei einem nicht erreichbaren Spielserver.
+Die Terminplaner-Ansicht wurde nicht verändert.
+
+UPDATE AUF GITHUB
+1. ZIP entpacken.
+2. Im Hauptverzeichnis des bestehenden GitHub-Projekts diese zwei Dateien
+   ersetzen: index.html und vercel.json. Keine Dateien in lessing-stars nötig.
+3. Commit changes speichern und den erfolgreichen Vercel-Build abwarten.
+4. https://lessing-coaching.vercel.app/ öffnen und Lessing Stars anklicken.
+
+WICHTIG
+Bestehende Ordner api, lib, assets und die Coach-Dateien visual.css,
+holidays.js und calendar-ui.js behalten. Dieses Update ersetzt nur die
+Webseite und ihre Routen. Es ist kein eigenständiger neuer Server.
+Die Spielseite muss nicht separat hochgeladen werden. Ihre Benutzeroberfläche,
+Figuren, JavaScript und Hintergrund sind bereits in der index.html enthalten.
+Online-Matches, Anmeldungen, Wartung, Konten und gemeinsame Fortschritte
+benötigen weiterhin die vorhandene API und Datenbank.
+Eine fehlende oder nicht erreichbare Datenbank wird nicht durch die Index
+ersetzt. Der Screenshot zeigte einen fehlgeschlagenen Serverzugriff; bei der
+Prüfung am 02.10.2026 antwortete /api/stars/status wieder erfolgreich.
+
+VERIFIKATION
+19 automatisierte Tests erfolgreich.
+Echter Chromium: Coach beim Start, Spiel ohne URL-Wechsel, direkte Rückkehr
+vom Desktop und Handy, Querformat füllt 844x390 ohne Scrollen, Rückkehr
+auch bei simuliertem Serverausfall. Kein JavaScript-Fehler beobachtet.
+Keine direkte Prüfung auf einem physischen iPhone.
+
+QUELLCODE
+Die komplette ZIP enthält das gesamte Projekt einschließlich server.js und
+scripts/build-coach-index.mjs für spätere Änderungen. Nicht zusätzlich zur
+kleinen Update-ZIP hochladen, wenn dein bisheriges Projekt funktioniert.

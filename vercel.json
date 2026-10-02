@@ -1,28 +1,28 @@
 {
   "redirects": [
     {
-      "source": "/",
-      "destination": "/coach.html",
-      "permanent": false
-    },
-    {
-      "source": "/index.html",
-      "destination": "/coach.html",
+      "source": "/coach.html",
+      "destination": "/",
       "permanent": false
     },
     {
       "source": "/lessing-stars",
-      "destination": "/lessing-stars/spiel.html",
+      "destination": "/",
       "permanent": false
     },
     {
       "source": "/lessing-stars/",
-      "destination": "/lessing-stars/spiel.html",
+      "destination": "/",
       "permanent": false
     },
     {
       "source": "/lessing-stars/index.html",
-      "destination": "/lessing-stars/spiel.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/lessing-stars/spiel.html",
+      "destination": "/",
       "permanent": false
     }
   ],
@@ -35,15 +35,30 @@
   "headers": [
     {
       "source": "/app.js",
-      "headers": [{"key":"Cache-Control","value":"no-cache, max-age=0, must-revalidate"}]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        }
+      ]
     },
     {
       "source": "/waiting-games.js",
-      "headers": [{"key":"Cache-Control","value":"no-cache, max-age=0, must-revalidate"}]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        }
+      ]
     },
     {
       "source": "/lessing-stars/spiel.html",
-      "headers": [{"key":"Cache-Control","value":"no-cache, max-age=0, must-revalidate"}]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        }
+      ]
     },
     {
       "source": "/",
