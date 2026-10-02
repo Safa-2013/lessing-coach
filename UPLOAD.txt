@@ -1,14 +1,18 @@
-DESIGN 13 – NEUE LOBBY
+DESIGN 14 – SPIELANSICHTEN + ADMIN-KI
 
-Bei bereits installiertem FIX 12 nur die index.html aus diesem Update im Hauptordner des GitHub-Repositories ersetzen. Nicht in lessing-stars hochladen.
+WICHTIG: Für die KI reicht nur index.html nicht.
 
-1. index.html herunterladen.
-2. GitHub-Repository öffnen: Add file > Upload files.
-3. index.html auswählen und Commit changes anklicken.
-4. Nach dem Vercel-Deployment die Website neu laden.
+1. ZIP herunterladen und entpacken.
+2. index.html in den Hauptordner deines GitHub-Projekts hochladen und ersetzen.
+3. Im GitHub-Projekt den vorhandenen Ordner lib öffnen. Alle 7 JS-Dateien aus dem lib-Ordner dieser ZIP dort hochladen. Existierende Dateien ersetzen; 3 Dateien sind neu. Keine Dateien aus lib neben die index.html legen.
+4. Commit changes. Das Vercel-Deployment abwarten und Website neu laden.
 
-Die Terminplaner-Ansicht wurde nicht geändert. Die Startseite bleibt Lessing Coach. Lessing Stars wird über den Menübutton geöffnet. Gastspiel ist möglich.
+KI verwenden: Lessing Stars > mit admin anmelden > + BRAWLER oder Verwaltung > KI-WERKSTATT. Typ wählen, Idee beschreiben, Entwurf erstellen, im Editor bearbeiten, speichern. Für Spieler freigeben ausdrücklich auswählen. Die KI nutzt die gleichen Vercel-Variablen wie Lern-KI: GEMINI_API_KEY/GEMINI_MODEL oder OPENAI_API_KEY/OPENAI_MODEL. Schlüssel bleiben auf dem Server. Wenn die Lern-KI nicht eingerichtet ist, braucht auch die Werkstatt ihre Einrichtung.
 
-Neue Lobby: gestaltetes Logo, Bildsymbole, größerer Brawler auf dem Podest, tägliche Belohnung, Modusauswahl, Spielen und direkter Rückweg zu Lessing Coach.
+Die KI erzeugt Werte, Kartenzellen und Farben/Accessoires. Figuren werden daraus gezeichnet; keine separate KI-Bildgenerierung. Eigene Brawler-Bilder sind weiterhin hochladbar. Skins sind kosmetisch und verändern keine Kampfwerte. Freigegebene Skins werden gespeichert, angeboten und im Match angezeigt.
 
-Prüfung: 22 automatisierte Tests und Chromium-Browserprüfungen für Gastspiel, Anmeldung/Abmeldung, Designer, Spielfelder, Drops mit vier Tipps und unterschiedliche Desktop-/Querformatgrößen. Kein Test auf einem echten iPhone.
+Vergleich: Bisher hatten Brawler sehr kleine Figuren, Shop zwei schlichte Textkästen, Anmeldung eine kleine Box auf leerem Blau und keine durchgehende Spielnavigation. Jetzt größere farbige Figurenkarten, violette/goldene Drop-Karten mit Seltenheiten, Anmeldung auf Campus-Hintergrund mit Figur und gemeinsame Seitenleiste. Die Vorlagen enthalten zusätzliche aufwendige Illustrationen und Shop-Angebote, die nicht vollständig nachgebildet sind. Kein pixelidentischer Nachbau.
+
+Terminplaner-Ansicht unverändert. Hauptadresse öffnet Lessing Coach, Stars ist optional eingebettet.
+
+Prüfung: 23 automatisierte Tests. Chromium-Klicktests: Gast, Admin, Abmeldung, Registrierung, Brawler-/Karteneditor, Match, vier Drop-Tipps, Rückweg zu Coach, KI-Vorschau und Speichern für alle 3 Typen, Skin-Auswahl. KI-Anbieterantworten im Test kontrolliert simuliert; kein Live-Aufruf mit deinem API-Schlüssel. Desktop und kurzes Querformat geprüft. Kein Test auf echtem iPhone.
