@@ -1,24 +1,21 @@
-LESSING COACH – BUGFIX 16
+LESSING COACH – LOBBY 17
 
-UPDATE HOCHLADEN
-1. Diese ZIP entpacken.
+UPLOAD
+1. ZIP entpacken.
 2. index.html im Hauptordner des bestehenden GitHub-Projekts ersetzen.
-3. Die acht Dateien aus lib in den EXISTIERENDEN GitHub-Ordner lib hochladen und ersetzen. stars-image.js ist enthalten und muss ebenfalls hochgeladen werden.
-4. Änderungen in GitHub speichern (Commit changes), Vercel-Deployment abwarten.
-5. Website neu laden. Im Spiel steht BUGFIX 16.
-Nur index.html genügt nicht. Den Terminplaner nicht durch die Spiel-Index ersetzen.
+3. Alle acht Dateien aus lib in den bestehenden Ordner lib hochladen und ersetzen.
+4. GitHub-Änderungen speichern und Vercel-Deployment abwarten.
+5. Seite neu laden. Die neue Lobby hat das Buch-Logo, die gelbe Figur mit Roboter und drei Modus-Karten unten.
 
-KORREKTUREN
-- Alte Raumantworten können neue Matches nicht mehr überschreiben oder deren Abfragen stoppen.
-- Verspätete Wartestatus-Antworten setzen gestartete Matches nicht zurück.
-- Mehrfachklicks erzeugen keinen zweiten Raum und starten nicht zweimal.
-- Matchstart-Antworten nach dem Verlassen öffnen die Arena nicht erneut.
-- Nach Brawler-Löschen wird die aktive Auswahl sofort durch Hamza. S. ersetzt.
-- Veraltete Statusantworten vor einer Anmeldung löschen die neue Anmeldung nicht.
-- Bei verborgenem Browserfenster werden Bewegungs- und Angriffseingaben zurückgesetzt.
-- Nicht mehr verfügbare ausgewählte Brawler blockieren den Matchstart nicht.
+ÄNDERUNGEN
+- Lobby-Anordnung nach deiner Vorlage: Shop/Brawler/Pass links, Events/Freunde/Club rechts.
+- Drei bebilderte Modus-Karten unten: Showdown, Juwelenjagd, Kontrolle. Spielen startet den ausgewählten Modus.
+- Freigestelltes Figurenbild und Logo nach der Vorlage. Eine erzeugte 2D-Spielgrafik, kein echtes animiertes 3D-Modell.
+- Münzen/Juwelen/Sterne und Trophäen zeigen tatsächliche Werte, keine Beispielwerte aus dem Bild.
+- Hamburger-Menü bietet Kontozugang, Skins und nach Admin-Anmeldung die Werkstätten und KI.
+- Rückweg zu Lessing Coach bleibt sichtbar.
+- Unteransichten blenden die Lobby-Klickflächen vollständig aus, damit Editoren und Spielsteuerung bedienbar bleiben.
+- Freunde und Club führen zu gemeinsamen bzw. privaten Spielräumen. Es ist kein vollständiges soziales Club-/Freundesystem implementiert.
 
-PRÜFUNG
-33 automatisierte Tests geprüft. Browserprüfung: Gastspiel, Neuladen zur Coach-Startseite, Rückweg, Tastatur, Joystick, Zoom, Brawler- und Karteneditor, vier Tipps pro Drop, Löschen des ausgewählten Brawlers und anschließendes Match, Registrierung und Abmeldung. Keine JavaScript-Fehler in diesen Abläufen.
-Die Terminplaner-Ansicht bleibt unverändert. Ein echter iPhone-/Safari-Test und der Live-Deploy wurden hier nicht durchgeführt.
-Die Foto-KI benötigt weiterhin OPENAI_API_KEY; ihre Ausgabe wurde ohne deinen Schlüssel nicht live erzeugt. Sie liefert eine 2D-Figur mit 3D-Look, kein animiertes 3D-Modell.
+Terminplaner/Coach sind außerhalb des eingebetteten Spiel-Dokuments bytegleich mit BUGFIX 16.
+33 automatisierte Tests bestanden. Browserprüfung der Lobby auf sechs Desktop-/Querformatgrößen sowie Gastmatch, Moduswechsel, Menüs und Rückweg. Zusätzliche Prüfung der Brawler-/Karteneditoren, Bewegung, Joystick, Zoom, Drops, Löschen, An- und Abmeldung. Kein echter Safari-/iPhone-Test und noch nicht auf deinem Vercel veröffentlicht.
