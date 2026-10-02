@@ -1,19 +1,42 @@
 {
-  "rewrites": [
+  "redirects": [
     {
       "source": "/",
-      "destination": "/coach.html"
+      "destination": "/coach.html",
+      "permanent": false
     },
     {
       "source": "/index.html",
-      "destination": "/coach.html"
+      "destination": "/coach.html",
+      "permanent": false
     },
+    {
+      "source": "/lessing-stars",
+      "destination": "/lessing-stars/spiel.html",
+      "permanent": false
+    },
+    {
+      "source": "/lessing-stars/",
+      "destination": "/lessing-stars/spiel.html",
+      "permanent": false
+    },
+    {
+      "source": "/lessing-stars/index.html",
+      "destination": "/lessing-stars/spiel.html",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "/api/index.js?path=:path*"
     }
   ],
   "headers": [
+    {
+      "source": "/lessing-stars/spiel.html",
+      "headers": [{"key":"Cache-Control","value":"no-cache, max-age=0, must-revalidate"}]
+    },
     {
       "source": "/",
       "headers": [
