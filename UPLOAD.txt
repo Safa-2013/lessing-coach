@@ -1,18 +1,24 @@
-DESIGN 14 – SPIELANSICHTEN + ADMIN-KI
+LESSING COACH – BUGFIX 16
 
-WICHTIG: Für die KI reicht nur index.html nicht.
+UPDATE HOCHLADEN
+1. Diese ZIP entpacken.
+2. index.html im Hauptordner des bestehenden GitHub-Projekts ersetzen.
+3. Die acht Dateien aus lib in den EXISTIERENDEN GitHub-Ordner lib hochladen und ersetzen. stars-image.js ist enthalten und muss ebenfalls hochgeladen werden.
+4. Änderungen in GitHub speichern (Commit changes), Vercel-Deployment abwarten.
+5. Website neu laden. Im Spiel steht BUGFIX 16.
+Nur index.html genügt nicht. Den Terminplaner nicht durch die Spiel-Index ersetzen.
 
-1. ZIP herunterladen und entpacken.
-2. index.html in den Hauptordner deines GitHub-Projekts hochladen und ersetzen.
-3. Im GitHub-Projekt den vorhandenen Ordner lib öffnen. Alle 7 JS-Dateien aus dem lib-Ordner dieser ZIP dort hochladen. Existierende Dateien ersetzen; 3 Dateien sind neu. Keine Dateien aus lib neben die index.html legen.
-4. Commit changes. Das Vercel-Deployment abwarten und Website neu laden.
+KORREKTUREN
+- Alte Raumantworten können neue Matches nicht mehr überschreiben oder deren Abfragen stoppen.
+- Verspätete Wartestatus-Antworten setzen gestartete Matches nicht zurück.
+- Mehrfachklicks erzeugen keinen zweiten Raum und starten nicht zweimal.
+- Matchstart-Antworten nach dem Verlassen öffnen die Arena nicht erneut.
+- Nach Brawler-Löschen wird die aktive Auswahl sofort durch Hamza. S. ersetzt.
+- Veraltete Statusantworten vor einer Anmeldung löschen die neue Anmeldung nicht.
+- Bei verborgenem Browserfenster werden Bewegungs- und Angriffseingaben zurückgesetzt.
+- Nicht mehr verfügbare ausgewählte Brawler blockieren den Matchstart nicht.
 
-KI verwenden: Lessing Stars > mit admin anmelden > + BRAWLER oder Verwaltung > KI-WERKSTATT. Typ wählen, Idee beschreiben, Entwurf erstellen, im Editor bearbeiten, speichern. Für Spieler freigeben ausdrücklich auswählen. Die KI nutzt die gleichen Vercel-Variablen wie Lern-KI: GEMINI_API_KEY/GEMINI_MODEL oder OPENAI_API_KEY/OPENAI_MODEL. Schlüssel bleiben auf dem Server. Wenn die Lern-KI nicht eingerichtet ist, braucht auch die Werkstatt ihre Einrichtung.
-
-Die KI erzeugt Werte, Kartenzellen und Farben/Accessoires. Figuren werden daraus gezeichnet; keine separate KI-Bildgenerierung. Eigene Brawler-Bilder sind weiterhin hochladbar. Skins sind kosmetisch und verändern keine Kampfwerte. Freigegebene Skins werden gespeichert, angeboten und im Match angezeigt.
-
-Vergleich: Bisher hatten Brawler sehr kleine Figuren, Shop zwei schlichte Textkästen, Anmeldung eine kleine Box auf leerem Blau und keine durchgehende Spielnavigation. Jetzt größere farbige Figurenkarten, violette/goldene Drop-Karten mit Seltenheiten, Anmeldung auf Campus-Hintergrund mit Figur und gemeinsame Seitenleiste. Die Vorlagen enthalten zusätzliche aufwendige Illustrationen und Shop-Angebote, die nicht vollständig nachgebildet sind. Kein pixelidentischer Nachbau.
-
-Terminplaner-Ansicht unverändert. Hauptadresse öffnet Lessing Coach, Stars ist optional eingebettet.
-
-Prüfung: 23 automatisierte Tests. Chromium-Klicktests: Gast, Admin, Abmeldung, Registrierung, Brawler-/Karteneditor, Match, vier Drop-Tipps, Rückweg zu Coach, KI-Vorschau und Speichern für alle 3 Typen, Skin-Auswahl. KI-Anbieterantworten im Test kontrolliert simuliert; kein Live-Aufruf mit deinem API-Schlüssel. Desktop und kurzes Querformat geprüft. Kein Test auf echtem iPhone.
+PRÜFUNG
+33 automatisierte Tests geprüft. Browserprüfung: Gastspiel, Neuladen zur Coach-Startseite, Rückweg, Tastatur, Joystick, Zoom, Brawler- und Karteneditor, vier Tipps pro Drop, Löschen des ausgewählten Brawlers und anschließendes Match, Registrierung und Abmeldung. Keine JavaScript-Fehler in diesen Abläufen.
+Die Terminplaner-Ansicht bleibt unverändert. Ein echter iPhone-/Safari-Test und der Live-Deploy wurden hier nicht durchgeführt.
+Die Foto-KI benötigt weiterhin OPENAI_API_KEY; ihre Ausgabe wurde ohne deinen Schlüssel nicht live erzeugt. Sie liefert eine 2D-Figur mit 3D-Look, kein animiertes 3D-Modell.
