@@ -1,0 +1,49 @@
+LESSING COACH – FIX 07 – 02.10.2026
+
+Die Ansicht des Terminplaners bleibt unverändert.
+Die ZIP ist ein Update für das vorhandene Projekt, kein eigenständiges neues Projekt.
+
+1. ZIP in der Dateien-App herunterladen und antippen, um sie zu entpacken.
+2. Im bestehenden GitHub-Projekt ganz oben diese fünf Dateien ersetzen:
+   index.html, coach.html, app.js, waiting-games.js, vercel.json
+   index.html und coach.html sind die Coach-Startseite, nicht das Spiel.
+3. Im bestehenden GitHub-Ordner lib die Datei api.js ersetzen.
+   Nicht ins Hauptverzeichnis laden: Der Zielpfad ist lib/api.js.
+4. Im bestehenden GitHub-Ordner lessing-stars die Datei spiel.html ersetzen.
+   Der Zielpfad ist lessing-stars/spiel.html.
+   Das ist die vollständige Spielseite aus FIX 06, damit kein alter Stand geladen wird.
+5. Änderungen speichern (Commit changes). Den erfolgreichen neuen Vercel-Build
+   abwarten. Dann https://lessing-coaching.vercel.app/ neu öffnen.
+
+Ordner müssen auf dem iPhone nicht als ganze Ordner ausgewählt werden.
+Immer zuerst den jeweiligen Zielordner auf GitHub öffnen und dann die einzelnen
+Dateien aus dem entsprechenden entpackten Ordner auswählen.
+Die vorhandenen Ordner assets, api und lib sowie alle weiteren Projektdateien
+behalten. Nicht durch die kleinere Update-ZIP ersetzen oder löschen.
+Es reicht NICHT, nur index.html zu ersetzen: Die Fehler stecken in app.js,
+waiting-games.js und lib/api.js.
+
+KORREKTUREN
+- Klicks in Formularen und Spielen zählen nicht mehr als Seitennavigation.
+  Das DVD-Spiel wurde bisher unmittelbar nach dem Start wieder gestoppt.
+- DVD wird sofort sichtbar gezeichnet, läuft automatisch endlos, wechselt bei
+  Randkontakt die Farbe und benötigt keine Videodatei oder Autoplay-Erlaubnis.
+- Staff-Sitzungen verlängern sich bei aktiver Bedienung auf 15 Minuten.
+  Die automatische Wartungsabfrage allein verlängert die Anmeldung nicht.
+- Die Wartungsabfrage meldet den tatsächlichen Anmeldestatus zurück.
+  Eine abgelaufene Anmeldung wird nicht weiter als Big Admin angezeigt.
+- Speichern ohne gültige Anmeldung zeigt eine verständliche Nachricht und
+  führt zur Anmeldung. Bestehende Wartungseinstellungen bleiben unverändert.
+- Coach bleibt die Startseite. Spiel bleibt unter /lessing-stars/spiel.html.
+
+WICHTIG ZU DEINER AUFNAHME
+Die Lern-KI ist weiterhin gesperrt, solange das Häkchen Lern-KI gesetzt ist.
+Um sie freizugeben: als Big Admin anmelden, Lern-KI abwählen, Wartung speichern.
+Lessing Stars hat ein eigenes Häkchen; es schaltet die Lern-KI nicht frei.
+
+VERIFIKATION
+19 automatisierte Tests erfolgreich.
+Im echten Chromium mit mobiler Ansicht getestet: Wartung speichern, Ablauf
+der Sitzung, korrekte Anmeldung, sofort sichtbares und bewegtes DVD-Logo.
+Coach-HTML und Gestaltung unverändert; Safari auf einem echten iPhone wurde
+nicht direkt getestet. Die Live-Website wird erst nach deinem Upload geändert.

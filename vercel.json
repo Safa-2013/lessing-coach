@@ -34,6 +34,14 @@
   ],
   "headers": [
     {
+      "source": "/app.js",
+      "headers": [{"key":"Cache-Control","value":"no-cache, max-age=0, must-revalidate"}]
+    },
+    {
+      "source": "/waiting-games.js",
+      "headers": [{"key":"Cache-Control","value":"no-cache, max-age=0, must-revalidate"}]
+    },
+    {
       "source": "/lessing-stars/spiel.html",
       "headers": [{"key":"Cache-Control","value":"no-cache, max-age=0, must-revalidate"}]
     },

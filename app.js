@@ -20,7 +20,13 @@ async function request(path, options = {}) {
   const response = await fetch('/api/' + path, { credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, signal:AbortSignal.timeout(12000), ...options });
   let result;
   try { result = await response.json(); } catch { throw new Error('Serverantwort konnte nicht gelesen werden'); }
-  if (!response.ok) throw new Error(result.error || 'Anfrage fehlgeschlagen');
+  if (!response.ok) {
+    if(response.status===401&&path!=='login'){
+      state.session={role:'visitor',permissions:[]};renderAuth();
+      if(document.querySelector('.view.active')?.id==='adminPanel')navigate('login');
+    }
+    throw new Error(result.error || 'Anfrage fehlgeschlagen');
+  }
   return result;
 }
 const send = (path, data, method='POST') => request(path, { method, body:JSON.stringify(data) });
@@ -42,9 +48,9 @@ function closeMobileMenu(){ $('#sidebar').classList.remove('open');$('#scrim').c
 function navigate(page,options={}) {
   if (page === 'adminPanel' && state.session.role === 'visitor') page = 'login';
   if(maintenanceBlocked(page)){showMaintenance(page);return;}
-  gameCleanup();
   const previous=document.querySelector('.view.active')?.id;
   if(previous===page){closeMobileMenu();return;}
+  gameCleanup();
   if(previous)pageScroll[previous]=window.scrollY;
   if (page === 'login' && !document.getElementById('login').classList.contains('active')) $('#loginForm').reset();
   document.body.dataset.page = page;
@@ -105,7 +111,7 @@ async function boot() {
   }
 }
 document.addEventListener('click', e => {
-  const page = e.target.closest('[data-page]')?.dataset.page;
+  const page = e.target.closest('button[data-page], a[data-page]')?.dataset.page;
   if (page) navigate(page);
   const prompt = e.target.closest('[data-prompt]')?.dataset.prompt;
   if (prompt) { if(maintenanceBlocked('ki')||(/lernplan/i.test(prompt)&&maintenanceBlocked('planner'))){showMaintenance(/lernplan/i.test(prompt)?'planner':'ki');return;} navigate('ki'); $('#aiForm input[name="message"]').value = prompt; $('#aiForm input[name="message"]').focus(); }
@@ -447,7 +453,7 @@ function startGame(kind){
  body.innerHTML=`<p>Aufgabe ${n+1}/10 · Punkte ${score}</p><p><strong>${safe(q)}</strong></p><form id="gameAnswer"><label class="field">Deine Antwort<input required autocomplete="off" aria-label="Deine Antwort"></label><button class="primary">Prüfen</button></form><p id="gameFeedback" role="status"></p>`;
  const f=$('#gameAnswer');f.onsubmit=e=>{e.preventDefault();if(f.querySelector('button').disabled)return;const norm=x=>x.trim().toLowerCase().replace(/^(der|die|das) /,'').replace(',', '.');const correct=(kind==='vocab'?[answer,...({Gelegenheit:['Chance'],Leistung:['Erfolg'],Beweis:['Nachweis','Belege'],Folge:['Konsequenz'],Nachbar:['Nachbarin'],Bibliothek:['Bücherei']}[answer]||[])]:[answer]).some(a=>norm(f.querySelector('input').value)===norm(a));if(correct)score++;n++;f.querySelector('button').disabled=true;f.querySelector('input').disabled=true;$('#gameFeedback').textContent=correct?'Richtig!':`Richtige Antwort: ${answer}`;const b=document.createElement('button');b.className='primary';b.textContent='Weiter';b.onclick=next;body.append(b);};}next();
 }
-setInterval(async()=>{try{maintenance=(await request('maintenance')).maintenance;const page=document.querySelector('.view.active')?.id;if(page&&maintenanceBlocked(page))showMaintenance(page);else if(page==='maintenancePage'&&!maintenanceBlocked(maintenanceOrigin))navigate(maintenanceOrigin==='planner'?'ki':maintenanceOrigin);}catch{}},15000);
+setInterval(async()=>{try{const data=await request('maintenance');maintenance=data.maintenance;if(data.session&&data.session.role!==state.session.role){const wasStaff=state.session.role!=='visitor';state.session=data.session;renderAuth();if(wasStaff&&state.session.role==='visitor'&&document.querySelector('.view.active')?.id==='adminPanel'){navigate('login');toast('Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.');}}const page=document.querySelector('.view.active')?.id;if(page&&maintenanceBlocked(page))showMaintenance(page);else if(page==='maintenancePage'&&!maintenanceBlocked(maintenanceOrigin))navigate(maintenanceOrigin==='planner'?'ki':maintenanceOrigin);}catch{}},15000);
 queueMicrotask(()=>boot().catch(e=>{document.documentElement.removeAttribute('data-loading');toast('Seite konnte nicht vollständig geladen werden: '+e.message);}));
 
 // Schüler-Passwortschalter: nur die Verwaltung kann den Modus ändern.
