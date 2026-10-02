@@ -1,21 +1,28 @@
-LESSING COACH – LOBBY 17
+LESSING COACH + LESSING STARS – LOBBY 18
 
-UPLOAD
-1. ZIP entpacken.
-2. index.html im Hauptordner des bestehenden GitHub-Projekts ersetzen.
-3. Alle acht Dateien aus lib in den bestehenden Ordner lib hochladen und ersetzen.
-4. GitHub-Änderungen speichern und Vercel-Deployment abwarten.
-5. Seite neu laden. Die neue Lobby hat das Buch-Logo, die gelbe Figur mit Roboter und drei Modus-Karten unten.
+UPDATE AUF GITHUB / VERCEL
+1. UPDATE.zip entpacken.
+2. index.html im Hauptverzeichnis des bestehenden GitHub-Projekts ersetzen.
+3. Die acht Dateien im Ordner lib durch die Dateien aus diesem Update ersetzen. Ordnerstruktur beibehalten.
+4. Änderungen committen und die erfolgreiche Vercel-Bereitstellung abwarten. Erst danach die Seite neu laden.
+Keine zusätzlichen Bildordner nötig: Spielbilder, CSS und Browser-JavaScript sind in index.html eingebettet.
+Nur index.html zu ersetzen reicht für die neuen Startwerte und Spielmodi nicht aus; lib/stars-game.js muss ebenfalls aktualisiert sein.
+Die öffentliche Website wurde hier nicht bereitgestellt.
 
 ÄNDERUNGEN
-- Lobby-Anordnung nach deiner Vorlage: Shop/Brawler/Pass links, Events/Freunde/Club rechts.
-- Drei bebilderte Modus-Karten unten: Showdown, Juwelenjagd, Kontrolle. Spielen startet den ausgewählten Modus.
-- Freigestelltes Figurenbild und Logo nach der Vorlage. Eine erzeugte 2D-Spielgrafik, kein echtes animiertes 3D-Modell.
-- Münzen/Juwelen/Sterne und Trophäen zeigen tatsächliche Werte, keine Beispielwerte aus dem Bild.
-- Hamburger-Menü bietet Kontozugang, Skins und nach Admin-Anmeldung die Werkstätten und KI.
-- Rückweg zu Lessing Coach bleibt sichtbar.
-- Unteransichten blenden die Lobby-Klickflächen vollständig aus, damit Editoren und Spielsteuerung bedienbar bleiben.
-- Freunde und Club führen zu gemeinsamen bzw. privaten Spielräumen. Es ist kein vollständiges soziales Club-/Freundesystem implementiert.
+– Kleinere Shop-/Brawler-/Pass- und Events-/Freunde-/Club-Buttons.
+– Hamza. S. behält das Aussehen der gezeigten gelben Figur mit Roboter.
+– Neue Spieler und neue Gäste: 1500 Münzen, 1000 Powerpunkte, 100 Gems, 100 Credits, 2 L-Drops, nur Hamza freigeschaltet und 0 Trophäen.
+– Grün: Gems. Lila: Powerpunkte, statt blauer Sterne in der Lobby.
+– Bestehende Spielstände werden nicht zurückgesetzt oder automatisch mit Startboni überschrieben.
+– Modi: Showdown, Juwelenjagd, Kontrolle, Brawlball, Kopfgeld (10 Abschüsse), Knockout (Team ausscheiden, keine Wiederbelebung). Auswahl im Spielmodus-Menü.
+– Ganzes Spielfeld im Map-Editor sichtbar, Vergrößerung zum präzisen Zeichnen, Testmodus auswählbar.
+– Alle Starts werden auf Wandkollision geprüft. Bei Knockout erscheint Zuschauen statt eines Respawn-Timers.
+– Brawler-/Map-/Skin-Editoren und KI-Werkstatt weiter über Admin → Menü erreichbar.
 
-Terminplaner/Coach sind außerhalb des eingebetteten Spiel-Dokuments bytegleich mit BUGFIX 16.
-33 automatisierte Tests bestanden. Browserprüfung der Lobby auf sechs Desktop-/Querformatgrößen sowie Gastmatch, Moduswechsel, Menüs und Rückweg. Zusätzliche Prüfung der Brawler-/Karteneditoren, Bewegung, Joystick, Zoom, Drops, Löschen, An- und Abmeldung. Kein echter Safari-/iPhone-Test und noch nicht auf deinem Vercel veröffentlicht.
+GEPRÜFT
+37 automatisierte Tests erfolgreich. Browserprüfung bei sechs Lobby-Bildschirmgrößen, vier Map-Vorschaugrößen, Gaststart aller sechs Modi, Brawler erstellen/ändern/löschen, Map speichern/testen, Tastatur/Joystick/Zoom, vier erforderliche Drop-Tipps, Abmelden, Registrierung und Rückkehr zur Coach-Startseite.
+Terminplaner-HTML außerhalb des eingebetteten Spieldokuments bytegleich mit LOBBY 17.
+Browserprüfung mit Chromium; kein Test auf einem echten iPhone. Echte externe KI-Ausgaben nicht live erzeugt: Anbieterzugang in Tests simuliert. Ohne eingerichteten API-Schlüssel zeigt die Werkstatt einen Fehler und keinen erfundenen Entwurf.
+Freunde/Club öffnen gemeinsame Räume; kein vollständiges dauerhaftes Freundes-/Clubverwaltungssystem.
+Foto-KI erstellt transparente 2D-Bilder mit 3D-Look, keine beweglichen 3D-Modelle.
