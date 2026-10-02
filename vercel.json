@@ -1,7 +1,72 @@
 {
   "rewrites": [
-    {"source": "/", "destination": "/coach.html"},
-    {"source": "/index.html", "destination": "/coach.html"},
-    {"source": "/api/:path*", "destination": "/api/index.js?path=:path*"}
+    {
+      "source": "/",
+      "destination": "/coach.html"
+    },
+    {
+      "source": "/index.html",
+      "destination": "/coach.html"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/index.js?path=:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/coach.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/lessing-stars",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/lessing-stars/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/lessing-stars/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
+        }
+      ]
+    }
   ]
 }

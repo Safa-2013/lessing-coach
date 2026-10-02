@@ -1,0 +1,46 @@
+LESSING COACH / STARS — FIX 05
+
+Die Hauptseite bleibt Lessing Coach. Das Spiel liegt nur unter /lessing-stars/.
+Die alte Version auf der veröffentlichten Spielseite enthält dieses Update noch nicht.
+
+UPLOAD AM IPHONE — NICHT ALLES IN DEN HAUPTORDNER LADEN!
+1. Dieses ZIP in Dateien entpacken.
+2. Im GitHub-Hauptordner index.html, coach.html und vercel.json ersetzen/hochladen. Commit changes.
+   Diese beiden HTML-Dateien sind die kleinen Coach-Dateien (je etwa 32 KB).
+3. In GitHub den vorhandenen Ordner lessing-stars öffnen.
+   Dort index.html durch die große Datei aus lessing-stars ersetzen (etwa 2,4 MB).
+   Commit changes. Diese Datei enthält alle neuen Spiel-Skripte und Styles.
+4. In GitHub den Ordner lib öffnen. Dort die vier Dateien stars-api.js, stars-game.js,
+   stars-services.js und stars-maps.js hochladen/ersetzen. Commit changes.
+   Falls stars-maps.js noch fehlt, wird sie neu hinzugefügt.
+5. Auf die erfolgreiche Vercel-Bereitstellung warten. Dann die Hauptadresse neu laden:
+   https://lessing-coaching.vercel.app/
+   Das muss Lessing Coach zeigen. Von dort Lessing Stars öffnen.
+6. Im Spiel steht COACH-FIX 05. Steht dort noch LEX oder die alte Bild-Lobby,
+   ist noch die alte Spiel-Datei veröffentlicht.
+
+Keine Ordner im iPhone-Dateiauswahlfenster markieren: in GitHub den richtigen
+Zielordner öffnen, dann die einzelnen Dateien aus dem entsprechenden ZIP-Ordner auswählen.
+Vorhandene assets-Ordner, API-Dateien und andere Coach-Dateien bleiben bestehen.
+
+ENTHALTEN
+Hauptordner: index.html, coach.html, vercel.json
+lessing-stars/: index.html
+lib/: stars-api.js, stars-game.js, stars-services.js, stars-maps.js
+
+KORREKTUREN
+- Coach bleibt Startseite; Zurück-Link direkt zu /coach.html, ohne Spiel-Anmeldung.
+- Hochformat auf Touch-Geräten: Dreh-Hinweis. Querformat: Bedienung frei.
+- Lobby füllt die verfügbare Webfläche; kein Scrollen und keine seitlichen Layout-Leerflächen.
+- Safari-Adressleiste und Systemleisten gehören zum Browser und bleiben außerhalb der Webseite.
+- Erneutes Öffnen: gespeicherte Admin-Sitzung abmelden. Admin-Anmeldung wieder erforderlich.
+- Spieler-Sitzungen und alle Spielstände bleiben gespeichert.
+- Starter Hamza. S.; echte Kontowerte statt Beschriftungen in Hintergrundbildern.
+- Kein extra Namensbalken unter der Figur; keine doppelten Spielen-/Quests-Buttons im Fußmenü.
+- Admin: Figur designen/hochladen, Werte ändern, Brawler speichern, Spielfelder zeichnen.
+- Drops: bildschirmfüllende Animation, vier getrennte Tipps, Drehung/Farben nach Seltenheit.
+  Ein Drop muss nicht bei jedem Tipp aufsteigen. Der Server bestimmt die Belohnung einmal.
+
+PRÜFUNG
+16 automatische Tests erfolgreich. Zusätzlich kompletter gebündelter Client mit simuliertem DOM
+für Start, Admin-Werkzeuge und Abmelden geprüft. Kein echter iPhone/Safari-Layouttest durchgeführt.
