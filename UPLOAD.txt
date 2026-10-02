@@ -1,31 +1,25 @@
-LESSING COACH + LESSING STARS – ADMIN 19
+LESSING COACH + LESSING STARS – 50 BRAWLER UPDATE – 02.10.2026
 
-HOCHLADEN
-1. UPDATE.zip entpacken.
-2. index.html im Hauptverzeichnis des bestehenden Projekts ersetzen.
-3. Die acht enthaltenen lib/*.js-Dateien im bestehenden lib-Ordner ersetzen. Ordnerstruktur beibehalten.
-4. Auf GitHub speichern/committen und die erfolgreiche Vercel-Bereitstellung abwarten.
-Nur die Index-Datei reicht für die neuen Admin-Funktionen nicht.
-Bilder und Browsercode sind eingebettet. Keine zusätzlichen Bilderordner nötig.
-Die Live-Website wurde nicht aktualisiert.
+DIESE ZIP IST ALS UPDATE FÜR DASSELBE GITHUB/VERCEL-PROJEKT GEDACHT.
+Entpacken und die enthaltenen Dateien mit gleicher Ordnerstruktur in dein bestehendes Repository kopieren/ersetzen.
 
-BEDIENUNG
-Als Spiel-Admin anmelden → oben links auf das Admin-Profil klicken → KONTEN ERSTELLEN / RESSOURCEN VERTEILEN.
-Links neues Spielerkonto mit Namen und Passwort (mindestens 6 Zeichen) erstellen oder ein bestehendes Spieler-/Gastkonto wählen.
-Rechts zusätzliche Münzen, Powerpunkte, Gems, Credits, L-Drops und Mega-Drops eingeben und optional einen Brawler auswählen. Mit AN DIESES KONTO VERTEILEN speichern.
-Es werden normale Spielerkonten erstellt, keine weiteren Admins. Der Admin bleibt dabei angemeldet.
-Brawler müssen in der Brawler-Werkstatt für Spieler freigegeben sein, bevor sie verteilt werden können.
-Der Spielstand des Empfängers bleibt erhalten; Geschenke werden hinzugefügt. Admins haben bereits unbegrenzte Ressourcen und benötigen kein Geschenk.
-Andere angemeldete Sitzungen laden den neuen Spielstand spätestens beim nächsten Statusabruf (normal alle 10 Sekunden), sofern sie eine Verbindung zum Server haben.
-Brawler und Maps bearbeiten: zurück zur Verwaltung → Brawler-/Spielfeld-Werkstatt.
+WICHTIGE ÄNDERUNGEN
+- Terminplaner / Coaching / Lern-KI / Admin-Bereich bleiben enthalten.
+- Lessing Stars bleibt direkt im Terminplaner eingebaut.
+- 50 Brawler sind im Start-Katalog vorhanden.
+- Nur Hamza.S. ist beim neuen Spieler automatisch freigeschaltet (Starter).
+- Safa Yildiz ist ein JUNGE.
+- Safa Yildiz ist der stärkste Brawler und mit 4.000 Credits der teuerste Brawler.
+- Startguthaben bleibt: 1.500 Münzen, 1.000 Powerpunkte, 100 Gems, 100 Credits.
+- Admin kann Konten erstellen, Ressourcen verteilen, Brawler freischalten sowie Brawler/Maps verwalten.
+- Shop, Drops/Mega Boxen, Brawler, Skins, Quests, Belohnungen, Freunde/Club, Profil, Anmeldung, Spielmodi und Admin-Werkstätten bleiben vorhanden.
 
-KORREKTUREN UND PRÜFUNG
-Konten werden serverseitig erstellt, Passwörter gehasht, bestehende Namen nicht überschrieben.
-Verteilungen sind nur für Admins zugelassen, validiert, transaktional gespeichert und protokolliert. Wiederholte identische Vorgänge erhalten keine zweite Gutschrift.
-Admin-Profil öffnet jetzt die Verwaltung statt der Kontoeinstellungen.
-Spieler synchronisieren auch geschenkte Ressourcen und neue Brawler, nicht nur einen gelöschten ausgewählten Brawler.
-Neue Verwaltungsansicht: volle Bildschirmhöhe, keine überlagernde Seitenleiste; Formbereiche separat scrollbar.
-39 automatisierte Tests bestanden. Zusätzlich mit getrennten Admin-/Spielersitzungen geprüft: Konto erstellen, anmelden, schenken, synchronisieren, geschenkten Brawler auswählen und spielen, Rückkehr zur Coach-Startseite. Desktop und Handy-Querformat im Browser geprüft.
-Bestehende Brawler-/Map-Editoren, Bewegung, vier erforderliche Drop-Tipps, Abmelden, Registrierung und sechs Spielmodi geprüft.
-Terminplaner außerhalb des eingebetteten Spiels bytegleich mit Version 18.
-Kein Test auf einem echten iPhone oder in der Live-Vercel-Bereitstellung. Echte externe KI-Generierung benötigt weiterhin einen eingerichteten API-Schlüssel; kein bewegliches 3D-Modell.
+GITHUB / VERCEL
+1. ZIP entpacken.
+2. index.html im Hauptordner ersetzen.
+3. Alle Dateien aus lib/ in den bestehenden lib/-Ordner kopieren und ersetzen.
+4. Committen und Vercel-Deployment abwarten.
+5. Bestehende Dateien, die nicht in dieser Update-ZIP enthalten sind (z. B. db.js, stars-maps.js, visual.css, package.json, api/), NICHT löschen.
+
+HINWEIS
+Diese Update-ZIP basiert direkt auf deiner Lessing_Coach_ADMIN_19_UPDATE-Datei. Sie ist deshalb absichtlich als sichere Ersatz-/Update-ZIP aufgebaut und löscht keine bestehenden Terminplaner-Dateien.
