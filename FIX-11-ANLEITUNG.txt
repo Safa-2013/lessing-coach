@@ -1,0 +1,24 @@
+LESSING COACH – FIX 11
+
+Änderungen:
+- Freiwillige Anmeldung: SPIELEN startet als Gast ohne Name und Passwort.
+- Gast-Spielstand bleibt über die Sitzung in diesem Browser erhalten; Adminrechte werden nie vergeben.
+- Wartung und Sperren gelten auch für Gäste.
+- Brawler verkleinert und vollständig sichtbar. Lobby ohne vertikales Scrollen.
+- Seitenaufruf beginnt bei Lessing Coach. Terminplaner-Ansicht unverändert.
+
+UPDATE AUF GITHUB (bestehendes Projekt ab FIX 09/10):
+1. ZIP in der Dateien-App antippen und entpacken.
+2. index.html im Hauptordner des GitHub-Projekts ERSETZEN.
+3. Im GitHub-Ordner lib die Datei stars-api.js ERSETZEN (aus lib in diesem ZIP).
+4. Beide Änderungen speichern/committen. Vercel-Bereitstellung abwarten und Seite neu laden.
+WICHTIG: Nur index.html reicht diesmal nicht – stars-api.js ermöglicht das Gastspielen.
+Andere Dateien und bestehende Konten nicht löschen. Anleitung selbst nicht hochladen.
+
+GEPRÜFT:
+21 automatische Tests bestanden. Zusätzlich Browserprüfung in Chromium:
+Gast-Match ohne Anmeldung; Gastfortschritt; Coach-Start/Zurück; Desktop 1920x1080;
+Handy-Querformat 844x390 ohne Scrollen; Anmeldung/Admin; Brawlerdesigner;
+Spielfeldeditor/Testmatch; Brawler-Auswahl; vier Drop-Tipps; Abmelden/Registrieren.
+Keine JavaScript-Fehler in geprüften Abläufen.
+Nicht auf einem echten iPhone/Safari oder im Live-Deployment geprüft.
