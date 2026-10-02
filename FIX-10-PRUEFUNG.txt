@@ -1,0 +1,44 @@
+LESSING COACH – FIX 10 – PRÜFUNG VOR DEINEM TEST – 02.10.2026
+
+GEFUNDENER UND BEHOBENER FEHLER
+In der Brawler-Auswahl überdeckte ein alter schwebender Zurück-Pfeil den
+neueren Lobby-Button. Der alte Button ist entfernt. Der verbleibende
+Lobby-Button wurde mit einem echten Browserklick im Querformat geprüft.
+
+UPLOAD
+1. Die index.html aus dieser ZIP entpacken.
+2. Im GitHub-Hauptverzeichnis die vorhandene index.html ersetzen.
+3. Commit changes speichern und den erfolgreichen Vercel-Build abwarten.
+Bestehende Serverdateien aus FIX 09 und vercel.json behalten.
+Kein Upload einer separaten Spielseite nötig: Das Spiel steckt in der Index.
+
+GEPRÜFTE ABLÄUFE – ECHTER CHROMIUM, MOBILE ANSICHT 844 x 390
+- Coach beim Start, Spiel über Menü, Rückkehr zur Coach-Startseite.
+- Admin anmelden und unendliche Ressourcen anzeigen.
+- Brawler selbst designen, speichern; Bild und Schaden 1777 auf dem Server
+  kontrolliert (Kampfwerte berücksichtigen zusätzlich die Power-Stufe).
+- Eigenen Brawler auswählen: Name und Figur werden in der Lobby übernommen.
+- Spielfeld durch Klick zeichnen, speichern, Testkampf starten und verlassen.
+- Drop kaufen und im Fullscreen öffnen: Belohnung bleibt bis zum vierten
+  getrennten Tipp verborgen. Danach Weiter, normale Bedienung wieder frei.
+- Abmelden, normales Spielerkonto registrieren, Starter Hamza. S., kein
+  Zugriff auf die Admin-Werkstatt, normalen Bot-Kampf starten und verlassen.
+- Big Admin: Wartung speichern, abgelaufene Sitzung korrekt behandeln.
+- DVD startet sichtbar und bewegt sich ohne Startknopf oder Videodownload.
+- Gast-Katalog mit simuliertem 401 blockiert die Anmeldung nicht mehr.
+- Wartung/API-Ausfall, Hochformat-Hinweis und Rückkehr funktionieren.
+- 20 automatisierte Tests erfolgreich; keine JavaScript-Fehler in den
+  erfolgreich abgeschlossenen interaktiven Abläufen.
+
+LIVE-PRÜFUNG
+Die veröffentlichte API antwortet jetzt auf /api/stars/status UND
+/api/stars/catalog mit 200. Die veraltete Katalog-Sperre ist damit behoben.
+
+GRENZEN DER PRÜFUNG
+Getestet wurde Chromium mit mobiler Bildschirmgröße und Touch-Unterstützung,
+kein physisches iPhone mit Safari. Die Spielabläufe wurden gegen eine
+isolierte lokale Datenbank getestet. Keine echten Live-Konten geändert.
+Die Lern-KI war auf der veröffentlichten Seite gesperrt; echte Antworten des
+KI-Anbieters wurden nicht live getestet. Dies ist keine Zusage, dass jeder
+mögliche Geräte-, Netzwerk- oder Mehrspielerfall fehlerfrei ist.
+Die Terminplaner-Ansicht ist unverändert. Nicht automatisch veröffentlicht.
