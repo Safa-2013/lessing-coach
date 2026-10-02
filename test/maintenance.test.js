@@ -4,13 +4,15 @@ import {mkdtempSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import api from '../lib/api.js';
+import {database} from '../lib/db.js';
+import {createHash} from 'node:crypto';
 process.chdir(mkdtempSync(join(tmpdir(),'lessing-maintenance-')));
 process.env.INITIAL_ADMIN_PASSWORD='teacher-test';process.env.INITIAL_BIG_ADMIN_PASSWORD='owner-test';
 async function call(path,method='GET',body={},cookie=''){const r={setHeader(k,v){if(k==='Set-Cookie')this.cookie=v.split(';')[0];},end(s){this.data=JSON.parse(s);}};await api({url:'/api/'+path,method,body:JSON.stringify(body),headers:{host:'localhost',cookie}},r);return r;}
 test('maintenance is shared, Big Admin only, enforced on API and reversible',async()=>{
  const owner=await call('login','POST',{username:'admin',password:'owner-test'});const teacher=await call('login','POST',{username:'Lessing',password:'teacher-test'});
  assert.equal((await call('admin/maintenance','PATCH',{all:true},teacher.cookie)).statusCode,403);
- assert.equal((await call('admin/maintenance','PATCH',{all:true})).statusCode,403);
+ assert.equal((await call('admin/maintenance','PATCH',{all:true})).statusCode,401);
  assert.equal((await call('admin/maintenance','PATCH',{all:true,games:true},owner.cookie)).statusCode,200);
  assert.equal((await call('maintenance')).data.maintenance.all,true);
  assert.equal((await call('appointments','POST')).statusCode,503);
@@ -22,4 +24,21 @@ test('maintenance is shared, Big Admin only, enforced on API and reversible',asy
  assert.equal((await call('catalog')).statusCode,200);
  await call('admin/maintenance','PATCH',{all:false,sections:{}},owner.cookie);
  assert.equal((await call('ai/threads')).statusCode,200);
+});
+test('active staff access renews, background checks do not, expired access is accurately reported',async()=>{
+ const owner=await call('login','POST',{username:'admin',password:'owner-test'});
+ const db=await database(),hash=createHash('sha256').update(owner.cookie.split('=')[1]).digest('hex');
+ const expires=Date.now()+60000;
+ await db.query('UPDATE sessions SET expires_at=$1 WHERE token_hash=$2',[expires,hash]);
+ assert.equal((await call('maintenance','GET',{},owner.cookie)).data.session.role,'big');
+ assert.equal((await db.query('SELECT expires_at FROM sessions WHERE token_hash=$1',[hash]))[0].expires_at,expires);
+ assert.equal((await call('admin/maintenance','PATCH',{sections:{ki:true}},owner.cookie)).statusCode,200);
+ assert((await db.query('SELECT expires_at FROM sessions WHERE token_hash=$1',[hash]))[0].expires_at>Date.now()+14*60000);
+ await db.query('UPDATE sessions SET expires_at=$1 WHERE token_hash=$2',[Date.now()-1,hash]);
+ const failed=await call('admin/maintenance','PATCH',{sections:{}},owner.cookie);
+ assert.equal(failed.statusCode,401);assert.match(failed.data.error,/Anmeldung ist abgelaufen/);
+ const check=await call('maintenance','GET',{},failed.cookie);
+ assert.equal(check.data.session.role,'visitor');assert.equal(check.data.maintenance.sections.ki,true);
+ const again=await call('login','POST',{username:'admin',password:'owner-test'},failed.cookie);
+ assert.equal((await call('admin/maintenance','PATCH',{sections:{}},again.cookie)).statusCode,200);
 });

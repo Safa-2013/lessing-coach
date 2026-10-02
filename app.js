@@ -572,4 +572,5 @@ function startMemory(root){
  restart.onclick=e=>{e.stopPropagation();gameCleanup();startMemory(root);};
 }
 
-const starsNavigation=document.querySelector('#starsNavigation');starsNavigation.onclick=()=>{if(maintenanceBlocked('stars'))showMaintenance('stars');else location.href='/lessing-stars/'};
+const starsNavigation=document.querySelector('#starsNavigation');starsNavigation.onclick=()=>{if(maintenanceBlocked('stars'))showMaintenance('stars');else{closeMobileMenu();window.openLessingStars();}};
+window.addEventListener('lessing-coach-home',()=>navigate('start'));

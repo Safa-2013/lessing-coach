@@ -1,0 +1,26 @@
+QUERFORMAT-UPDATE – 01.10.2026
+
+Dieses kleine Update setzt die vorhandene Mobile-Fix-Version voraus.
+Nur drei Dateien ersetzen:
+lessing-stars/index.html
+lessing-stars/release.css
+lessing-stars/release.js
+
+Auf GitHub lessing-stars öffnen -> Upload files -> die drei Dateien aus
+dem entpackten gleichnamigen Ordner auswählen -> Commit changes.
+Keine assets neu hochladen. Nach erfolgreicher Veröffentlichung steht
+in der Lobby QUERFORMAT · 01.10.2026.
+
+Auf Geräten mit Touchbedienung im Hochformat erscheint „Bitte Handy drehen“.
+Das Spiel ist dahinter nicht bedienbar. Neue Matches können erst im
+Querformat gestartet werden. Bei Drehen während eines laufenden Matches
+werden Bewegung und Angriff unterdrückt; das Online-Match läuft weiter.
+Nach dem Zurückdrehen ins Querformat ist die Bedienung wieder freigegeben.
+Die Terminplaner-Seite bleibt im Hochformat bedienbar.
+
+Safari kann das Gerät nicht physisch drehen. Falls sich die Ansicht nicht
+dreht, im iPhone-Kontrollzentrum die Ausrichtungssperre ausschalten.
+
+Geprüft: Client-Initialisierung, blockierter Match-Start und neutrale
+Steuereingaben im Hochformat sowie Freigabe im Querformat.
+Kein echter Safari-/iPhone-Test durchgeführt.

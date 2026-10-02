@@ -1,0 +1,54 @@
+LESSING COACH — STARTSEITE UND SPIEL, FIX 06
+
+WICHTIG: Die Ansicht des Terminplaners wurde NICHT verändert.
+index.html und coach.html sind bytegenau dieselbe Coach-Seite wie vorher.
+Das Spiel hat jetzt den eindeutigen Dateinamen spiel.html. Damit kann es
+nicht mehr mit der Startseiten-index.html verwechselt werden.
+
+UPLOAD AUF GITHUB AM IPHONE
+1. Lessing_Coach_FIX_06_UPDATE.zip in Dateien entpacken.
+2. Im GitHub-HAUPTORDNER die Dateien index.html, coach.html und vercel.json
+   aus dem Hauptordner dieses Updates hochladen/ersetzen. Commit changes.
+3. Im GitHub-Ordner lessing-stars die Datei spiel.html aus dem gleichnamigen
+   ZIP-Ordner hochladen. Commit changes. NICHT als index.html umbenennen!
+4. Auf das erfolgreiche Vercel-Deployment warten. Hauptadresse neu öffnen:
+   https://lessing-coaching.vercel.app/
+   Sie führt direkt zur unveränderten Coach-Startseite /coach.html.
+5. Lessing Stars über die Seitenleiste öffnen. Die neue Spielseite liegt unter:
+   /lessing-stars/spiel.html — Versionsanzeige COACH-FIX 06.
+
+Die alten Spieladressen /lessing-stars/, /lessing-stars und
+/lessing-stars/index.html werden auf spiel.html weitergeleitet.
+Alte Assets und Server-Dateien bleiben bestehen. Keine Ordner löschen.
+Für dieses Update sind KEINE neuen lib-Dateien und KEIN Asset-Upload nötig:
+Der neue Schulhofhintergrund und die Spiel-Skripte sind in spiel.html enthalten.
+Es wird ein bestehendes funktionierendes Stars-Backend aus FIX 05 vorausgesetzt.
+
+KORREKTUREN
+- Echte temporäre Weiterleitungen statt der bisherigen Startseiten-Rewrites.
+- Schutz in der Spiel-Datei: Falls sie versehentlich an / oder /index.html liegt,
+  wird ebenfalls zu /coach.html gewechselt, ohne die Spiel-Lobby anzuzeigen.
+- Zuerst Zugang/Wartung prüfen. Vorher keine Lobby sichtbar oder bedienbar.
+- Wartung sofort nach der ersten Statusantwort anzeigen; kein Warten auf den
+  Brawler-Katalog. Bei Serverfehler bleibt das Spiel gesperrt, mit Retry und
+  einem direkten Coach-Link.
+- Wartungsanzeige auch in kleinen Querformat-Fenstern vollständig sichtbar.
+- Schulhof-Lobby mit dynamischen echten Buttons, Starter in der Mitte,
+  Hamza. S., echten Kontowerten und ohne feste Bild-Beschriftungen.
+- Keine seitlichen Layout-Leerflächen und kein Seiten-Scroll in der Lobby.
+- Spielerlisten und lange Editorformulare dürfen weiterhin intern scrollen.
+- Auf dem Handy weiterhin Querformat-Pflicht für das Spiel.
+- Vier getrennte Drop-Tipps und serverseitige Belohnungen bleiben erhalten.
+
+VERIFIKATION
+18 automatisierte Tests erfolgreich. Zusätzlich reales Chromium:
+Coach-Einstieg, neue Spieladresse, Querformat 844x390, 844x220, 667x210,
+erste Statusprüfung, frühe Wartung, Fehlerfall ohne Lobby-Freigabe,
+Hochformat-Sperre auf emuliertem Touch-Gerät, Rückkehr ohne Spiel-Anmeldung.
+Kein Test auf einem physischen iPhone; Safari-Systemleisten bleiben außerhalb
+der von der Website kontrollierten Fläche.
+
+Der Hintergrund wurde mit Bildgenerierung aus der vorhandenen Schulhofansicht
+bereinigt: alle UI-Overlays und festen Beschriftungen entfernen, Schulhof,
+Architektur, Bäume, Brunnen und Podium beibehalten; keinen neuen Helden hinzufügen.
+Die unveränderte Terminplaner-Datei ist davon nicht betroffen.

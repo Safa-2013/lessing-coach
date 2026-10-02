@@ -11,9 +11,12 @@ createServer(async (req, res) => {
     }
     return api(req, res);
   }
+  if (['/coach.html','/lessing-stars','/lessing-stars/','/lessing-stars/index.html','/lessing-stars/spiel.html'].includes(req.url.split('?')[0])) {
+    res.writeHead(307, {'Location':'/','Cache-Control':'no-store'}).end();
+    return;
+  }
   if(['/lessing-stars/release.js','/lessing-stars/release.css'].includes(req.url.split('?')[0])) {const p=req.url.split('?')[0];res.setHeader('Content-Type',p.endsWith('.js')?'text/javascript':'text/css');res.end(await readFile(new URL('.'+p,import.meta.url)));}
   else if (/^\/lessing-stars\/assets\/[a-f0-9]{16}\.(png|jpg|webp)$/.test(req.url.split('?')[0])) {const path=req.url.split('?')[0];res.setHeader('Content-Type',path.endsWith('.png')?'image/png':path.endsWith('.webp')?'image/webp':'image/jpeg');res.end(await readFile(new URL('.'+path,import.meta.url)));}
-  else if (['/lessing-stars/','/lessing-stars/index.html'].includes(req.url.split('?')[0])) {res.setHeader('Content-Type','text/html; charset=utf-8');res.end(await readFile(new URL('./lessing-stars/index.html',import.meta.url)));}
   else if (['/assets/maintenance-loop.mp4','/assets/maintenance-loop-violet.mp4','/assets/maintenance-loop-teal.mp4','/assets/maintenance-poster.jpg','/assets/dvd-screensaver.mp4','/assets/dvd-poster.jpg'].includes(req.url)) {
     res.setHeader('Content-Type',req.url.endsWith('.mp4')?'video/mp4':'image/jpeg');
     res.end(await readFile(new URL('.'+req.url,import.meta.url)));
@@ -29,7 +32,7 @@ createServer(async (req, res) => {
   } else if (['/app.js','/holidays.js','/calendar-ui.js'].includes(req.url.split('?')[0])) {
     res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
     res.end(await readFile(new URL('.' + req.url.split('?')[0], import.meta.url)));
-  } else if (req.url === '/' || req.url === '/index.html') {
+  } else if (['/','/index.html','/coach.html'].includes(req.url.split('?')[0])) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.end(await readFile(new URL('./index.html', import.meta.url)));
   } else res.writeHead(404).end();

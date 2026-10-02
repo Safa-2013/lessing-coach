@@ -1,0 +1,34 @@
+LESSING COACH – STARTSEITE UND LOBBY FIX 04
+
+Diesmal wird ausdrücklich die Lessing-Coach-Hauptseite wiederhergestellt.
+Das Spiel bleibt eine Unterseite unter lessing-stars.
+
+1. ZIP in Dateien entpacken.
+2. GitHub HAUPTVERZEICHNIS öffnen (dort liegen app.js, lib, assets und lessing-stars).
+   Die drei Dateien aus dem obersten ZIP-Ordner hochladen:
+   index.html (32 KB), coach.html (32 KB), vercel.json.
+   Commit changes bestätigen.
+3. GitHub-Ordner lessing-stars öffnen.
+   Die index.html aus dem gleichnamigen ZIP-Unterordner hochladen (ca. 2,4 MB).
+   Commit changes bestätigen.
+4. Nach erfolgreichem Deployment Hauptadresse neu laden:
+   https://lessing-coaching.vercel.app/
+   Diese zeigt Lessing Coach. Das Spiel erreichst du über dessen Menü.
+
+Wichtig: Die zwei index.html-Dateien haben unterschiedliche Inhalte!
+Die kleine Datei gehört ins Hauptverzeichnis; die große in lessing-stars.
+coach.html gehört ebenfalls ins Hauptverzeichnis, NICHT in lessing-stars.
+Es müssen keine weiteren lib-Dateien verändert werden, wenn Studio 03 vollständig installiert ist.
+
+Rückkehr: Beide Lessing-Coach-Buttons im Spiel öffnen /coach.html direkt,
+ohne Anmeldung oder vorherige Spielserver-Anfrage.
+Die Hauptadresse und /index.html werden in Vercel auf /coach.html geleitet.
+
+Die komplette Lobby wird in die tatsächliche sichtbare Safari-Fläche
+skaliert. Die Lobby scrollt nicht mehr. Bei wenig verfügbarer Höhe wird
+alles entsprechend kleiner. Längere Verwaltungsformulare bleiben scrollbar.
+
+Prüfung: 14 automatische Tests bestanden. Lokaler HTTP-Test: /,
+/index.html und /coach.html liefern Coach; /lessing-stars/ liefert das Spiel.
+Die sichtbare Fläche wurde mit mehreren kurzen Querformatgrößen geprüft.
+Kein echter Safari-Renderingtest und keine Live-Veröffentlichung durch Codex.

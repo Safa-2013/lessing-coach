@@ -1,0 +1,27 @@
+PLAY 15 – STEUERUNG, SHOWDOWN UND EDITOREN
+
+UPLOAD: Nur index.html reicht diesmal NICHT.
+1. ZIP entpacken.
+2. index.html im Hauptordner des GitHub-Repositories ersetzen.
+3. Den vorhandenen GitHub-Ordner lib öffnen und alle 8 Dateien aus dem lib-Ordner dieser ZIP dort hochladen/ersetzen. stars-image.js ist neu. Die Dateien müssen innerhalb lib liegen.
+4. Commit changes und Vercel-Deployment abwarten, Website neu laden.
+
+KORRIGIERT:
+- Zwei konkrete Steuerungsfehler: alte Tastaturprüfung auf lokalen statt Online-Modus, und Zeitstempel größer als die serverseitige Sequenzgrenze. Bewegungen werden jetzt fortlaufend verarbeitet.
+- Tastatur WASD/Pfeile, Leertaste für Angriff, E für Super. Touch-Joystick und Angriff halten/ziehen. Vergrößern/verkleinern mit +/−.
+- Showdown: 10 Teilnehmer, jeder gegen jeden, freie Plätze Bots. Getrennte Startplätze, bei Hindernissen sichere Ersatzplätze. Team-Modi bleiben 6 Teilnehmer.
+- Bots greifen in den ersten 3 Sekunden nicht an. Kamera folgt dem Spieler. Untere Navigation während Match verborgen; Zurück-Taste im Spielfeld.
+- Neue Spieler: 500 Münzen, 500 Powerpunkte, 100 Credits; ein Start-Brawler Hamza. S.; 0 Trophäen. Bestehende gespeicherte Konten werden nicht zurückgesetzt.
+- Verwaltung: Brawler ändern/löschen (Start-Brawler wird bearbeitet statt gelöscht), Karteneditor und KI direkt erreichbar. Gelöschte Figuren werden aus der Sammlung entfernt; Auswahl wechselt zu Hamza. S.
+- Designer: detaillierte vorhandene Figuren als Basis statt einfacher Ovalfigur, Farben, Accessoires, Kopfgröße, Körperbreite und Figurengröße. Figureneinstellungen werden gespeichert.
+- Super-Design: Projektilsalve, Heilung oder Sprint; eigene Farbe, Streuung, Anzahl, Schaden; Projektiltempo und Größe. Serverseitige Kampfberechnung.
+- Drops: vier getrennte Tipps, L-Symbol und kantige Form, Seltenheitsfarben Grün/Blau/Violett/Rot/Gold. Mega-Box golden. Die Illustrationen sind weiterhin kein pixelidentischer Nachbau der Vorlagen.
+
+KI:
+Admin anmelden > ✦ KI. Text-KI erstellt Brawlerwerte, Outfit-Entwürfe und Karten. Gleiche GEMINI_API_KEY/GEMINI_MODEL bzw. OPENAI_API_KEY/OPENAI_MODEL wie Lern-KI. Entwurf bearbeiten, speichern, für Spieler freigeben.
+Foto: + BRAWLER > Figurenbild hochladen > Foto → Brawler mit 3D-Look. Benötigt OPENAI_API_KEY für OpenAI-Bilddienst; STARS_IMAGE_MODEL optional (Standard gpt-image-1.5). Ergebnis ist ein transparentes 2D-Spielbild mit 3D-Look, kein drehbares 3D-Modell und keine animierte 3D-Figur. Bild-KI kann Kontingent-/Modell-/Laufzeitfehler melden. API-Schlüssel niemals in HTML eintragen.
+
+GEPRÜFT:
+28 automatische Tests. Tatsächliche Browserbewegung mit Tastatur und Joystick, Zoom, gespeichertes Feld im Match, Brawler-Design und Auswahl, vier Drop-Tipps, Gast-/Admin-/Spielerkonten, Abmeldung und Coach-Rückweg. KI-Entwürfe für Brawler/Karten/Skins durch Vorschau und Speicherung getestet. Bild-API mit kontrollierter Testantwort geprüft; keine Live-Generierung mit deinem API-Schlüssel. Kein echtes iPhone getestet. Nicht automatisch veröffentlicht.
+
+Lessing Coach bleibt die Startseite; Terminplaner-Ansicht unverändert.
