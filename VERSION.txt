@@ -1,0 +1,10 @@
+LESSING STARS VIEW UPDATE
+03.10.2026
+- Lobby redesigned to match the desired colorful game look
+- Shop redesigned
+- Brawler collection redesigned
+- L-Drops / Mega Box screen redesigned
+- Login redesigned
+- Right quick menu redesigned
+- Existing Lessing Coaching / admin / game logic preserved from ANIM_DROPS_UPDATE
+- Relative asset paths for GitHub/Vercel compatibility
