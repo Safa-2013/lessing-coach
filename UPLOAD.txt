@@ -1,6 +1,11 @@
-Finale lokale Vorschau. Dateien in einen Ordner laden und index.html öffnen.
-Hinweise:
-- Startwerte: 1500 Münzen, 100 Gems, 1000 Powerpunkte.
-- Start-Brawler: Hamza. S.
-- Insgesamt 50 Brawler im Katalog.
-- Safa Yildiz ist als legendärer Brawler mit 4000 Credits hinterlegt.
+LESSING COACH + LESSING STARS – FIXED VIEW
+
+Was korrigiert wurde:
+- Lessing-Coach-Ansicht wieder im bisherigen/polierten Design (Startseite, Termin & Coaching, Termine, Lern-KI, Kontakt, Wartung).
+- Lessing Stars bleibt als eigener Spielbereich erhalten.
+- 50 Brawler im Lessing-Stars-Katalog; Hamza. S. ist Starter; Safa Yildiz ist der stärkste/teuerste Brawler mit 4.000 Credits.
+- Keine personalisierte Begrüßung im Coaching-/KI-Bereich: nur „Hallo!“.
+- Keine Namens-/Pro-Anzeige im KI-Bereich.
+- Alte sichtbare „by Safa Yildiz 7G2“-Texte werden im Coaching-Bereich entfernt.
+
+Für GitHub/Vercel: ZIP entpacken und die enthaltenen Dateien/Ordner über die bestehenden Dateien im Repository hochladen. Bestehende zusätzliche Lessing-Stars-Assets im Repository NICHT löschen.

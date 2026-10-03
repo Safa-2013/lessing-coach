@@ -633,4 +633,22 @@ window.addEventListener('lessing-coach-home',()=>navigate('start'));
  window.closeLessingStars=function(){overlay.hidden=true;document.body.classList.remove('coach-stars-open');document.querySelector('.shell').inert=false;frame.removeAttribute('src');window.dispatchEvent(new Event('lessing-coach-home'));focusBefore?.focus();};
  window.addEventListener('message',function(event){if(event.source===frame.contentWindow&&event.origin===location.origin&&event.data?.type==='lessing-coach-home')window.closeLessingStars();});
 })();
-</script></body></html>
+</script>
+<script id="coach-nonpersonalized-ui">
+(function(){
+  function scrub(root=document){
+    root.querySelectorAll('.ai-main h1').forEach(el=>{
+      const html=el.innerHTML;
+      if(/^Hallo\s+[^!<]+!/i.test(el.textContent||'')) el.innerHTML='Hallo!<br><span class="gradient">Was möchtest du heute lernen?</span>';
+    });
+    const walker=document.createTreeWalker(root.body||root,NodeFilter.SHOW_TEXT);
+    let n; while(n=walker.nextNode()){
+      if(/by\s+Safa\s+Yildiz\s*7G2/i.test(n.nodeValue||'')) n.nodeValue='';
+    }
+    root.querySelectorAll('[data-personal-profile],.ai-user-profile,.ai-plan-badge').forEach(el=>el.remove());
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>scrub());else scrub();
+  new MutationObserver(()=>scrub()).observe(document.documentElement,{subtree:true,childList:true,characterData:true});
+})();
+</script>
+</body></html>

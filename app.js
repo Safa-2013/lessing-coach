@@ -1,6 +1,5 @@
 import { holidayOn } from './holidays.js';
 import { makeSchedule } from './calendar-ui.js';
-import { createDvdScreensaver } from './waiting-games.js';
 
 const $ = selector => document.querySelector(selector);
 function showManagedCopy(key, value) { const target = $('#' + key + 'Copy'); target.textContent = value || ''; target.classList.toggle('hidden', !value); }
@@ -20,13 +19,7 @@ async function request(path, options = {}) {
   const response = await fetch('/api/' + path, { credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, signal:AbortSignal.timeout(12000), ...options });
   let result;
   try { result = await response.json(); } catch { throw new Error('Serverantwort konnte nicht gelesen werden'); }
-  if (!response.ok) {
-    if(response.status===401&&path!=='login'){
-      state.session={role:'visitor',permissions:[]};renderAuth();
-      if(document.querySelector('.view.active')?.id==='adminPanel')navigate('login');
-    }
-    throw new Error(result.error || 'Anfrage fehlgeschlagen');
-  }
+  if (!response.ok) throw new Error(result.error || 'Anfrage fehlgeschlagen');
   return result;
 }
 const send = (path, data, method='POST') => request(path, { method, body:JSON.stringify(data) });
@@ -48,9 +41,9 @@ function closeMobileMenu(){ $('#sidebar').classList.remove('open');$('#scrim').c
 function navigate(page,options={}) {
   if (page === 'adminPanel' && state.session.role === 'visitor') page = 'login';
   if(maintenanceBlocked(page)){showMaintenance(page);return;}
+  gameCleanup();
   const previous=document.querySelector('.view.active')?.id;
   if(previous===page){closeMobileMenu();return;}
-  gameCleanup();
   if(previous)pageScroll[previous]=window.scrollY;
   if (page === 'login' && !document.getElementById('login').classList.contains('active')) $('#loginForm').reset();
   document.body.dataset.page = page;
@@ -111,7 +104,7 @@ async function boot() {
   }
 }
 document.addEventListener('click', e => {
-  const page = e.target.closest('button[data-page], a[data-page]')?.dataset.page;
+  const page = e.target.closest('[data-page]')?.dataset.page;
   if (page) navigate(page);
   const prompt = e.target.closest('[data-prompt]')?.dataset.prompt;
   if (prompt) { if(maintenanceBlocked('ki')||(/lernplan/i.test(prompt)&&maintenanceBlocked('planner'))){showMaintenance(/lernplan/i.test(prompt)?'planner':'ki');return;} navigate('ki'); $('#aiForm input[name="message"]').value = prompt; $('#aiForm input[name="message"]').focus(); }
@@ -418,7 +411,7 @@ $('#categoryCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin
 $('#passwordForm').onsubmit = async e => { e.preventDefault(); const form=e.target; try { await send('admin/password',Object.fromEntries(new FormData(form)),'PATCH'); form.reset(); toast('Passwort geändert'); }catch(err){toast(err.message);} };
 
 let maintenance={};
-const maintenanceLabels={start:'Startseite',coaching:'Termin & Coaching',termine:'Termine',ki:'Lern-KI',contact:'Chat',planner:'Lernplaner',stars:'Lessing Stars'};
+const maintenanceLabels={start:'Startseite',coaching:'Termin & Coaching',termine:'Termine',ki:'Lern-KI',contact:'Chat',planner:'Lernplaner'};
 const gameLabels={math:'Mathe-Quiz',vocab:'Vokabeltrainer',memory:'Memory',reaction:'Reaktionsspiel',logic:'Logik-Quiz',dvd:'DVD-Video'};
 let gameCleanup=()=>{};
 let maintenanceOrigin='start';
@@ -432,7 +425,7 @@ function showMaintenance(page){
  maintenanceOrigin=page;gameCleanup();const video=$('#maintenancePage video');if(video){video.src=nextMaintenanceVideo();video.load();video.play().catch(()=>{});}document.body.classList.remove('ai-mode');closeMobileMenu();$('.view.active')?.classList.remove('active');$('#maintenancePage').classList.add('active');document.body.dataset.page='maintenancePage';
  $('#maintenanceTitle').textContent=maintenance.title||'Wartungsarbeiten';$('#maintenanceMessage').textContent=maintenance.message||(page==='coaching'||page==='termine'?'Derzeit sind keine Terminerstellungen möglich, da Wartungsarbeiten durchgeführt werden.':'Dieser Bereich wird gerade gewartet. Bitte versuche es später erneut.');
  const box=$('#maintenanceGames');box.replaceChildren();if(maintenance.games===false)return;
- box.innerHTML='<h2 style="margin-top:24px">Lernspiele ab Klasse 5</h2><p>Wähle ein Lernspiel oder schau dir den DVD-Bildschirmschoner an.</p><label class="field">Schwierigkeit<select id="gameLevel"><option value="5">Klasse 5–6</option><option value="7">Klasse 7–8</option><option value="9">Klasse 9+</option></select></label><div class="row" id="gameChoices"></div><div class="panel" id="gameArea"></div>';
+ box.innerHTML='<h2 style="margin-top:24px">Lernspiele ab Klasse 5</h2><p>Wähle ein Lernspiel oder schau dir das DVD-Video an.</p><div class="row" id="gameChoices"></div><div class="panel" id="gameArea"></div>';
  for(const [key,label] of Object.entries(gameLabels)){if(maintenance.enabledGames?.[key]===false)continue;const b=document.createElement('button');b.className='primary';b.textContent=label;b.onclick=()=>startGame(key);$('#gameChoices').append(b);}
  $('#gameArea').textContent='Wähle ein Spiel aus.';
 }
@@ -453,7 +446,7 @@ function startGame(kind){
  body.innerHTML=`<p>Aufgabe ${n+1}/10 · Punkte ${score}</p><p><strong>${safe(q)}</strong></p><form id="gameAnswer"><label class="field">Deine Antwort<input required autocomplete="off" aria-label="Deine Antwort"></label><button class="primary">Prüfen</button></form><p id="gameFeedback" role="status"></p>`;
  const f=$('#gameAnswer');f.onsubmit=e=>{e.preventDefault();if(f.querySelector('button').disabled)return;const norm=x=>x.trim().toLowerCase().replace(/^(der|die|das) /,'').replace(',', '.');const correct=(kind==='vocab'?[answer,...({Gelegenheit:['Chance'],Leistung:['Erfolg'],Beweis:['Nachweis','Belege'],Folge:['Konsequenz'],Nachbar:['Nachbarin'],Bibliothek:['Bücherei']}[answer]||[])]:[answer]).some(a=>norm(f.querySelector('input').value)===norm(a));if(correct)score++;n++;f.querySelector('button').disabled=true;f.querySelector('input').disabled=true;$('#gameFeedback').textContent=correct?'Richtig!':`Richtige Antwort: ${answer}`;const b=document.createElement('button');b.className='primary';b.textContent='Weiter';b.onclick=next;body.append(b);};}next();
 }
-setInterval(async()=>{try{const data=await request('maintenance');maintenance=data.maintenance;if(data.session&&data.session.role!==state.session.role){const wasStaff=state.session.role!=='visitor';state.session=data.session;renderAuth();if(wasStaff&&state.session.role==='visitor'&&document.querySelector('.view.active')?.id==='adminPanel'){navigate('login');toast('Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.');}}const page=document.querySelector('.view.active')?.id;if(page&&maintenanceBlocked(page))showMaintenance(page);else if(page==='maintenancePage'&&!maintenanceBlocked(maintenanceOrigin))navigate(maintenanceOrigin==='planner'?'ki':maintenanceOrigin);}catch{}},15000);
+setInterval(async()=>{try{maintenance=(await request('maintenance')).maintenance;const page=document.querySelector('.view.active')?.id;if(page&&maintenanceBlocked(page))showMaintenance(page);else if(page==='maintenancePage'&&!maintenanceBlocked(maintenanceOrigin))navigate(maintenanceOrigin==='planner'?'ki':maintenanceOrigin);}catch{}},15000);
 queueMicrotask(()=>boot().catch(e=>{document.documentElement.removeAttribute('data-loading');toast('Seite konnte nicht vollständig geladen werden: '+e.message);}));
 
 // Schüler-Passwortschalter: nur die Verwaltung kann den Modus ändern.
@@ -544,7 +537,8 @@ function nextMaintenanceVideo(){
  const next=(last+1)%clips.length;try{localStorage.setItem('lessing_background_clip',String(next));}catch{}return clips[next];
 }
 function startDvdGame(body){
- body.replaceChildren();gameCleanup=createDvdScreensaver(body);
+ body.innerHTML='<video id="dvdVideo" autoplay muted loop playsinline disablepictureinpicture disableremoteplayback preload="auto" poster="/assets/dvd-poster.jpg" style="width:100%;max-width:960px;display:block;background:black;border-radius:12px" aria-label="DVD-VIDEO-Bildschirmschoner"><source src="/assets/dvd-screensaver.mp4" type="video/mp4"></video>';
+ const video=$('#dvdVideo');video.muted=true;video.defaultMuted=true;video.loop=true;video.autoplay=true;video.controls=false;video.play().catch(()=>{});video.addEventListener('canplay',()=>video.play().catch(()=>{}),{once:true});gameCleanup=()=>{video.pause();};
 }
 
 function startMemory(root){
@@ -571,6 +565,3 @@ function startMemory(root){
  gameCleanup=()=>{active=false;clearTimeout(timer);};
  restart.onclick=e=>{e.stopPropagation();gameCleanup();startMemory(root);};
 }
-
-const starsNavigation=document.querySelector('#starsNavigation');starsNavigation.onclick=()=>{if(maintenanceBlocked('stars'))showMaintenance('stars');else{closeMobileMenu();window.openLessingStars();}};
-window.addEventListener('lessing-coach-home',()=>navigate('start'));
