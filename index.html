@@ -154,7 +154,8 @@ async function boot() {
   finally {
     renderAuth();
     const target = location.hash.slice(1);
-    if (target && $('#' + target)?.classList.contains('view')) navigate(target,{history:true,restore:true});
+    const targetView = target && /^[A-Za-z][A-Za-z0-9_-]*$/.test(target) ? document.getElementById(target) : null;
+    if (targetView?.classList.contains('view')) navigate(target,{history:true,restore:true});
     else navigate('start',{history:true});
     document.documentElement.removeAttribute('data-loading');
   }
@@ -170,7 +171,7 @@ document.addEventListener('click', e => {
 $('.admin-tabs').onclick=e=>{const tab=e.target.closest('[data-admin-tab]:not(.hidden)')?.dataset.adminTab;if(tab)showAdminTab(tab);};
 $('#menuToggle').onclick=e=>{e.stopPropagation();const open=!$('#sidebar').classList.contains('open');$('#sidebar').classList.toggle('open',open);$('#scrim').classList.toggle('open',open);document.body.classList.toggle('menu-open',open);$('#menuToggle').setAttribute('aria-expanded',String(open));};
 $('#scrim').onclick=closeMobileMenu;
-window.addEventListener('popstate',()=>{const p=location.hash.slice(1)||'start';if($('#'+p)?.classList.contains('view'))navigate(p,{history:true,restore:true});});
+window.addEventListener('popstate',()=>{const raw=location.hash.slice(1)||'start';const p=/^[A-Za-z][A-Za-z0-9_-]*$/.test(raw)?raw:'start';const view=document.getElementById(p);if(view?.classList.contains('view'))navigate(p,{history:true,restore:true});else navigate('start',{history:true,restore:true});});
 const berlinToday = () => {
   const parts = new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
   const get = type => parts.find(p => p.type === type).value;
