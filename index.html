@@ -1,369 +1,654 @@
 <!doctype html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lessing Stars – Ansicht Fix</title>
-  <style>
-    :root {
-      --bg: #07162d;
-      --panel: rgba(5, 14, 28, 0.82);
-      --accent: #ffd84b;
-      --text: #f7fbff;
-      --shadow: 0 18px 40px rgba(0,0,0,.45);
+<html lang="de" data-loading="true"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102945"><title>Lessing Schulen Coaching</title>
+<style>
+:root{font-family:Inter,Arial,sans-serif;color:#102945;background:#f4f8fd;font-synthesis:none}*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:wait}a{color:inherit}.shell{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:224px;background:linear-gradient(160deg,#17375e,#0d2543 72%);color:white;padding:18px 10px;z-index:30;display:flex;flex-direction:column;box-shadow:4px 0 22px #10294516}.brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:800;line-height:1.12;padding:0 7px 24px}.brand-mark{font-size:48px;line-height:.9;font-weight:900;color:#fff}.nav{display:flex;flex-direction:column;gap:5px}.nav button{border:0;background:transparent;color:#cfdaea;border-radius:8px;text-align:left;padding:12px 11px;display:flex;align-items:center;gap:12px;width:100%;font-size:14px}.nav button:hover,.nav button.active{background:#1067dd;color:white}.nav button span:first-child{font-size:19px;width:22px;text-align:center}.nav .separator{height:1px;background:#ffffff37;margin:10px 11px}.mobile-top,.scrim{display:none}.main{margin-left:224px;min-width:0}.topbar{height:52px;background:#ffffffc9;display:flex;align-items:center;justify-content:flex-end;padding:0 25px}.topbar button{background:#0568e9;color:white;border:0;border-radius:9px;padding:10px 21px;font-size:13px}.view{display:none;padding:32px clamp(18px,4vw,50px) 60px;max-width:1320px;margin:auto;animation:appear .2s ease}.view.active{display:block}@keyframes appear{from{opacity:.5;transform:translateY(5px)}to{opacity:1;transform:none}}h1{font-size:clamp(29px,3.5vw,47px);letter-spacing:-.045em;margin:0 0 12px}h2{font-size:25px;letter-spacing:-.03em;margin:0 0 14px}h3{margin:0 0 8px}p{line-height:1.5}.muted{color:#61758e}.eyebrow{color:#0574ef;text-transform:uppercase;letter-spacing:.2em;font-size:11px;font-weight:800}.hero{min-height:160px;background:radial-gradient(circle at 67% 5%,#d8ecff,transparent 35%),linear-gradient(110deg,#fff,#eef7ff);border-radius:18px;padding:37px 36px;position:relative;overflow:hidden}.hero p{max-width:620px;margin:0;color:#526984}.hero .accent{color:#0869e7}.hero:after{content:'✏️  📚';position:absolute;right:6%;bottom:20px;font-size:65px;opacity:.75;transform:rotate(-12deg)}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}.feature{min-height:345px;border-radius:18px;padding:23px;display:flex;flex-direction:column;box-shadow:0 12px 25px #17375e18;overflow:hidden}.feature.orange{background:linear-gradient(135deg,#fff2e2,#fff9f3)}.feature.blue{background:linear-gradient(135deg,#dff0ff,#f4faff)}.feature.green{background:linear-gradient(135deg,#dff9e8,#f5fff8)}.feature .icon{font-size:76px;text-align:center;flex:1;display:grid;place-items:center;filter:drop-shadow(0 14px 12px #18518a2a)}.feature h2{font-size:24px;margin:0}.feature p{color:#536882;margin:6px 0 14px;font-size:14px}.primary{border:0;background:#0868e8;color:white;border-radius:10px;padding:12px 18px;font-weight:650}.orange .primary{background:#ff7618}.green .primary{background:#069052}.panel{background:white;border:1px solid #e5ecf5;border-radius:18px;padding:25px;box-shadow:0 10px 24px #1029450b;margin-top:18px}.narrow{max-width:760px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.field{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:700;margin-bottom:15px}.field input,.field select,.field textarea,.composer input,.composer textarea{width:100%;border:1px solid #ccd8e5;border-radius:10px;padding:12px 13px;background:#fff;color:#102945;outline-color:#0868e8;font-weight:400}.field textarea{min-height:100px;resize:vertical}.result{margin-top:18px;padding:15px;border-radius:11px;background:#e6f3ff;line-height:1.5;overflow-wrap:anywhere}.notice{color:#b52735;background:#fff0f2}.code{font-weight:800;letter-spacing:.06em;font-size:21px}.chat-area{background:radial-gradient(circle at top right,#e8f4ff,transparent 42%),#f6f9fe;border-radius:18px;border:1px solid #e1eaf5;height:min(66vh,590px);min-height:380px;display:flex;flex-direction:column;padding:18px}.chat-scroll{flex:1;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:14px 7px}.bubble{max-width:min(82%,620px);padding:13px 17px;background:white;border-radius:16px;box-shadow:0 2px 10px #163d6820;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}.bubble.mine{align-self:flex-end;background:#dcecff}.bubble small{display:block;color:#69809c;margin-top:8px;font-size:11px}.composer{display:flex;gap:8px;background:white;border-radius:15px;padding:8px;border:1px solid #e3e9f3}.composer input{border:0;flex:1}.composer button{min-width:50px}.ai-page{background:#080d19;color:#eff4ff;min-height:calc(100vh - 52px);display:grid;grid-template-columns:215px 1fr}.ai-side{border-right:1px solid #ffffff1b;padding:18px 12px}.ai-side button{width:100%;border:0;border-radius:10px;color:#dfe8f7;background:#ffffff0e;padding:12px;text-align:left;margin-bottom:8px}.ai-side button:hover{background:#7355db66}.ai-main{padding:30px;max-width:1100px;width:100%;margin:0 auto}.ai-main h1{font-size:clamp(25px,3vw,37px)}.gradient{background:linear-gradient(100deg,#ac71ff,#398df9);background-clip:text;color:transparent}.ai-sub{color:#a7b1c8}.subjects{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:25px 0}.subjects button,.ai-quick button{border:1px solid #ffffff12;background:#141b2b;color:#eef1fa;border-radius:12px;padding:15px;text-align:left}.subjects button:hover,.ai-quick button:hover{border-color:#8955e9}.ai-quick{display:flex;gap:9px;flex-wrap:wrap;margin:10px 0 22px}.ai-quick button{padding:10px 14px;font-size:12px}.ai-main .composer{background:#161d2e;border-color:#353c58}.ai-main .composer input{background:transparent;color:white}.ai-main .composer button{background:#884de7}.ai-scroll{max-height:48vh;overflow:auto;display:flex;flex-direction:column;gap:12px;margin-bottom:15px}.ai-scroll .bubble{background:#1c2941;color:#fff}.ai-scroll .bubble.mine{background:#58389c}.ai-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:27px}.ai-tools button{background:#131f2d;color:#f1f4fa;border:1px solid #41546c;border-radius:14px;text-align:left;padding:18px;line-height:1.5}.ai-tools strong{display:block;margin-bottom:5px}.admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.list-item{border-bottom:1px solid #e7edf6;padding:14px 0}.list-item:last-child{border:0}.list-item p{margin:5px 0}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row .field{flex:1;min-width:150px}.small{font-size:12px}.pill{display:inline-block;background:#e4f0ff;border-radius:99px;padding:5px 10px;font-size:12px}.danger{background:#b52c42}.toast{position:fixed;bottom:20px;right:20px;background:#17375e;color:white;padding:14px 18px;border-radius:10px;z-index:80;box-shadow:0 8px 28px #0004;max-width:400px}.hidden{display:none!important}
+@media(max-width:1000px){.cards{gap:10px}.feature{padding:18px}.subjects{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.sidebar{transform:translateX(-105%);transition:transform .25s;width:min(80vw,280px)}.sidebar.open{transform:none}.scrim.open{display:block;position:fixed;inset:0;background:#05152988;z-index:25}.mobile-top{height:54px;display:flex;align-items:center;padding:0 14px;gap:10px;background:#102945;color:white;position:sticky;top:0;z-index:20;font-weight:750}.mobile-top button{border:0;color:white;background:transparent;font-size:25px;padding:2px 8px}.main{margin-left:0}.topbar{height:46px}.view{padding:20px 14px 44px}.hero{padding:27px 20px}.hero:after{font-size:30px;opacity:.4;bottom:5px}.cards,.grid2,.admin-grid{grid-template-columns:1fr}.feature{min-height:220px}.feature .icon{font-size:58px}.chat-area{height:calc(100dvh - 190px);min-height:320px}.ai-page{grid-template-columns:1fr}.ai-side{border:0;border-bottom:1px solid #ffffff1b;display:flex;gap:8px;overflow:auto;padding:10px}.ai-side button{flex:0 0 auto;width:auto;white-space:nowrap;margin:0}.ai-main{padding:20px 13px}.subjects{grid-template-columns:repeat(2,1fr)}.subjects button{padding:12px}.ai-tools{grid-template-columns:1fr}.ai-scroll{max-height:45vh}}
+</style><link rel="stylesheet" href="visual.css?v=mobile-20261001"><style>html[data-loading="true"] .shell{visibility:hidden;pointer-events:none}html[data-loading="true"] body::before{content:"Seite wird geladen …";position:fixed;inset:0;display:grid;place-items:center;color:#61758e;background:#f4f8fd;z-index:1000}</style><noscript><style>html[data-loading="true"] .shell{visibility:visible}html[data-loading="true"] body::before{display:none}</style></noscript><script>window.addEventListener("error",function(){document.documentElement.removeAttribute("data-loading");});</script></head><body><div class="shell"><div class="scrim" id="scrim"></div><div class="mobile-top"><button id="menuToggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="sidebar">☰</button><span>Lessing Schulen Coaching</span></div><aside class="sidebar" id="sidebar"><div class="brand"><span class="brand-mark">L</span><span>Lessing<br>Schulen<br>Coaching</span></div><nav class="nav" id="nav"><button data-page="start"><span>⌂</span>Startseite</button><button data-page="coaching"><span>▣</span>Termin &amp; Coaching</button><button data-page="termine"><span>▦</span>Termine</button><button data-page="ki"><span>✦</span>Lern-KI</button><button id="starsNavigation" type="button"><span>★</span>Lessing Stars</button><div class="separator"></div><button data-page="about"><span>ⓘ</span>Über Lessing</button><button data-page="help"><span>ⓘ</span>Hilfe</button><button data-page="contact"><span>☏</span>Kontakt</button></nav></aside><div class="main"><header class="topbar"><button data-page="login" id="topLogin">Anmelden</button></header>
+<section class="view active" id="start"><div class="hero"><div class="eyebrow">Lessing Schulen Coaching</div><h1>Alles an einem <span class="accent">Ort.</span></h1><p id="heroText">Termine erstellen, Lernunterstützung erhalten und mit der Lern-KI lernen – einfach, verständlich und ohne Schülerkonto.</p></div><div class="cards"><article class="feature orange"><div class="icon">🧑‍🏫💬</div><h2>Termin &amp; Coaching</h2><p>Termine erstellen, Unterstützung anfragen und eine passende Lehrkraft bzw. einen Bereich auswählen.</p><button class="primary" data-page="coaching">Jetzt öffnen →</button></article><article class="feature blue"><div class="icon">🗓️⏱️</div><h2>Termine</h2><p>Mit deinem persönlichen Anfragecode kannst du den Status deiner Termine ansehen.</p><button class="primary" data-page="termine">Jetzt öffnen →</button></article><article class="feature green"><div class="icon">🤖📚</div><h2>Lern-KI</h2><p>Normal chatten, Aufgaben lösen, erklären lassen und Lernpläne erstellen.</p><button class="primary" data-page="ki">Jetzt öffnen →</button></article></div></section>
+<section class="view" id="coaching"><div class="eyebrow">Termin &amp; Coaching</div><h1>Unterstützung anfragen</h1><p class="muted">Nach dem Senden erhältst du einen Anfragecode. Bitte bewahre ihn sicher auf.</p><form class="panel narrow" id="appointmentForm"><div class="grid2"><label class="field">Vorname<input name="first_name" required maxlength="100" autocomplete="given-name"></label><label class="field">Nachname<input name="last_name" required maxlength="100" autocomplete="family-name"></label><label class="field">Klasse<input name="class_name" required maxlength="100" placeholder="z. B. 9b"></label></div><label class="field">Thema<textarea name="topic" required maxlength="500" placeholder="Wobei brauchst du Unterstützung?"></textarea></label>
+<div class="grid2">
+  <label class="field">Bereich
+    <select name="category_id" id="appointmentCategory" required><option value="">Bereich auswählen …</option></select>
+  </label>
+  <label class="field">Lehrkraft
+    <select name="teacher_id" id="appointmentTeacher" required><option value="">Lehrkraft auswählen …</option></select>
+  </label>
+</div>
+<div id="categoryLegend" class="category-legend" aria-label="Bereiche"></div><p id="categoryTeacherHint" class="small muted"></p>
+<div class="field"><span>Wähle einen Tag im Kalender</span><p class="calendar-help">Die Markierung zeigt, ob an einem Tag schon Termine, Anfragen oder Ferien liegen. Die genaue Uhrzeit klären wir nach deiner Anfrage.</p><div class="booking-calendar" id="bookingCalendar"><div class="calendar-head"><button type="button" id="calendarPrev" aria-label="Vorheriger Monat">‹</button><strong id="calendarMonth"></strong><button type="button" id="calendarNext" aria-label="Nächster Monat">›</button></div><div class="calendar-grid" id="calendarDays"></div><p id="calendarStatus" class="calendar-status" aria-live="polite">Bitte wähle einen Tag.</p></div><input type="hidden" name="requested_at"></div><label class="field">Gewünschte Uhrzeit<input type="time" name="requested_time" min="07:00" max="20:00" step="900" required></label><fieldset class="school-end"><legend>Wann hast du Schule aus?</legend><label><input type="radio" name="school_end" value="13:20" required><span>Um 13:20 Uhr</span></label><label><input type="radio" name="school_end" value="15:50" required><span>Um 15:50 Uhr</span></label><label><input type="radio" name="school_end" value="later" required><span>Noch später</span></label></fieldset><button type="submit" class="primary">Anfrage senden</button><div id="appointmentResult" aria-live="polite"></div></form></section>
+<section class="view" id="termine"><div class="eyebrow">Termine</div><h1>Kalender &amp; Anfrage</h1><p class="muted">Hier siehst du, an welchen Tagen bereits Termine oder Anfragen liegen. Persönliche Angaben anderer Schüler bleiben verborgen.</p><div class="panel my-appointments-panel"><h2>Deine Termine</h2><p class="muted">Hier siehst du nur deine eigenen Terminanfragen von diesem Gerät. Termine anderer Schüler werden nicht angezeigt.</p><div id="myAppointments"></div></div><div class="schedule-shell student-schedule" id="studentSchedule"><div class="schedule-heading"><div><h2>Termin-Kalender</h2><p>Wochen- oder Monatsübersicht · Ferien in Baden-Württemberg markiert</p></div><div class="schedule-controls"><button type="button" class="schedule-prev" aria-label="Vorheriger Zeitraum">‹</button><button type="button" class="schedule-today">Heute</button><button type="button" class="schedule-next" aria-label="Nächster Zeitraum">›</button><strong class="schedule-period"></strong><div class="schedule-modes"><button type="button" data-mode="week">Woche</button><button type="button" data-mode="month" class="active">Monat</button></div></div></div><div class="schedule-body" aria-live="polite"></div><p class="schedule-legend">Blau: bestätigte Termine · Orange: offene Anfragen · Grün: keine Termine · Lila: Schulferien BW. Bewegliche Ferientage können abweichen.</p></div><form class="panel narrow" id="lookupForm"><h2>Deine Anfrage prüfen</h2><label class="field">Anfragecode<input name="code" required placeholder="ABC123"></label><button class="primary">Status anzeigen</button><div id="lookupResult" aria-live="polite"></div></form></section>
+<section class="view" id="contact"><div class="eyebrow">Kontakt</div><h1>Chat</h1><p class="muted">Gib einmal deine Klasse und deinen Namen ein. Das wird dein persönlicher Chat-Zugang, damit du später deinen alten Chat wieder siehst.</p><div class="panel narrow" id="chatGate"><form id="chatLoginForm"><div class="grid2"><label class="field">Klasse<input name="class_name" required maxlength="50" placeholder="z. B. 9b"></label><label class="field">Name<input name="name" required maxlength="120" placeholder="Dein Name"></label></div><label class="field hidden" id="studentPasswordField">Passwort (beim ersten Mal erstellen)<input name="password" type="password" minlength="8" autocomplete="current-password" disabled></label><button class="primary">Chat öffnen</button><p class="small muted">Deine Angaben werden nicht als Name in der Chatliste angezeigt.</p></form></div><div class="chat-area hidden" id="chatArea"><div class="chat-chatbar"><strong id="chatClassLabel"></strong><button type="button" class="primary" id="chatLogout">Chat wechseln</button></div><div class="chat-scroll" id="contactMessages" aria-live="polite"></div><form class="composer" id="contactForm"><button type="button" class="chat-attach" id="contactAttach" aria-label="Textdatei anhängen">📎</button><input id="contactFile" type="file" accept=".txt,.md,text/plain" hidden><input name="message" required maxlength="2000" aria-label="Nachricht schreiben" placeholder="Nachricht schreiben …"><button type="button" class="chat-emoji" id="contactEmoji" aria-label="Emoji einfügen">☺</button><button class="primary" aria-label="Senden">➤</button></form></div></section>
+<section class="view" id="ki" style="padding:0;max-width:none"><div class="ai-page"><aside class="ai-side"><button id="newThread">＋ Neuer Chat</button><button data-prompt="Erstelle mir einen Lernplan für eine Prüfung. Frage mich zuerst nach Fach, Themen und Datum.">▦ Lernplaner</button><button data-prompt="Hilf mir bei einer Aufgabe. Bitte frage erst nach der Aufgabenstellung.">☑ Aufgaben</button><button data-prompt="Hilf mir bei der Prüfungsvorbereitung. Frage nach Fach und Zeitrahmen.">✧ Prüfungsvorbereitung</button><button data-prompt="Fasse einen Text für mich zusammen. Bitte frage nach dem Text.">▤ Zusammenfassungen</button><button id="notesButton">▤ Notizen</button><button id="toolsButton">▦ Tools</button><button id="settingsButton">⚙ Einstellungen</button><div id="threadList"></div></aside><div class="ai-main"><div class="ai-toolbar"><button type="button" id="aiTheme" aria-label="Darstellung wechseln">☼</button></div><h1>Hallo!<br><span class="gradient">Was möchtest du heute lernen?</span></h1><p class="ai-sub">Dein persönlicher KI-Lernassistent. Stelle Fragen, erhalte Erklärungen, erstelle Lernpläne und bereite dich optimal auf deine Prüfungen vor.</p><div class="ai-slogan">Besser<br>Lernen<br>Größer<br>Erreichen</div><div class="subjects" id="subjects"><button data-subject="Mathematik"><span class="subject-icon">▦</span><span>Mathematik</span></button><button data-subject="Deutsch"><span class="subject-icon">▣</span><span>Deutsch</span></button><button data-subject="Englisch"><span class="subject-icon">🇬🇧</span><span>Englisch</span></button><button data-subject="Biologie"><span class="subject-icon">✿</span><span>Biologie</span></button><button data-subject="Chemie"><span class="subject-icon">⚗</span><span>Chemie</span></button><button data-subject="Physik"><span class="subject-icon">⚛</span><span>Physik</span></button><button data-subject="Geschichte"><span class="subject-icon">▥</span><span>Geschichte</span></button><button data-subject="Erdkunde"><span class="subject-icon">🌐</span><span>Erdkunde</span></button><button data-subject="Informatik"><span class="subject-icon">▰</span><span>Informatik</span></button><button data-subject="andere Fächer"><span class="subject-icon">•••</span><span>Weitere Fächer</span></button></div><div class="ai-utility hidden" id="aiUtility" aria-live="polite"></div><div class="ai-scroll" id="aiMessages" aria-live="polite"></div><form class="composer" id="aiForm"><button type="button" id="aiAttach" class="ai-attach" aria-label="Textdatei anhängen">＋</button><input type="file" id="aiFile" accept=".txt,.md,text/plain" hidden><input name="message" maxlength="4000" required placeholder="Stelle mir eine Frage …" aria-label="Frage an Lern-KI"><button type="button" id="aiVoice" class="ai-voice" aria-label="Spracheingabe">🎙</button><button class="primary" aria-label="Frage senden">↑</button></form><div class="ai-quick"><button data-prompt="Erkläre mir ein Thema Schritt für Schritt. Welches Thema soll ich nennen?">Erkläre mir …</button><button data-prompt="Gib mir Übungsaufgaben. Frage nach Fach und Thema.">Gib mir Übungsaufgaben …</button><button data-prompt="Fasse einen Text zusammen. Frage zuerst nach dem Text.">Fasse diesen Text zusammen …</button><button data-prompt="Erstelle einen Lernplan. Frage zuerst nach Fach, Themen und Prüfungstermin.">Erstelle einen Lernplan …</button></div><div class="ai-tools"><button data-prompt="Erstelle einen individuellen Lernplan. Frage nach meinen Zielen und meinem Zeitbudget."><strong>🗓️ Lernplan erstellen</strong><span>Erhalte einen Lernplan für deine Ziele.</span><em>Jetzt planen →</em></button><button data-prompt="Hilf mir eine Aufgabe zu lösen. Bitte frage nach der Aufgabe und erkläre den Lösungsweg."><strong>📄 Aufgaben lösen</strong><span>Schreibe Aufgaben direkt in den Chat.</span><em>Aufgaben starten →</em></button><button data-prompt="Erkläre ein schwieriges Thema einfach. Frage zuerst nach dem Thema."><strong>💡 Themen verstehen</strong><span>Verständliche Erklärungen zu jedem Thema.</span><em>Hier fragen →</em></button></div></div></div></section>
+<section class="view" id="about"><div class="eyebrow">Über Lessing</div><h1>Lessing Schulen Coaching</h1><div class="panel narrow" id="aboutText"><h2>Unterstützung beim Lernen</h2><p class="managed-copy hidden" id="aboutCopy"></p><p>Diese Plattform verbindet Terminanfragen, Kontakt zum Coaching-Team und Lernunterstützung. Du kannst ein Fach und dein Thema nennen, einen Tag im Kalender auswählen und deine Anfrage mit einem persönlichen Code wiederfinden.</p><p>Bei Fragen erreichst du das Team über den Kontakt-Chat. Die Lern-KI hilft dir beim Verstehen von Themen, beim Üben und beim Planen deiner Lernzeit.</p><button class="primary" data-page="contact">Kontakt öffnen →</button></div></section><section class="view" id="help"><div class="eyebrow">Hilfe</div><h1>So funktioniert es</h1><div class="panel narrow" id="helpText"><p class="managed-copy hidden" id="helpCopy"></p><h2>Termine anfragen</h2><p>Öffne „Termin &amp; Coaching“, wähle im Kalender einen Tag und gib an, wann du Schule aus hast. Die genaue Uhrzeit stimmt das Team später mit dir ab. Sende die Anfrage und notiere den angezeigten Code.</p><h2>Status prüfen</h2><p>Unter „Termine“ gibst du deinen Code ein. Dort siehst du den aktuellen Status und Rückmeldungen zu deinem gewählten Tag.</p><h2>Kontakt und Lern-KI</h2><p>Im Kontakt-Chat kannst du dem Team schreiben. Die Lern-KI beantwortet Fragen und unterstützt dich beim Üben, sobald der KI-Dienst eingerichtet ist.</p><h2>Anmeldung</h2><p>Die Anmeldung ist für berechtigte Mitarbeitende. Schüler brauchen für Terminanfragen und Kontakt kein Konto.</p></div></section>
+<section class="view" id="login"><h1>Anmeldung</h1><p class="muted">Für berechtigte Mitarbeitende.</p><form class="panel narrow" id="loginForm" autocomplete="off"><label class="field">Benutzername<input name="username" required autocomplete="off"></label><label class="field">Passwort<input name="password" required type="password" autocomplete="current-password"></label><button class="primary">Anmelden</button></form></section>
+<section class="view" id="adminPanel"><div class="admin-header"><div><div class="eyebrow">Verwaltung</div><h1>Administration</h1></div><div class="row"><button class="primary" id="reloadAdmin">Aktualisieren</button><button class="primary danger" id="logout">Abmelden</button></div></div><nav class="admin-tabs" aria-label="Verwaltungsbereiche"><button type="button" class="active" data-admin-tab="overview">Übersicht</button><button type="button" data-admin-tab="calendar" data-requires="appointments">Kalender</button><button type="button" data-admin-tab="requests" data-requires="appointments">Terminanfragen</button><button type="button" data-admin-tab="chats" data-requires="chats">Alle Chats</button><button type="button" data-admin-tab="content" data-requires="content">Inhalte</button><button type="button" data-admin-tab="accounts">Konten verwalten</button><button type="button" data-admin-tab="staff">Lehrkräfte &amp; Bereiche</button><button type="button" data-admin-tab="notes">Notizen</button><button type="button" data-admin-tab="studentsecurity">Schüler-Passwort</button><button type="button" data-admin-tab="design" id="bigDesignTab" hidden>Ansicht bearbeiten</button><button type="button" data-admin-tab="maintenance" id="maintenanceTab" hidden>Wartung &amp; Sperren</button><button type="button" data-admin-tab="password">Passwort ändern</button></nav><div class="admin-workspace"><div class="admin-section active" data-admin-section="overview"><h2>Dashboard</h2><p class="muted">Alle wichtigen Terminanfragen auf einen Blick.</p><div class="admin-stats" id="adminStats"></div><div class="admin-overview-list" id="adminOverviewList"></div></div><div class="admin-section" data-admin-section="calendar"><div class="schedule-shell admin-schedule" id="adminSchedule"><div class="schedule-heading"><div><h2>Termin-Kalender</h2><p>Termine und Anfragen im Überblick</p></div><div class="schedule-controls"><button type="button" class="schedule-prev" aria-label="Vorheriger Zeitraum">‹</button><button type="button" class="schedule-today">Heute</button><button type="button" class="schedule-next" aria-label="Nächster Zeitraum">›</button><strong class="schedule-period"></strong><div class="schedule-modes"><button type="button" data-mode="week">Woche</button><button type="button" data-mode="month" class="active">Monat</button><button type="button" data-mode="year">Jahr</button></div></div></div><div class="schedule-body" aria-live="polite"></div><p class="schedule-legend">Schulferien Baden-Württemberg markiert · Bewegliche Ferientage unterscheiden sich je Schule.</p></div></div><div class="admin-section" data-admin-section="requests"><div class="panel" id="adminAppointments"><h2>Terminanfragen</h2><p class="muted">Hier bestätigst oder bearbeitest du Anfragen und teilst die Uhrzeit über die Rückmeldung mit.</p><div id="appointmentList"></div></div></div><div class="admin-section" data-admin-section="chats"><div class="panel" id="adminChats"><h2>Alle Chats</h2><div class="admin-chat-layout"><div class="staff-chat-list"><label class="field">Schüler suchen<input id="staffChatSearch" type="search" placeholder="Name, Nachname oder Klasse" autocomplete="off"></label><div id="chatList"></div></div><div id="adminChatDetail"></div></div></div></div><div class="admin-section" data-admin-section="content"><div class="panel" id="adminContent"><h2>Inhalte</h2><div id="contentEditor"></div></div></div><div class="admin-section" data-admin-section="accounts"><div class="panel" id="adminAccounts"><h2>Konten verwalten</h2><p class="muted">Normale Admins können hier andere normale Admin-Konten verwalten. Der Big Admin wird niemals angezeigt.</p><form id="createAdmin" class="panel nested"><h3>Admin hinzufügen</h3><div class="grid2"><label class="field">Benutzername<input name="username" required pattern="[A-Za-z0-9_-]{3,80}"></label><label class="field">Passwort<input name="password" type="password" minlength="10" required></label></div><p class="small muted">Jeder normale Admin erhält automatisch Vollzugriff auf Termine, Chats, Inhalte, Konten, Lehrkräfte und Bereiche.</p><button class="primary">Admin erstellen</button></form><div id="accountList"></div></div></div>
+<div class="admin-section" data-admin-section="staff"><div class="admin-grid">
+  <div class="panel"><h2>Lehrkräfte</h2><p class="muted">Lehrkräfte hinzufügen, umbenennen oder deaktivieren.</p><form id="teacherCreate" class="row"><input class="field" name="name" placeholder="Name der Lehrkraft" required><button class="primary">Hinzufügen</button></form><div id="teacherList"></div></div>
+  <div class="panel"><h2>Bereiche &amp; Farben</h2><p class="muted">Jeder Bereich hat seine eigene Kalenderfarbe. Die Farbe erscheint im Admin-Kalender.</p><form id="categoryCreate" class="row"><input class="field" name="name" placeholder="Neuer Bereich" required><input type="color" name="color" value="#3B82F6" title="Farbe"><button class="primary">Hinzufügen</button></form><div id="categoryList"></div></div>
+</div></div><div class="admin-section" data-admin-section="notes"><div class="panel"><h2>Notizen &amp; archivierte Anfragen</h2><p class="muted">Abgelehnte Anfragen können hier als Erinnerung aufbewahrt oder endgültig gelöscht werden.</p><div id="appointmentNotesList"></div></div></div><div class="admin-section" data-admin-section="studentsecurity"><div class="panel narrow"><h2>Schüler-Anmeldung</h2><label class="field"><input type="checkbox" id="studentPasswordToggle"> Passwort für Schüler aktivieren</label><p class="muted">Aus: Anmeldung mit Klasse und Vor- und Nachname. An: Neue Schüler erstellen ein Passwort (mindestens 8 Zeichen); bestehende Konten ohne Passwort müssen von der Verwaltung geklärt werden. Nur für den Kontaktchat.</p><button type="button" class="primary" id="saveStudentPassword">Einstellung speichern</button></div></div>
+<div class="admin-section" data-admin-section="maintenance"><div class="panel"><h2>Wartung &amp; Sperren · Big Admin</h2><form id="maintenanceForm"></form></div></div><div class="admin-section" data-admin-section="design"><div class="panel"><h2>Ansicht bearbeiten · Big Admin</h2><p class="muted">Seite wählen, Elemente hinzufügen, verschieben und an der rechten unteren Ecke skalieren. Speichern veröffentlicht die Elemente auf der gewählten Seite. Bestehende Seitenelemente bleiben erhalten.</p><div class="row"><select id="designPage" class="field"><option value="start">Startseite</option><option value="termine">Termine</option><option value="ki">KI</option><option value="contact">Chat</option></select><button type="button" class="primary" id="designAddText">+ Text</button><button type="button" class="primary" id="designAddBox">+ Feld</button><button type="button" class="primary" id="designAddButton">+ Button</button><button type="button" class="primary" id="designSave">Ansicht speichern</button></div><div class="row"><label>Text <input id="designText" class="field" maxlength="350"></label><label>Schriftgröße <input id="designSize" type="number" class="field" min="10" max="72" value="20"></label><label>Textfarbe <input id="designColor" type="color" value="#172554"></label><label>Hintergrund <input id="designBg" type="color" value="#ffffff"></label><button type="button" class="primary danger" id="designDelete">Element löschen</button></div><div id="designStage"><iframe id="designFrame" title="Live-Vorschau der ausgewählten Seite" src="/" tabindex="-1"></iframe><div id="designLayer"></div></div></div></div>
+<div class="admin-section" data-admin-section="password"><div class="panel narrow"><h2>Passwort ändern</h2><form id="passwordForm"><label class="field">Aktuelles Passwort<input name="current" type="password" required></label><label class="field">Neues Passwort (mindestens 10 Zeichen)<input name="next" type="password" minlength="10" required></label><button class="primary">Passwort ändern</button></form></div></div></div></section>
+<section class="view" id="maintenancePage"><video class="maintenance-video" autoplay muted loop playsinline preload="metadata" poster="/assets/maintenance-poster.jpg" aria-hidden="true"><source src="/assets/maintenance-loop.mp4" type="video/mp4"></video><div class="panel maintenance-card"><h1 id="maintenanceTitle">Wartungsarbeiten</h1><p id="maintenanceMessage"></p><div class="row"><button class="primary" data-page="start">Zur Startseite</button></div><div id="maintenanceGames"></div></div></section></div></div><div class="toast hidden" id="toast" role="status"></div><script type="module" id="coachApplication">import { holidayOn } from './holidays.js';
+import { makeSchedule } from './calendar-ui.js';
+// Render directly: video "playing" can fire on Safari before a visible frame.
+// This continuous animation needs neither a download nor autoplay permission.
+function advanceDvd(s,dt){
+ const width=720,height=405,lw=120,lh=64;
+ s.x+=s.vx*Math.min(dt,.05);s.y+=s.vy*Math.min(dt,.05);
+ let hit=false;
+ if(s.x<=0||s.x>=width-lw){s.x=Math.max(0,Math.min(width-lw,s.x));s.vx*=-1;hit=true}
+ if(s.y<=0||s.y>=height-lh){s.y=Math.max(0,Math.min(height-lh,s.y));s.vy*=-1;hit=true}
+ if(hit)s.color=(s.color+1)%6;return s;
+}
+function createDvdScreensaver(root){
+ const canvas=document.createElement('canvas');canvas.width=720;canvas.height=405;canvas.className='dvd-media';canvas.setAttribute('aria-label','Automatisch laufender DVD-Bildschirmschoner');canvas.style.display='block';root.append(canvas);
+ const context=canvas.getContext('2d'),colors=['#66deff','#ff75aa','#fbe474','#73ffb0','#b791ff','#ff985f'];let live=true,frame=0,last=0;const s={x:35,y:80,vx:110,vy:83,color:0};
+ function draw(t){if(!live)return;advanceDvd(s,last?(t-last)/1000:0);last=t;if(context){context.fillStyle='#03050b';context.fillRect(0,0,720,405);context.save();context.translate(s.x,s.y);context.fillStyle=colors[s.color];context.font='italic 900 38px Arial';context.textAlign='center';context.fillText('DVD',60,35);context.beginPath();context.ellipse(60,45,56,7,0,0,Math.PI*2);context.fill();context.fillStyle='#03050b';context.beginPath();context.ellipse(60,45,12,3,0,0,Math.PI*2);context.fill();context.fillStyle=colors[s.color];context.font='bold 12px Arial';context.fillText('V I D E O',60,64);context.restore()}frame=requestAnimationFrame(draw)}
+ draw(0);
+ const visibility=()=>{if(!live)return;cancelAnimationFrame(frame);frame=0;last=0;if(!document.hidden)draw(0)};document.addEventListener('visibilitychange',visibility);
+ return ()=>{live=false;cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',visibility)};
+}
+
+
+const $ = selector => document.querySelector(selector);
+function showManagedCopy(key, value) { const target = $('#' + key + 'Copy'); target.textContent = value || ''; target.classList.toggle('hidden', !value); }
+const aiSide = $('.ai-side');
+aiSide.insertAdjacentHTML('afterbegin', '<button class="ai-back" data-page="start">← Zurück zur Startseite</button><div class="ai-brand"><span class="cap-symbol">✦</span><span>Lessing Coach<small>Dein KI-Lernassistent</small></span></div>');
+const aiMain = $('.ai-main');
+const heading = document.createElement('div'); heading.className = 'ai-heading';
+aiMain.insertBefore(heading, aiMain.firstChild);
+heading.append(aiMain.querySelector('h1'), aiMain.querySelector('.ai-sub'));
+const cap = document.createElement('img'); cap.src = 'assets/ai-cap.png'; cap.alt = ''; cap.className = 'ai-cap'; heading.append(cap);
+aiMain.insertAdjacentHTML('beforeend', '<div class="ai-footer">„Wissen ist der Schlüssel zu deiner Zukunft.“</div>');
+const safe = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+const state = { session: { role:'visitor', permissions:[] }, content:{}, threadId:null, currentChat:null };
+let toastTimer;
+function toast(message) { const el = $('#toast'); el.textContent = message; el.classList.remove('hidden'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.add('hidden'), 6000); }
+async function request(path, options = {}) {
+  const response = await fetch('/api/' + path, { credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, signal:AbortSignal.timeout(12000), ...options });
+  let result;
+  try { result = await response.json(); } catch { throw new Error('Serverantwort konnte nicht gelesen werden'); }
+  if (!response.ok) {
+    if(response.status===401&&path!=='login'){
+      state.session={role:'visitor',permissions:[]};renderAuth();
+      if(document.querySelector('.view.active')?.id==='adminPanel')navigate('login');
     }
+    throw new Error(result.error || 'Anfrage fehlgeschlagen');
+  }
+  return result;
+}
+const send = (path, data, method='POST') => request(path, { method, body:JSON.stringify(data) });
+const studentSchedule = makeSchedule($('#studentSchedule'),request);async function loadMyAppointments(){const box=$('#myAppointments');if(!box)return;try{const {appointments}=await request('appointments/mine');box.innerHTML=appointments.length?appointments.map(a=>`<div class="list-item"><div class="row"><strong>${safe(a.subject)}</strong><span class="pill">${safe(a.status)}</span></div><p>${safe(dayLabel(a.requested_at))}${a.appointment_time?' · '+safe(a.appointment_time)+' Uhr':''}</p><p class="small">${safe(a.topic)}</p><small>Dein Code: ${safe(a.code)}</small></div>`).join(''):'<p class="muted">Du hast auf diesem Gerät noch keine eigenen Terminanfragen.</p>';}catch(e){box.innerHTML='<p class="muted">Eigene Termine konnten nicht geladen werden.</p>';}}
 
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: Arial, Helvetica, sans-serif;
-      background: radial-gradient(circle at top, #11356c 0%, #07162d 52%, #030b17 100%);
-      color: var(--text);
+const adminSchedule = makeSchedule($('#adminSchedule'),request,true);
+let activeAdminTab = 'overview';
+function showAdminTab(tab) {
+  const selected=document.querySelector(`[data-admin-tab="${tab}"]`);
+  if (!selected || selected.hidden || selected.classList.contains('hidden') || (['maintenance','design'].includes(tab)&&state.session.role!=='big')) tab='overview';
+  activeAdminTab=tab;
+  document.querySelectorAll('[data-admin-tab]').forEach(button=>{button.classList.toggle('active',button.dataset.adminTab===tab);button.setAttribute('aria-current',button.dataset.adminTab===tab?'page':'false');});
+  document.querySelectorAll('[data-admin-section]').forEach(section=>section.classList.toggle('active',section.dataset.adminSection===tab));
+  if(tab==='calendar') adminSchedule.refresh();
+  if(tab==='maintenance')renderMaintenanceForm();
+}
+const pageScroll={};
+function closeMobileMenu(){ $('#sidebar').classList.remove('open');$('#scrim').classList.remove('open');document.body.classList.remove('menu-open');$('#menuToggle').setAttribute('aria-expanded','false'); }
+function navigate(page,options={}) {
+  if (page === 'adminPanel' && state.session.role === 'visitor') page = 'login';
+  if(maintenanceBlocked(page)){showMaintenance(page);return;}
+  const previous=document.querySelector('.view.active')?.id;
+  if(previous===page){closeMobileMenu();return;}
+  gameCleanup();
+  if(previous)pageScroll[previous]=window.scrollY;
+  if (page === 'login' && !document.getElementById('login').classList.contains('active')) $('#loginForm').reset();
+  document.body.dataset.page = page;
+  document.body.classList.toggle('ai-mode', page === 'ki');
+  $('.view.active')?.classList.remove('active');
+  $('#' + page)?.classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  closeMobileMenu();
+  requestAnimationFrame(()=>window.scrollTo({top:options.restore?(pageScroll[page]||0):0,behavior:'auto'}));
+  if (page === 'contact') initChat();
+  if (page === 'coaching') loadCalendar();
+  if (page === 'termine') { studentSchedule.refresh(); loadMyAppointments(); }
+  if (page === 'ki') loadThreads();
+  if (page === 'adminPanel' && state.session.role==='big') $('#bigDesignTab').hidden=false;
+  if (page === 'adminPanel') { showAdminTab(activeAdminTab); loadAdmin(); }
+  if(!options.history&&location.hash!=='#'+page)history.pushState({page},'','#'+page);
+}
+async function loadCatalog() {
+  try {
+    const {categories, teachers} = await request('catalog'); window.lessingCatalog={categories,teachers};
+    const categorySelect=$('#appointmentCategory'), teacherSelect=$('#appointmentTeacher'), legend=$('#categoryLegend');
+    if(categorySelect) categorySelect.innerHTML='<option value="">Bereich auswählen …</option>'+categories.map(c=>`<option value="${safe(c.id)}">${safe(c.name)}</option>`).join('');
+    const renderTeachers=()=>{if(!teacherSelect)return;const cid=categorySelect?.value;const available=cid?teachers.filter(t=>(t.category_ids||[]).includes(cid)):[];teacherSelect.innerHTML=cid?(available.length?'<option value="">Lehrkraft auswählen …</option>'+available.map(t=>`<option value="${safe(t.id)}">${safe(t.name)}</option>`).join(''):'<option value="">Keine Lehrkraft für diesen Bereich hinterlegt</option>'):'<option value="">Erst Bereich auswählen …</option>';const hint=$('#categoryTeacherHint');const category=categories.find(c=>c.id===cid);if(hint)hint.textContent=category?(available.length?`${category.name}: ${available.map(t=>t.name).join(' · ')}`:`${category.name}: Noch keine Lehrkraft hinterlegt`):'';if(available.length===1)teacherSelect.value=available[0].id;};
+    categorySelect?.addEventListener('change',renderTeachers); renderTeachers();
+    if(legend) legend.innerHTML=categories.map(c=>`<span class="category-chip" style="--category-color:${safe(c.color)}"><i></i>${safe(c.name)}</span>`).join('');
+  } catch(e){toast(e.message);}
+}
+function renderAuth() {
+  const isStaff = state.session.role !== 'visitor';
+  $('#maintenanceTab').hidden=state.session.role!=='big';
+  $('#bigDesignTab').hidden=state.session.role!=='big';
+  if(state.session.role==='big') renderMaintenanceForm();
+  $('#topLogin').textContent = isStaff ? 'Verwaltung' : 'Anmelden';
+  $('#topLogin').dataset.page = isStaff ? 'adminPanel' : 'login';
+  $('#adminAccounts').classList.toggle('hidden', !isStaff);
+  for (const [permission, element] of [['appointments','#adminAppointments'],['chats','#adminChats'],['content','#adminContent']]) {
+    $(element).classList.toggle('hidden', !(state.session.role === 'big' || state.session.permissions.includes(permission)));
+  }
+  document.querySelectorAll('[data-admin-tab]').forEach(button => {
+    const required = button.dataset.requires;
+    button.classList.toggle('hidden', !!required && !(state.session.role==='big' || state.session.permissions.includes(required)));
+  });
+}
+async function boot() {
+  try {
+    const data = await request('bootstrap'); state.session = data.session; state.content = data.content; try { maintenance=JSON.parse(data.content.maintenance||'{}'); } catch {} await loadCatalog();
+    $('#heroText').textContent = data.content.hero || $('#heroText').textContent;
+    showManagedCopy('about', data.content.about);
+    showManagedCopy('help', data.content.help);
+    renderPublishedDesign();
+  } catch(e) { toast(e.message); }
+  finally {
+    renderAuth();
+    const target = location.hash.slice(1);
+    if (target && $('#' + target)?.classList.contains('view')) navigate(target,{history:true,restore:true});
+    else navigate('start',{history:true});
+    document.documentElement.removeAttribute('data-loading');
+  }
+}
+document.addEventListener('click', e => {
+  const page = e.target.closest('button[data-page], a[data-page]')?.dataset.page;
+  if (page) navigate(page);
+  const prompt = e.target.closest('[data-prompt]')?.dataset.prompt;
+  if (prompt) { if(maintenanceBlocked('ki')||(/lernplan/i.test(prompt)&&maintenanceBlocked('planner'))){showMaintenance(/lernplan/i.test(prompt)?'planner':'ki');return;} navigate('ki'); $('#aiForm input[name="message"]').value = prompt; $('#aiForm input[name="message"]').focus(); }
+  const subject = e.target.closest('[data-subject]')?.dataset.subject;
+  if (subject) { $('#aiForm input[name="message"]').value = `Hilf mir beim Lernen für ${subject}. Frage zuerst, was ich üben möchte.`; $('#aiForm input[name="message"]').focus(); }
+});
+$('.admin-tabs').onclick=e=>{const tab=e.target.closest('[data-admin-tab]:not(.hidden)')?.dataset.adminTab;if(tab)showAdminTab(tab);};
+$('#menuToggle').onclick=e=>{e.stopPropagation();const open=!$('#sidebar').classList.contains('open');$('#sidebar').classList.toggle('open',open);$('#scrim').classList.toggle('open',open);document.body.classList.toggle('menu-open',open);$('#menuToggle').setAttribute('aria-expanded',String(open));};
+$('#scrim').onclick=closeMobileMenu;
+window.addEventListener('popstate',()=>{const p=location.hash.slice(1)||'start';if($('#'+p)?.classList.contains('view'))navigate(p,{history:true,restore:true});});
+const berlinToday = () => {
+  const parts = new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const get = type => parts.find(p => p.type === type).value;
+  return `${get('year')}-${get('month')}-${get('day')}`;
+};
+const dayLabel = value => new Date(`${value.slice(0,10)}T12:00:00Z`).toLocaleDateString('de-DE',{timeZone:'UTC',day:'numeric',month:'long',year:'numeric'});
+const schoolEndLabel = value => ({'13:20':'13:20 Uhr','15:50':'15:50 Uhr',later:'später als 15:50 Uhr'})[value] || 'nicht angegeben';
+let calendarOffset = 0, calendarRequest = 0, calendarDays = {};
+const monthAt = offset => { const today=berlinToday(); return new Date(Date.UTC(Number(today.slice(0,4)),Number(today.slice(5,7))-1+offset,1)); };
+function renderCalendar() {
+  const month = monthAt(calendarOffset), today=berlinToday(), max= new Date(`${today}T00:00:00Z`);
+  max.setUTCMonth(max.getUTCMonth()+6);
+  $('#calendarMonth').textContent = month.toLocaleDateString('de-DE',{timeZone:'UTC',month:'long',year:'numeric'});
+  $('#calendarPrev').disabled = calendarOffset === 0;
+  $('#calendarNext').disabled = calendarOffset === 6;
+  const count = new Date(Date.UTC(month.getUTCFullYear(),month.getUTCMonth()+1,0)).getUTCDate();
+  const spaces = (month.getUTCDay()+6)%7;
+  const weekdays = ['Mo','Di','Mi','Do','Fr','Sa','So'].map(day=>`<span class="calendar-weekday">${day}</span>`).join('');
+  const selected = $('#appointmentForm').elements.requested_at.value;
+  $('#calendarDays').innerHTML = weekdays + Array.from({length:spaces},()=>'<span></span>').join('') + Array.from({length:count},(_,i)=>{
+    const date=`${month.getUTCFullYear()}-${String(month.getUTCMonth()+1).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
+    const info=calendarDays[date], holiday=holidayOn(date), availability=info?.hasAppointments||info?.hasRequests?'Nicht verfügbar':'Verfügbar';
+    const status=holiday?`${holiday} · ${availability}`:availability;
+    const disabled=date<today||date>max.toISOString().slice(0,10)||Boolean(info?.hasAppointments);
+    return `<button type="button" data-date="${date}" class="calendar-day ${holiday?'holiday':info?.hasAppointments?'busy':info?.hasRequests?'pending':'free'} ${selected===date?'selected':''}" aria-label="${dayLabel(date)}: ${status}" aria-pressed="${selected===date}" ${disabled?'disabled':''}><span>${i+1}</span><span class="calendar-dot" aria-hidden="true"></span></button>`;
+  }).join('');
+  if (selected) {
+    const info=calendarDays[selected];
+    $('#calendarStatus').textContent=`Gewählt: ${dayLabel(selected)} · ${holidayOn(selected)?holidayOn(selected)+' · ':''}Der Tag ist vorgemerkt. Die Uhrzeit wird später abgestimmt.`;
+  }
+}
+async function loadCalendar() {
+  const month=monthAt(calendarOffset).toISOString().slice(0,7), current=++calendarRequest;
+  calendarDays={}; renderCalendar();
+  $('#calendarStatus').textContent='Kalender wird geladen …';
+  try {
+    const {days}=await request('appointments/calendar?month='+month);
+    if (current !== calendarRequest) return;
+    calendarDays=Object.fromEntries(days.map(day=>[day.date,day])); renderCalendar();
+    if (!$('#appointmentForm').elements.requested_at.value) $('#calendarStatus').textContent='Grün: verfügbar · Grau: nicht verfügbar · Lila: Ferien BW. Wähle einen Tag.';
+  } catch(e) { if (current===calendarRequest) { renderCalendar(); $('#calendarStatus').textContent='Kalenderdaten konnten nicht geladen werden: '+e.message; } }
+}
+$('#calendarPrev').onclick=()=>{ if(calendarOffset>0){calendarOffset--;loadCalendar();} };
+$('#calendarNext').onclick=()=>{ if(calendarOffset<6){calendarOffset++;loadCalendar();} };
+$('#calendarDays').onclick=e=>{
+  const day=e.target.closest('[data-date]:not(:disabled)'); if (!day) return;
+  $('#appointmentForm').elements.requested_at.value=day.dataset.date;
+  renderCalendar();
+};
+$('#appointmentForm').onsubmit = async e => {
+  e.preventDefault(); const form = e.currentTarget, button = form.querySelector('button[type="submit"]');
+  if (!form.elements.requested_at.value) { $('#calendarStatus').textContent='Bitte wähle zuerst einen Tag im Kalender.'; $('#bookingCalendar').scrollIntoView({block:'center'}); return; }
+  button.disabled = true;
+  try { const data = await send('appointments', Object.fromEntries(new FormData(form))); $('#appointmentResult').innerHTML = `<div class="result">Anfrage gesendet! Dein persönlicher Anfragecode:<br><span class="code">${safe(data.code)}</span><br>Bewahre ihn auf, damit du den Status unter „Termine“ prüfen kannst.</div>`; form.reset(); await loadCalendar(); }
+  catch(err) { toast(err.message); } finally { button.disabled = false; }
+};
+$('#lookupForm').onsubmit = async e => {
+  e.preventDefault(); const code = new FormData(e.currentTarget).get('code');
+  try { const {appointment:a} = await request('appointments?code=' + encodeURIComponent(code)); $('#lookupResult').innerHTML = `<div class="result"><strong>${safe(a.status)}</strong><p>${safe(a.subject==='Coaching'?'Coaching · ':a.subject+' · ')}${safe(a.topic)}</p><p>Gewählter Tag: ${safe(dayLabel(a.requested_at))}</p><p>Schule aus: ${safe(schoolEndLabel(a.school_end))}</p>${a.note ? `<p>Rückmeldung: ${safe(a.note)}</p>` : ''}<small>Zuletzt aktualisiert: ${new Date(Number(a.updated_at)).toLocaleString('de-DE')}</small></div>`; }
+  catch(err) { $('#lookupResult').innerHTML = `<div class="result notice">${safe(err.message)}</div>`; }
+};
+function bubbles(messages, target) {
+  target.innerHTML = messages.map(m => `<div class="bubble ${m.author === 'visitor' || m.role === 'user' ? 'mine' : ''}">${target.id === 'contactMessages' && m.author !== 'visitor' ? '<span class="sender">Lessing Schulen Coaching</span>' : ''}${safe(m.body)}<small>${new Date(Number(m.created_at)).toLocaleString('de-DE')}</small></div>`).join('');
+  target.scrollTop = target.scrollHeight;
+}
+async function syncStudentPassword(){
+  const {enabled}=await request('student-settings');
+  const field=$('#studentPasswordField'), input=field.querySelector('input');
+  field.classList.toggle('hidden',!enabled); input.disabled=!enabled; input.required=enabled;
+}
+async function initChat(){try{await syncStudentPassword();const me=await request('chat/me');$('#chatGate').classList.toggle('hidden',me.authenticated);$('#chatArea').classList.toggle('hidden',!me.authenticated);if(me.authenticated){$('#chatClassLabel').textContent=`Klasse ${me.class_name}`;await loadMessages();}}catch(e){toast(e.message);}}
+$('#chatLoginForm').onsubmit=async e=>{e.preventDefault();try{const d=await send('chat/login',Object.fromEntries(new FormData(e.currentTarget)));$('#chatGate').classList.add('hidden');$('#chatArea').classList.remove('hidden');$('#chatClassLabel').textContent=`Klasse ${d.class_name}`;e.currentTarget.reset();await loadMessages();}catch(err){toast(err.message);}};
+$('#chatLogout').onclick=async()=>{try{await send('chat/logout',{});$('#chatArea').classList.add('hidden');$('#chatGate').classList.remove('hidden');$('#contactMessages').replaceChildren();}catch(e){toast(e.message);}};
+async function loadMessages() {
+  try { const {messages} = await request('messages'); bubbles(messages.length ? messages : [{author:'admin',body:'Hallo! 👋 Schreibe uns deine Frage oder Anfrage. Unser Team meldet sich so bald wie möglich.',created_at:Date.now()}], $('#contactMessages')); }
+  catch(e) { bubbles([{author:'admin',body:'Hallo! 👋 Schreibe uns hier deine Frage oder Anfrage. Unser Team meldet sich so schnell wie möglich bei dir.',created_at:Date.now()}], $('#contactMessages')); $('#contactMessages').insertAdjacentHTML('beforeend', `<div class="chat-error" role="alert">Der Chat kann gerade nicht geladen werden. ${safe(e.message)}</div>`); toast(e.message); }
+}
+$('#contactForm').onsubmit = async e => {
+  e.preventDefault(); const form = e.currentTarget, field = form.elements.message, message = field.value; form.querySelector('button').disabled = true;
+  try { await send('messages', {message}); field.value = ''; await loadMessages(); }
+  catch(err) { toast(err.message); } finally { form.querySelector('button').disabled = false; }
+};
+$('#contactAttach').onclick = () => $('#contactFile').click();
+$('#contactFile').onchange = async e => {
+  const file = e.target.files?.[0]; if (!file) return;
+  if (!/\.(txt|md)$/i.test(file.name) || file.size > 1500) { toast('Bitte eine Textdatei (.txt oder .md) bis 1,5 KB auswählen.'); e.target.value = ''; return; }
+  const input = $('#contactForm').elements.message;
+  input.value = (input.value + `\n[${file.name}]\n` + await file.text()).trim().slice(0,2000);
+  input.focus(); e.target.value = '';
+};
+$('#contactEmoji').onclick = () => { const field = $('#contactForm').elements.message; field.value += ' 😊'; field.focus(); };
+$('#loginForm').onsubmit = async e => {
+  e.preventDefault(); const form = e.currentTarget;
+  const credentials = Object.fromEntries(new FormData(form));
+  form.reset();
+  try { const data = await send('login', credentials); state.session = data.session; renderAuth(); navigate('adminPanel'); }
+  catch(err) { toast(err.message); }
+};
+$('#logout').onclick = async () => { try { const data = await send('logout', {}); state.session = data.session; state.threadId = null; state.currentChat=null; $('#adminChatDetail').replaceChildren(); $('#loginForm').reset(); renderAuth(); navigate('start'); } catch(e) { toast(e.message); } };
+async function loadThreads() {
+  try { const {threads} = await request('ai/threads'); $('#threadList').innerHTML = threads.map(t => `<button data-thread="${safe(t.id)}">💬 ${safe(t.title)}</button>`).join(''); }
+  catch(e) { toast(e.message); }
+}
+$('#threadList').onclick = async e => { const id = e.target.closest('[data-thread]')?.dataset.thread; if (id) openThread(id); };
+async function openThread(id) {
+  try { const {messages} = await request('ai/threads/' + encodeURIComponent(id)); state.threadId = id; bubbles(messages, $('#aiMessages')); }
+  catch(e) { toast(e.message); }
+}
+$('#newThread').onclick = () => { state.threadId = null; $('#aiMessages').innerHTML = ''; $('#aiUtility').classList.add('hidden'); $('#aiForm input[name="message"]').focus(); };
+function utility(html) { const panel=$('#aiUtility'); panel.innerHTML=html; panel.classList.remove('hidden'); panel.scrollIntoView({block:'nearest'}); }
+$('#notesButton').onclick = () => { utility('<h2>Notizen</h2><p>Deine Notizen werden nur in diesem Browser gespeichert.</p><textarea id="aiNotes" aria-label="Notizen" placeholder="Schreibe deine Notizen …"></textarea>'); const notes=$('#aiNotes'); notes.value=localStorage.getItem('lessing_notes') || ''; notes.oninput=()=>localStorage.setItem('lessing_notes',notes.value.slice(0,10000)); notes.focus(); };
+$('#toolsButton').onclick = async () => { utility('<h2>Tools</h2><p id="aiToolStatus">Lernfortschritt wird geladen …</p>'); try { const p=await request('ai/progress'); $('#aiToolStatus').textContent=`${p.chats} Chats und ${p.questions} Fragen in diesem Browser.`; } catch(e) { $('#aiToolStatus').textContent=e.message; } };
+$('#settingsButton').onclick = () => { utility('<h2>Einstellungen</h2><label><input type="checkbox" id="aiMotion"> Animationen reduzieren</label>'); $('#aiMotion').checked=document.body.classList.contains('reduced-motion'); $('#aiMotion').onchange=e=>{document.body.classList.toggle('reduced-motion',e.target.checked); localStorage.setItem('lessing_less_motion',String(e.target.checked));}; };
+document.body.classList.toggle('reduced-motion',localStorage.getItem('lessing_less_motion')==='true');
+$('#aiTheme').onclick = () => { document.body.classList.toggle('ai-light'); $('#aiTheme').textContent=document.body.classList.contains('ai-light')?'☾':'☼'; };
+$('#aiAttach').onclick = () => $('#aiFile').click();
+$('#aiFile').onchange = async e => { const file=e.target.files?.[0]; if (!file) return; if (!/\.(txt|md)$/i.test(file.name) || file.size>3000) { toast('Bitte eine Textdatei (.txt oder .md) bis 3 KB auswählen.'); e.target.value=''; return; } const input=$('#aiForm').elements.message; input.value=(input.value+`\n[${file.name}]\n`+await file.text()).trim().slice(0,4000); input.focus(); e.target.value=''; };
+$('#aiVoice').onclick = () => { const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition; if (!SpeechRecognition) { toast('Spracheingabe wird von diesem Browser nicht unterstützt.'); return; } const recognizer=new SpeechRecognition(); recognizer.lang='de-DE'; recognizer.onresult=e=>{const input=$('#aiForm').elements.message; input.value=(input.value+' '+e.results[0][0].transcript).trim().slice(0,4000);input.focus();}; recognizer.onerror=()=>toast('Spracheingabe konnte nicht gestartet werden.');recognizer.start(); };
+$('#aiForm').onsubmit = async e => {
+  e.preventDefault(); const form = e.currentTarget, input = form.elements.message, question = input.value.trim(), button = form.querySelector('button');
+  if (!question) return; button.disabled = true;
+  try {
+    if (!state.threadId) { const {thread} = await send('ai/threads', {title:question.slice(0,55)}); state.threadId = thread.id; await loadThreads(); }
+    const {answer} = await send('ai/ask', {thread_id:state.threadId,message:question}); input.value = ''; await openThread(state.threadId);
+    if (!answer) throw new Error('Keine Antwort');
+  } catch(err) { toast(err.message); } finally { button.disabled = false; }
+};
+const can = permission => state.session.role === 'big' || state.session.permissions.includes(permission);
+async function loadAdmin() {
+  if (state.session.role === 'visitor') return;
+  try {
+    if (can('appointments')) {
+      const [{appointments},{byStatus,upcoming}]=await Promise.all([request('admin/appointments'),request('admin/overview')]);
+      const totals=Object.fromEntries(byStatus.map(row=>[row.status,Number(row.count)]));
+      const total=Object.values(totals).reduce((sum,count)=>sum+count,0);
+      $('#adminStats').innerHTML=[['Alle Anfragen',total],['Kommende Termine',upcoming],['Offene Anfragen',(totals['Anfrage eingegangen']||0)+(totals['In Bearbeitung']||0)],['Bestätigt',totals['Bestätigt']||0]].map(([label,value])=>`<div class="admin-stat"><span>${label}</span><strong>${value}</strong></div>`).join('');
+      $('#adminOverviewList').innerHTML=`<div class="panel"><h3>Neueste Anfragen</h3>${appointments.length?appointments.slice(0,5).map(a=>`<div class="admin-overview-item"><span>${safe(dayLabel(a.requested_at))}</span><strong>${safe(a.category_name||a.topic)}</strong><span class="pill">${safe(a.status)}</span></div>`).join(''):'<p class="muted">Noch keine Anfragen vorhanden.</p>'}</div>`;
+            $('#appointmentList').innerHTML=appointments.length?appointments.map(a=>`<div class="list-item appointment-admin-card" style="--category-color:${safe(a.category_color||'#3B82F6')}"><div class="row"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong><span class="pill">${safe(a.status)}</span><span class="category-chip" style="--category-color:${safe(a.category_color||'#3B82F6')}"><i></i>${safe(a.category_name||a.subject)}</span></div><p class="small">${safe(a.class_name)} · ${safe(a.teacher_name||'Lehrkraft nicht gesetzt')} · ${safe(dayLabel(a.requested_at))} · ${safe(a.appointment_time||'Uhrzeit offen')} · Schule aus: ${safe(schoolEndLabel(a.school_end))}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="grid2"><label class="field">Datum<input type="date" name="requested_at" value="${safe(a.requested_at)}"></label><label class="field">Uhrzeit<input type="time" name="appointment_time" value="${safe(a.appointment_time||'')}"></label><label class="field">Bereich<select name="category_id" class="category-edit" data-current="${safe(a.category_id||'')}"></select></label><label class="field">Lehrkraft<select name="teacher_id" class="teacher-edit" data-current="${safe(a.teacher_id||'')}"></select></label></div><label class="field">Status<select name="status"><option ${a.status==='Anfrage eingegangen'?'selected':''}>Anfrage eingegangen</option><option ${a.status==='In Bearbeitung'?'selected':''}>In Bearbeitung</option><option ${a.status==='Bestätigt'?'selected':''}>Bestätigt</option><option ${a.status==='Abgelehnt'?'selected':''}>Abgelehnt</option><option ${a.status==='Erledigt'?'selected':''}>Erledigt</option><option ${a.status==='Nicht erschienen'?'selected':''}>Nicht erschienen</option></select></label><label class="field">Rückmeldung / Notiz<input name="note" maxlength="500" placeholder="z. B. Termin bestätigt / verschoben" value="${safe(a.note)}"></label><div class="row"><button type="button" class="primary" data-accept="${safe(a.id)}">Anfrage annehmen</button><button type="button" class="primary" data-reschedule="${safe(a.id)}">Termin verschieben</button><button type="button" class="primary danger" data-reject="${safe(a.id)}">Ablehnen</button><button class="primary">Speichern</button></div></form></div>`).join(''):'<p class="muted">Noch keine Anfragen.</p>';
+      const catalog=window.lessingCatalog||{categories:[],teachers:[]}; document.querySelectorAll('.appointment-admin-card').forEach(card=>{const cf=card.querySelector('.category-edit'),tf=card.querySelector('.teacher-edit');if(!cf||!tf)return;const currentC=cf.dataset.current,currentT=tf.dataset.current;cf.innerHTML=catalog.categories.map(c=>`<option value="${safe(c.id)}" ${c.id===currentC?'selected':''}>${safe(c.name)}</option>`).join('');const fill=()=>{const cid=cf.value,ts=catalog.teachers.filter(t=>(t.category_ids||[]).includes(cid));tf.innerHTML=ts.map(t=>`<option value="${safe(t.id)}" ${t.id===currentT?'selected':''}>${safe(t.name)}</option>`).join('')||'<option value="">Keine Lehrkraft</option>';};cf.onchange=fill;fill();});
+      }
+    if (can('chats')) {
+      const {chats}=await request('admin/chats');state.staffChats=chats;
+      renderStaffChats();
+      if(state.currentChat) await openAdminChat(state.currentChat);
     }
-
-    #app {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px;
+    if (can('content')) $('#contentEditor').innerHTML = ['hero','about','help'].map(key => `<form class="contentForm" data-key="${key}"><label class="field">${{hero:'Startseite',about:'Über Lessing',help:'Hilfe'}[key]}<textarea name="value" maxlength="3000">${safe(state.content[key] || '')}</textarea></label><button class="primary">Speichern</button></form>`).join('');
+    if(isStaffForAccounts()){
+      const settings=await request('student-settings');
+      $('#studentPasswordToggle').checked=settings.enabled;
     }
-
-    #stageWrap {
-      position: relative;
-      width: min(100vw - 20px, calc((100vh - 20px) * 16 / 9));
-      height: min(calc((100vw - 20px) * 9 / 16), 100vh - 20px);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      background: #05101f;
-      border: 2px solid rgba(255,255,255,.14);
+    if(state.session.role==='big') $('#bigDesignTab').hidden=false;
+    if (isStaffForAccounts()) await loadAccounts();
+    if (can('appointments')) { await loadStaffManagement(); await loadAppointmentNotes(); }
+  } catch(e) { toast(e.message); }
+}
+function isStaffForAccounts(){ return state.session.role === 'admin' || state.session.role === 'big'; }
+async function loadAccounts() {
+  const box=$('#accountList'); if(!box) return;
+  const {accounts} = await request('admin/accounts');
+  box.innerHTML = accounts.length ? accounts.map(a => `<div class="list-item"><strong>${safe(a.username)}</strong><span class="pill">Admin · Vollzugriff</span><form class="accountForm" data-id="${safe(a.id)}"><label class="field">Neues Passwort (optional)<input type="password" name="password" minlength="10"></label><button class="primary">Speichern</button> <button class="primary danger" type="button" data-delete="${safe(a.id)}">Löschen</button></form></div>`).join('') : '<p class="muted">Noch keine normalen Admin-Konten vorhanden.</p>';
+}
+async function loadStaffManagement() {
+  const [{teachers},{categories}] = await Promise.all([request('admin/teachers'),request('admin/categories')]);
+  $('#teacherList').innerHTML=teachers.length?teachers.map(t=>`<div class="list-item teacher-card"><div class="row"><input class="field teacher-name" data-id="${safe(t.id)}" value="${safe(t.name)}"><button class="primary" data-save-teacher="${safe(t.id)}">Speichern</button><button class="primary danger" data-delete-teacher="${safe(t.id)}">Entfernen</button></div><div class="teacher-categories"><strong>Bereiche:</strong><div class="row">${categories.map(c=>`<label><input type="checkbox" class="teacher-category" data-teacher="${safe(t.id)}" data-category="${safe(c.id)}" ${(t.category_ids||[]).includes(c.id)?'checked':''}> ${safe(c.name)}</label>`).join('')}</div></div></div>`).join(''):'<p class="muted">Noch keine Lehrkräfte.</p>';
+  $('#categoryList').innerHTML=categories.map(c=>`<div class="list-item row"><input class="field category-name" data-id="${safe(c.id)}" value="${safe(c.name)}"><input type="color" class="category-color" data-id="${safe(c.id)}" value="${safe(c.color)}" title="Farbe"><button class="primary" data-save-category="${safe(c.id)}">Speichern</button><button class="primary danger" type="button" data-delete-category="${safe(c.id)}">Deaktivieren</button></div>`).join('');
+}
+async function loadAppointmentNotes() {
+  const box=$('#appointmentNotesList'); if(!box) return;
+  const {notes}=await request('admin/appointment-notes');
+  box.innerHTML=notes.length?notes.map(n=>`<div class="list-item appointment-note-card"><div class="row"><strong>${safe(n.category_name)}</strong><span class="pill">${safe(n.reason)}</span><span class="small">${safe(dayLabel(n.requested_at))} · ${safe(n.appointment_time||'Uhrzeit offen')}</span></div><p class="small">${safe(n.first_name)} ${safe(n.last_name)} · ${safe(n.class_name)} · ${safe(n.teacher_name)}</p><p>${safe(n.note)}</p><div class="row"><button type="button" class="primary danger" data-delete-note="${safe(n.id)}">Notiz endgültig löschen</button></div></div>`).join(''):'<p class="muted">Keine archivierten Notizen.</p>';
+}
+function rejectChoiceModal(form){
+  return new Promise(resolve=>{
+    const wrap=document.createElement('div'); wrap.className='overlay'; wrap.style.cssText='position:fixed;inset:0;background:rgba(10,20,40,.55);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
+    wrap.innerHTML=`<div class="panel" style="max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)"><h2>Anfrage ablehnen</h2><p class="muted">Was soll mit der Anfrage passieren?</p><label class="field">Notiz (optional)<textarea id="rejectNote" maxlength="500" placeholder="Warum wurde die Anfrage abgelehnt?"></textarea></label><div class="row" style="flex-wrap:wrap"><button type="button" class="primary" data-choice="note">Ablehnen &amp; in Notizen speichern</button><button type="button" class="primary danger" data-choice="delete">Ablehnen &amp; komplett löschen</button><button type="button" data-choice="reject">Nur ablehnen</button><button type="button" data-choice="cancel">Abbrechen</button></div></div>`;
+    document.body.appendChild(wrap);
+    wrap.onclick=e=>{const b=e.target.closest('[data-choice]');if(!b)return;const choice=b.dataset.choice;const note=wrap.querySelector('#rejectNote').value.trim();wrap.remove();resolve({choice,note});};
+  });
+}
+$('#reloadAdmin').onclick = loadAdmin;
+$('#appointmentList').onsubmit=async e=>{if(!e.target.matches('.statusForm'))return;e.preventDefault();const form=e.target;try{await send('admin/appointments',{id:form.dataset.id,...Object.fromEntries(new FormData(form))},'PATCH');toast('Termin gespeichert');await loadAdmin();}catch(err){toast(err.message);}};
+$('#appointmentList').onclick=async e=>{
+  const noteBtn=e.target.closest('[data-delete-note]');
+  if(noteBtn){try{await send('admin/appointment-notes/'+encodeURIComponent(noteBtn.dataset.deleteNote),{},'DELETE');toast('Notiz gelöscht');await loadAppointmentNotes();}catch(err){toast(err.message);}return;}
+  const btn=e.target.closest('[data-accept],[data-reject],[data-reschedule]');if(!btn)return;
+  const form=btn.closest('.statusForm'); const data=Object.fromEntries(new FormData(form)); data.id=form.dataset.id;
+  try{
+    if(btn.dataset.reject){
+      const result=await rejectChoiceModal(form); if(result.choice==='cancel')return;
+      await send('admin/appointments/'+encodeURIComponent(data.id)+'/reject',{action:result.choice,note:result.note});
+      toast(result.choice==='note'?'Anfrage abgelehnt und in Notizen gespeichert':result.choice==='delete'?'Anfrage vollständig gelöscht':'Anfrage abgelehnt');
+    } else {
+      if(btn.dataset.accept){data.status='Bestätigt';data.note=data.note||'Anfrage angenommen';}
+      if(btn.dataset.reschedule){data.status='Bestätigt';data.note=data.note||'Termin verschoben';}
+      await send('admin/appointments',data,'PATCH');
+      toast(btn.dataset.reschedule?'Termin verschoben':'Anfrage angenommen');
     }
-
-    .screen {
-      position: absolute;
-      inset: 0;
-      display: none;
+    await loadAdmin();
+  }catch(err){toast(err.message);}
+};
+document.querySelector('[data-admin-section="notes"]')?.addEventListener('click', async e=>{const b=e.target.closest('[data-delete-note]');if(!b)return;try{await send('admin/appointment-notes/'+encodeURIComponent(b.dataset.deleteNote),{},'DELETE');toast('Notiz gelöscht');await loadAppointmentNotes();}catch(err){toast(err.message);}});
+function renderStaffChats(){
+ const term=($('#staffChatSearch')?.value||'').trim().toLocaleLowerCase('de');
+ const chats=(state.staffChats||[]).filter(c=>[c.display_name,c.class_name,c.last_message].join(' ').toLocaleLowerCase('de').includes(term));
+ $('#chatList').innerHTML=chats.length?chats.map(c=>`<button type="button" class="staff-chat-card ${state.currentChat===c.visitor_id?'selected':''}" data-chat="${safe(c.visitor_id)}"><strong>${safe(c.display_name)}</strong><span>${safe(c.class_name)} · ${Number(c.count)} Nachrichten</span><small>${safe(c.last_message||'')}</small></button>`).join(''):'<p class="muted">Keine passenden Chats.</p>';
+}
+$('#staffChatSearch').oninput=renderStaffChats;
+$('#chatList').onclick = e => { const id=e.target.closest('[data-chat]')?.dataset.chat; if (id) openAdminChat(id); };
+async function openAdminChat(id) {
+  const detail=$('#adminChatDetail');
+  if (state.currentChat !== id || !detail.querySelector('#staffForm')) {
+    detail.innerHTML = `<div id="staffStudentHeader" class="panel nested"></div><div class="chat-area" style="height:350px;min-height:250px;margin-top:15px"><div class="chat-scroll" id="staffMessages"></div><form class="composer" id="staffForm"><input name="message" required maxlength="2000" placeholder="Antwort schreiben …" autocomplete="off"><button class="primary">➤</button></form></div>`;
+  }
+  state.currentChat=id;
+  try {
+    const student=(state.staffChats||[]).find(c=>c.visitor_id===id);
+    const header=detail.querySelector('#staffStudentHeader');
+    if(header){
+      header.innerHTML=`<h3>${safe(student?.display_name||'Schüler (älteres Konto)')}</h3><p class="muted">${safe(student?.class_name||'Klasse unbekannt')} · Nur für das Schulteam sichtbar</p><button type="button" class="danger" id="deleteStaffChat">Chat endgültig löschen</button><label class="field">Interne Notiz (Schüler sehen diese nicht)<textarea id="staffInternalNote" maxlength="1000" rows="2">${safe(student?.internal_note||'')}</textarea></label><button class="primary" type="button" id="saveStaffNote">Notiz speichern</button><div id="staffStudentAppointments"></div>`;
+      header.querySelector('#saveStaffNote').onclick=async()=>{try{await send('admin/chats/'+encodeURIComponent(id)+'/note',{note:header.querySelector('#staffInternalNote').value},'PATCH');if(student)student.internal_note=header.querySelector('#staffInternalNote').value;toast('Interne Notiz gespeichert');}catch(e){toast(e.message);}};
+      header.querySelector('#deleteStaffChat').onclick=async()=>{if(!confirm('Diesen Chat wirklich endgültig löschen?'))return;try{await request('admin/chats/'+encodeURIComponent(id)+'/delete',{method:'DELETE'});state.currentChat=null;await loadAdminChats();detail.innerHTML='';toast('Chat gelöscht');}catch(e){toast(e.message);}};
+      try{const {appointments}=await request('admin/chats/'+encodeURIComponent(id)+'/appointments');header.querySelector('#staffStudentAppointments').innerHTML='<h4>Termine dieses Schülers</h4>'+(appointments.length?appointments.map(a=>`<p class="small">${safe(a.subject)} · ${safe(dayLabel(a.requested_at))} · ${safe(a.appointment_time||'Uhrzeit offen')} · ${safe(a.status)}</p>`).join(''):'<p class="muted">Keine Termine vorhanden.</p>');}catch{}
     }
-    .screen.active { display: block; }
-
-    .screen > img.bg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: fill;
-      user-select: none;
-      -webkit-user-drag: none;
-      pointer-events: none;
+    const {messages} = await request('admin/chats/'+encodeURIComponent(id));
+    if (state.currentChat !== id) return;
+    bubbles(messages.map(m=>({...m,author:m.author==='admin'?'visitor':'admin'})), detail.querySelector('#staffMessages'));
+  } catch(e) { toast(e.message); }
+}
+$('#adminChatDetail').onsubmit = async e => {
+  if (e.target.id!=='staffForm') return;
+  e.preventDefault();
+  const form=e.target, target=state.currentChat, message=form.elements.message.value.trim(), button=form.querySelector('button');
+  if (!message || button.disabled) return;
+  button.disabled=true;
+  try {
+    await send('admin/chats/'+encodeURIComponent(target), {message});
+    if (state.currentChat === target) {
+      if (form.elements.message.value.trim() === message) form.elements.message.value='';
+      await openAdminChat(target);
     }
+  } catch(err) { toast(err.message); }
+  finally { button.disabled=false; }
+};
+$('#contentEditor').onsubmit = async e => { if (!e.target.matches('.contentForm')) return; e.preventDefault(); const form=e.target,key=form.dataset.key,value=form.elements.value.value; try { await send('admin/content',{key,value},'PATCH'); state.content[key]=value; if (key==='hero') $('#heroText').textContent=value; else showManagedCopy(key,value); toast('Inhalt gespeichert'); } catch(err){toast(err.message);} };
+const permissions = () => ['appointments','chats','content'];
+$('#adminAccounts').onsubmit = async e => {
+  const form=e.target;
+  if (form.id==='createAdmin') {
+    e.preventDefault();
+    try { await send('admin/accounts',{username:form.elements.username.value,password:form.elements.password.value,permissions:permissions()}); form.reset(); await loadAccounts(); toast('Admin erstellt'); }
+    catch(err){toast(err.message);}
+  } else if (form.matches('.accountForm')) {
+    e.preventDefault();
+    try { await send('admin/accounts/'+form.dataset.id,{permissions:permissions(),password:form.elements.password.value},'PATCH'); await loadAccounts(); toast('Admin aktualisiert'); }
+    catch(err){toast(err.message);}
+  }
+};
+$('#adminAccounts').onclick = async e => {
+  const del=e.target.dataset.delete;
+  if (del) { if (!confirm('Dieses normale Admin-Konto wirklich löschen?')) return; try { await request('admin/accounts/'+del,{method:'DELETE'}); await loadAccounts(); } catch(err){toast(err.message);} return; }
+};
+document.querySelector('[data-admin-section="staff"]').onclick = async e => {
+  const teacherId=e.target.dataset.deleteTeacher;
+  if (teacherId) { try { await request('admin/teachers/'+teacherId,{method:'DELETE'}); await loadStaffManagement(); await loadCatalog(); toast('Lehrkraft deaktiviert'); } catch(err){toast(err.message);} return; }
+  const saveTeacher=e.target.dataset.saveTeacher;
+  if (saveTeacher) { const input=document.querySelector(`.teacher-name[data-id="${CSS.escape(saveTeacher)}"]`); const category_ids=[...document.querySelectorAll(`.teacher-category[data-teacher="${CSS.escape(saveTeacher)}"]:checked`)].map(x=>x.dataset.category); try { await send('admin/teachers/'+saveTeacher,{name:input.value,category_ids},'PATCH'); await loadStaffManagement(); await loadCatalog(); toast('Lehrkraft gespeichert'); } catch(err){toast(err.message);} return; }
+  const deleteCategory=e.target.dataset.deleteCategory;
+  if (deleteCategory) { try { await request('admin/categories/'+deleteCategory,{method:'DELETE'}); await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Bereich deaktiviert'); } catch(err){toast(err.message);} return; }
+  const saveCategory=e.target.dataset.saveCategory;
+  if (saveCategory) { const name=document.querySelector(`.category-name[data-id="${CSS.escape(saveCategory)}"]`).value; const color=document.querySelector(`.category-color[data-id="${CSS.escape(saveCategory)}"]`).value; try { await send('admin/categories/'+saveCategory,{name,color},'PATCH'); await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Bereich gespeichert'); } catch(err){toast(err.message);} }
+};
+// Bereichszuordnungen beim Anklicken speichern, ohne die Ansicht neu aufzubauen.
+$('#teacherList').addEventListener('change', async e => {
+  if (!e.target.matches('.teacher-category')) return;
+  const checkbox=e.target, teacherId=checkbox.dataset.teacher;
+  const card=checkbox.closest('.teacher-card');
+  const name=card.querySelector('.teacher-name').value;
+  const category_ids=[...card.querySelectorAll('.teacher-category:checked')].map(x=>x.dataset.category);
+  const boxes=[...card.querySelectorAll('.teacher-category')];
+  boxes.forEach(x=>x.disabled=true);
+  try {
+    await send('admin/teachers/'+encodeURIComponent(teacherId),{name,category_ids},'PATCH');
+    await loadCatalog();
+    toast('Bereiche gespeichert');
+  } catch(err) {
+    checkbox.checked=!checkbox.checked;
+    toast(err.message);
+  } finally {
+    boxes.forEach(x=>x.disabled=false);
+  }
+});
+$('#teacherCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/teachers',{name:e.target.elements.name.value});e.target.reset();await loadStaffManagement();await loadCatalog();toast('Lehrkraft hinzugefügt');}catch(err){toast(err.message);}};
+$('#categoryCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/categories',{name:e.target.elements.name.value,color:e.target.elements.color.value});e.target.reset();e.target.elements.color.value='#3B82F6';await loadStaffManagement();await loadCatalog();adminSchedule.refresh();toast('Bereich hinzugefügt');}catch(err){toast(err.message);}};
+$('#passwordForm').onsubmit = async e => { e.preventDefault(); const form=e.target; try { await send('admin/password',Object.fromEntries(new FormData(form)),'PATCH'); form.reset(); toast('Passwort geändert'); }catch(err){toast(err.message);} };
 
-    .hotspot {
-      position: absolute;
-      z-index: 20;
-      pointer-events: auto;
-      touch-action: manipulation;
-      background: transparent;
-      border: 0;
-      padding: 0;
-      margin: 0;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .hotspot:hover,
-    .hotspot:focus-visible {
-      outline: 3px solid rgba(255, 216, 75, 0.75);
-      border-radius: 14px;
-      background: rgba(255, 216, 75, 0.08);
-    }
+let maintenance={};
+const maintenanceLabels={start:'Startseite',coaching:'Termin & Coaching',termine:'Termine',ki:'Lern-KI',contact:'Chat',planner:'Lernplaner',stars:'Lessing Stars'};
+const gameLabels={math:'Mathe-Quiz',vocab:'Vokabeltrainer',memory:'Memory',reaction:'Reaktionsspiel',logic:'Logik-Quiz',dvd:'DVD-Video'};
+let gameCleanup=()=>{};
+let maintenanceOrigin='start';
+function maintenanceBlocked(page){return state.session.role!=='big'&&!['login','maintenancePage'].includes(page)&&(maintenance.all||maintenance.sections?.[page]);}
+function renderMaintenanceForm(){
+ if(state.session.role!=='big')return;
+ const f=$('#maintenanceForm');f.innerHTML=`<label class="field"><span><input type="checkbox" name="all" ${maintenance.all?'checked':''}> Gesamte Website sperren (nur Big Admin hat Zugang)</span></label><h3>Einzelne Bereiche sperren</h3>${Object.entries(maintenanceLabels).map(([key,label])=>`<label class="field"><span><input type="checkbox" name="section_${key}" ${maintenance.sections?.[key]?'checked':''}> ${label}</span></label>`).join('')}<label class="field">Titel<input name="title" maxlength="100" value="${safe(maintenance.title||'Wartungsarbeiten')}"></label><label class="field">Nachricht<textarea name="message" maxlength="700">${safe(maintenance.message||'Wir verbessern gerade Lessing Coach. Bitte versuche es später erneut.')}</textarea></label><label class="field"><span><input type="checkbox" name="games" ${maintenance.games!==false?'checked':''}> Spiele während der Wartung erlauben</span></label>${Object.entries(gameLabels).map(([key,label])=>`<label><input type="checkbox" name="game_${key}" ${maintenance.enabledGames?.[key]!==false?'checked':''}> ${label}</label> `).join('')}<p><button class="primary">Wartung speichern</button></p>`;
+ f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button');b.disabled=true;try{const data={all:f.elements.all.checked,games:f.elements.games.checked,title:f.elements.title.value,message:f.elements.message.value,sections:{},enabledGames:{}};for(const k of Object.keys(maintenanceLabels))data.sections[k]=f.elements['section_'+k].checked;for(const k of Object.keys(gameLabels))data.enabledGames[k]=f.elements['game_'+k].checked;maintenance=(await send('admin/maintenance',data,'PATCH')).maintenance;toast('Wartung gespeichert – gilt für alle Geräte.');}catch(err){toast(err.message);}finally{b.disabled=false;}};
+}
+function showMaintenance(page){
+ maintenanceOrigin=page;gameCleanup();const video=$('#maintenancePage video');if(video){video.src=nextMaintenanceVideo();video.load();video.play().catch(()=>{});}document.body.classList.remove('ai-mode');closeMobileMenu();$('.view.active')?.classList.remove('active');$('#maintenancePage').classList.add('active');document.body.dataset.page='maintenancePage';
+ $('#maintenanceTitle').textContent=maintenance.title||'Wartungsarbeiten';$('#maintenanceMessage').textContent=maintenance.message||(page==='coaching'||page==='termine'?'Derzeit sind keine Terminerstellungen möglich, da Wartungsarbeiten durchgeführt werden.':'Dieser Bereich wird gerade gewartet. Bitte versuche es später erneut.');
+ const box=$('#maintenanceGames');box.replaceChildren();if(maintenance.games===false)return;
+ box.innerHTML='<h2 style="margin-top:24px">Lernspiele ab Klasse 5</h2><p>Wähle ein Lernspiel oder schau dir den DVD-Bildschirmschoner an.</p><label class="field">Schwierigkeit<select id="gameLevel"><option value="5">Klasse 5–6</option><option value="7">Klasse 7–8</option><option value="9">Klasse 9+</option></select></label><div class="row" id="gameChoices"></div><div class="panel" id="gameArea"></div>';
+ for(const [key,label] of Object.entries(gameLabels)){if(maintenance.enabledGames?.[key]===false)continue;const b=document.createElement('button');b.className='primary';b.textContent=label;b.onclick=()=>startGame(key);$('#gameChoices').append(b);}
+ $('#gameArea').textContent='Wähle ein Spiel aus.';
+}
+function startGame(kind){
+ gameCleanup();const level=Number($('#gameLevel')?.value||5);const area=$('#gameArea');let live=true,timer;gameCleanup=()=>{live=false;clearTimeout(timer);};area.innerHTML=`<h3>${gameLabels[kind]}</h3><p class="muted">${safe({math:'Rechne im Kopf oder auf Papier. Gib dein Ergebnis ein, drücke Prüfen und danach Weiter. Dezimalzahlen kannst du mit Komma schreiben.',vocab:'Übersetze das englische Wort ins Deutsche. Gib die Übersetzung ein und drücke Prüfen. Groß- und Kleinschreibung zählen nicht.',memory:'Decke zwei Karten auf und finde zweimal dasselbe Symbol. Du spielst allein. Ziel: alle acht Paare mit möglichst wenigen Zügen finden.',reaction:'Drücke Start. Nach 0,5 bis 1,5 Sekunden wird das Feld grün. Klicke dann möglichst schnell. Ein Klick vor Grün zählt als Fehlstart.',dvd:'Das DVD-Logo bewegt sich automatisch und prallt an den Rändern ab. Schau, ob es eine Ecke trifft.',logic:'Erkenne das Muster der Zahlenfolge und gib die nächste Zahl ein. Drücke Prüfen und danach Weiter.'}[kind])}</p><div id="gameBody"></div>`;const body=$('#gameBody');
+ if(kind==='dvd'){startDvdGame(body);return;}
+ if(kind==='memory'){startMemory(body);return;}
+ if(kind==='reaction'){
+  body.innerHTML='<p id="reactionInfo">Drücke Start. Klicke erst, sobald das Feld grün wird.</p><button class="primary" id="reactionTarget">Start</button>';let phase='idle',start=0;const b=$('#reactionTarget');b.onclick=()=>{if(phase==='waiting'){clearTimeout(timer);phase='idle';b.textContent='Zu früh! Erneut starten';b.style.background='';return;}if(phase==='ready'){const ms=Math.round(performance.now()-start);phase='idle';b.textContent=`${ms} ms – erneut starten`;b.style.background='';return;}phase='waiting';b.textContent='Warten …';b.style.background='#b45309';timer=setTimeout(()=>{if(!live)return;phase='ready';start=performance.now();b.style.background='#15803d';b.textContent='JETZT klicken!';},500+Math.random()*1000);};return;
+ }
+ const vocabSets={5:[['timetable','Stundenplan'],['homework','Hausaufgaben'],['classroom','Klassenzimmer'],['neighbour','Nachbar'],['breakfast','Frühstück'],['library','Bibliothek'],['weather','Wetter'],['journey','Reise'],['exercise','Übung'],['language','Sprache']],7:[['environment','Umwelt'],['opportunity','Gelegenheit'],['responsibility','Verantwortung'],['experience','Erfahrung'],['knowledge','Wissen'],['decision','Entscheidung'],['achievement','Leistung'],['confidence','Selbstvertrauen'],['development','Entwicklung'],['behaviour','Verhalten']],9:[['sustainability','Nachhaltigkeit'],['inequality','Ungleichheit'],['evidence','Beweis'],['consequence','Folge'],['awareness','Bewusstsein'],['assumption','Annahme'],['reliability','Zuverlässigkeit'],['perspective','Perspektive'],['requirement','Anforderung'],['controversy','Kontroverse']]};
+ const vocab=vocabSets[level];
+ const logicSets={5:[['2, 5, 8, 11, …','14'],['3, 6, 12, 24, …','48'],['1, 4, 9, 16, …','25'],['80, 40, 20, …','10'],['2, 6, 12, 20, …','30'],['1, 2, 4, 7, 11, …','16'],['5, 10, 8, 16, 14, …','28'],['100, 90, 81, 73, …','66'],['4, 7, 13, 25, …','49'],['1, 1, 2, 3, 5, …','8']],7:[['2, 6, 18, 54, …','162'],['1, 8, 27, 64, …','125'],['−12, −7, −2, 3, …','8'],['1, 3, 7, 15, …','31'],['2, 3, 5, 8, 12, …','17'],['81, 27, 9, …','3'],['2, 5, 10, 17, …','26'],['1, 2, 6, 24, …','120'],['4, 9, 19, 39, …','79'],['2, −4, 8, −16, …','32']],9:[['1, 4, 10, 20, 35, …','56'],['2, 3, 5, 9, 17, …','33'],['1, 2, 5, 14, 41, …','122'],['3, 8, 15, 24, …','35'],['1, 4, 13, 40, …','121'],['64, −32, 16, −8, …','4'],['2, 6, 24, 120, …','720'],['0,5; 1,5; 4,5; 13,5; …','40,5'],['2, 7, 17, 37, …','77'],['1, 3, 6, 10, 15, …','21']]};
+ const logic=logicSets[level];
+ function mathQuestion(){const a=Math.floor(Math.random()*30)+10,b=Math.floor(Math.random()*12)+2;const type=Math.floor(Math.random()*4);if(level===5){return [[`${a} × ${b}`,String(a*b)],[`${a*b} ÷ ${b}`,String(a)],[`${a} + ${b} × 3`,String(a+b*3)],[`${a*4} − (${b} + ${a})`,String(a*3-b)]][type];}if(level===7){return [[`${b*5} % von 200`,String(b*10)],[`−${a} + ${b*4}`,String(b*4-a)],[`${b}x + ${a} = ${b*3+a}. x = ?`,'3'],[`${b}/4 von ${a*4}`,String(b*a)]][type];}return [[`${b}x − ${a} = ${b*7-a}. x = ?`,'7'],[`√${a*a} + ${b}²`,String(a+b*b)],[`Ein Preis von ${a*10} € steigt um 15 %. Neuer Preis?`,String(a*11.5)],[`f(x) = 3x² − 2x. f(${b}) = ?`,String(3*b*b-2*b)]][type];}
+ let n=0,score=0;const questions=(kind==='vocab'?vocab:logic).map(x=>[...x]);for(let i=questions.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[questions[i],questions[j]]=[questions[j],questions[i]];}
+ function next(){if(n===10){body.innerHTML=`<p>Fertig! ${score} von 10 richtig.</p><button class="primary">Noch einmal</button>`;body.querySelector('button').onclick=()=>startGame(kind);return;}let q,answer;if(kind==='math'){[q,answer]=mathQuestion();}else{[q,answer]=questions[n];q=kind==='vocab'?`Übersetze ins Deutsche: ${q}`:`Welche Zahl folgt? ${q}`;}
+ body.innerHTML=`<p>Aufgabe ${n+1}/10 · Punkte ${score}</p><p><strong>${safe(q)}</strong></p><form id="gameAnswer"><label class="field">Deine Antwort<input required autocomplete="off" aria-label="Deine Antwort"></label><button class="primary">Prüfen</button></form><p id="gameFeedback" role="status"></p>`;
+ const f=$('#gameAnswer');f.onsubmit=e=>{e.preventDefault();if(f.querySelector('button').disabled)return;const norm=x=>x.trim().toLowerCase().replace(/^(der|die|das) /,'').replace(',', '.');const correct=(kind==='vocab'?[answer,...({Gelegenheit:['Chance'],Leistung:['Erfolg'],Beweis:['Nachweis','Belege'],Folge:['Konsequenz'],Nachbar:['Nachbarin'],Bibliothek:['Bücherei']}[answer]||[])]:[answer]).some(a=>norm(f.querySelector('input').value)===norm(a));if(correct)score++;n++;f.querySelector('button').disabled=true;f.querySelector('input').disabled=true;$('#gameFeedback').textContent=correct?'Richtig!':`Richtige Antwort: ${answer}`;const b=document.createElement('button');b.className='primary';b.textContent='Weiter';b.onclick=next;body.append(b);};}next();
+}
+setInterval(async()=>{try{const data=await request('maintenance');maintenance=data.maintenance;if(data.session&&data.session.role!==state.session.role){const wasStaff=state.session.role!=='visitor';state.session=data.session;renderAuth();if(wasStaff&&state.session.role==='visitor'&&document.querySelector('.view.active')?.id==='adminPanel'){navigate('login');toast('Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.');}}const page=document.querySelector('.view.active')?.id;if(page&&maintenanceBlocked(page))showMaintenance(page);else if(page==='maintenancePage'&&!maintenanceBlocked(maintenanceOrigin))navigate(maintenanceOrigin==='planner'?'ki':maintenanceOrigin);}catch{}},15000);
+queueMicrotask(()=>boot().catch(e=>{document.documentElement.removeAttribute('data-loading');toast('Seite konnte nicht vollständig geladen werden: '+e.message);}));
 
-    .floating-back {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 50;
-      border: none;
-      border-radius: 999px;
-      padding: 10px 16px;
-      background: rgba(3, 12, 24, 0.86);
-      color: white;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 8px 22px rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.14);
-    }
-    .floating-back:hover { background: rgba(18, 42, 76, .96); }
-
-    .hint {
-      position: fixed;
-      right: 10px;
-      bottom: 10px;
-      z-index: 50;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(3, 12, 24, 0.86);
-      color: #dcebff;
-      font-size: 12px;
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 8px 22px rgba(0,0,0,.35);
-    }
-
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      transform: translateX(-50%) translateY(120px);
-      background: rgba(8, 16, 34, 0.96);
-      color: white;
-      padding: 14px 18px;
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255,255,255,.1);
-      z-index: 70;
-      font-weight: 700;
-      transition: transform .25s ease;
-      pointer-events: none;
-    }
-    .toast.show { transform: translateX(-50%) translateY(0); }
-
-    .login-overlay {
-      position: absolute;
-      inset: 0;
-    }
-
-    .login-input {
-      position: absolute;
-      z-index: 25;
-      border: none;
-      border-radius: 18px;
-      background: rgba(8, 32, 70, 0.15);
-      color: white;
-      font-size: clamp(12px, 1.45vw, 26px);
-      font-weight: 700;
-      padding: 0 18px;
-      outline: none;
-      box-shadow: inset 0 0 0 2px rgba(64, 161, 255, 0.06);
-    }
-    .login-input::placeholder { color: rgba(255,255,255,.72); }
-    .login-input:focus { background: rgba(10, 38, 82, 0.28); box-shadow: inset 0 0 0 2px rgba(103, 211, 255, .35); }
-
-    .visually-hidden {
-      position: absolute !important;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0,0,0,0);
-      white-space: nowrap;
-      border: 0;
-    }
-  </style>
-</head>
-<body>
-  <div id="app">
-    <div id="stageWrap">
-
-      <section class="screen active" id="screen-lobby" aria-label="Lobby">
-        <img class="bg" src="assets/lobby.png" alt="Lessing Stars Lobby" />
-        <button class="hotspot" style="left:1.45%;top:18.7%;width:12.95%;height:8.2%;" data-go="shop" aria-label="Shop"></button>
-        <button class="hotspot" style="left:1.45%;top:27.8%;width:12.95%;height:8.2%;" data-go="brawler" aria-label="Brawler"></button>
-        <button class="hotspot" style="left:1.45%;top:36.9%;width:12.95%;height:8.2%;" data-feature="Pass" aria-label="Pass"></button>
-        <button class="hotspot" style="left:1.45%;top:46.0%;width:12.95%;height:8.2%;" data-feature="Quests" aria-label="Quests"></button>
-        <button class="hotspot" style="left:1.45%;top:55.1%;width:12.95%;height:8.2%;" data-feature="Freunde" aria-label="Freunde"></button>
-        <button class="hotspot" style="left:1.45%;top:64.2%;width:12.95%;height:8.2%;" data-feature="Club" aria-label="Club"></button>
-        <button class="hotspot" style="left:1.45%;top:73.3%;width:12.95%;height:8.2%;" data-go="login" aria-label="Profil / Anmelden"></button>
-        <button class="hotspot" style="left:1.45%;top:82.4%;width:12.95%;height:8.6%;" data-feature="Einstellungen" aria-label="Einstellungen"></button>
-
-        <button class="hotspot" style="left:89.2%;top:19.6%;width:8.3%;height:11.5%;" data-feature="Events" aria-label="Events"></button>
-        <button class="hotspot" style="left:89.2%;top:39.2%;width:8.3%;height:11.5%;" data-feature="Freunde" aria-label="Freunde rechts"></button>
-        <button class="hotspot" style="left:89.2%;top:58.8%;width:8.3%;height:11.5%;" data-feature="Club" aria-label="Club rechts"></button>
-        <button class="hotspot" style="left:94.0%;top:2.2%;width:4.4%;height:7.2%;" data-go="menu" aria-label="Menü öffnen"></button>
-
-        <button class="hotspot" style="left:14.9%;top:81.0%;width:12.5%;height:13.5%;" data-toast="Tägliche Belohnung eingesammelt!" aria-label="Tägliche Belohnung"></button>
-        <button class="hotspot" style="left:28.8%;top:81.0%;width:18.3%;height:13.5%;" data-toast="Showdown Auswahl gespeichert" aria-label="Showdown"></button>
-        <button class="hotspot" style="left:47.8%;top:81.0%;width:18.3%;height:13.5%;" data-toast="Juwelenjagd Auswahl gespeichert" aria-label="Juwelenjagd"></button>
-        <button class="hotspot" style="left:66.8%;top:81.0%;width:18.3%;height:13.5%;" data-toast="Kontrolle Auswahl gespeichert" aria-label="Kontrolle"></button>
-        <button class="hotspot" style="left:75.0%;top:79.4%;width:23.3%;height:17.5%;" data-feature="Spielen" aria-label="Spielen"></button>
-      </section>
-
-      <section class="screen" id="screen-menu" aria-label="Rechtes Menü">
-        <img class="bg" src="assets/menu.png" alt="Lessing Stars Seitenleiste rechts" />
-        <button id="coachBackMenu" style="position:absolute;z-index:30;left:73%;top:10%;width:24%;height:6.5%;border:3px solid #0a172e;border-radius:14px;background:linear-gradient(#2f6aa5,#143b6c);color:#fff;font-weight:1000;font-size:clamp(12px,1.3vw,22px);cursor:pointer">← LESSING COACH</button>
-        <button class="hotspot" style="left:93.6%;top:2.1%;width:4.0%;height:7.3%;" data-go="lobby" aria-label="Menü schließen"></button>
-
-        <button class="hotspot" style="left:72.8%;top:18.1%;width:24.8%;height:8.6%;" data-go="login" aria-label="Anmelden"></button>
-        <button class="hotspot" style="left:72.8%;top:28.4%;width:24.8%;height:8.6%;" data-toast="Einstellungen werden noch ausgebaut" aria-label="Einstellungen"></button>
-        <button class="hotspot" style="left:72.8%;top:38.8%;width:24.8%;height:8.6%;" data-toast="Post folgt als Nächstes" aria-label="Post"></button>
-        <button class="hotspot" style="left:72.8%;top:49.1%;width:24.8%;height:8.6%;" data-toast="Hilfe folgt als Nächstes" aria-label="Hilfe"></button>
-        <button class="hotspot" style="left:72.8%;top:59.5%;width:24.8%;height:8.6%;" data-toast="Support folgt als Nächstes" aria-label="Support"></button>
-        <button class="hotspot" style="left:72.8%;top:69.8%;width:24.8%;height:8.6%;" data-toast="Datenschutz folgt als Nächstes" aria-label="Datenschutz"></button>
-        <button class="hotspot" style="left:72.8%;top:80.1%;width:24.8%;height:8.6%;" data-toast="Sprache folgt als Nächstes" aria-label="Sprache"></button>
-        <button class="hotspot" style="left:72.8%;top:90.3%;width:24.8%;height:7.8%;" data-go="login" aria-label="Abmelden"></button>
-
-        <button class="hotspot" style="left:1.45%;top:18.7%;width:12.95%;height:8.2%;" data-go="shop" aria-label="Shop"></button>
-        <button class="hotspot" style="left:1.45%;top:27.8%;width:12.95%;height:8.2%;" data-go="brawler" aria-label="Brawler"></button>
-        <button class="hotspot" style="left:81.2%;top:79.4%;width:13.2%;height:15.2%;" data-feature="Spielen" aria-label="Spielen"></button>
-      </section>
-
-      <section class="screen" id="screen-shop" aria-label="Shop">
-        <img class="bg" src="assets/shop.png" alt="Lessing Stars Shop" />
-        <button class="hotspot" style="left:1.7%;top:17.4%;width:12.7%;height:9.8%;" data-go="lobby" aria-label="Zum Hauptmenü über Logo"></button>
-        <button class="hotspot" style="left:1.7%;top:27.9%;width:12.7%;height:9.8%;" data-toast="Angebote geöffnet" aria-label="Angebote"></button>
-        <button class="hotspot" style="left:1.7%;top:38.5%;width:12.7%;height:9.8%;" data-go="brawler" aria-label="Brawler"></button>
-        <button class="hotspot" style="left:1.7%;top:49.0%;width:12.7%;height:9.8%;" data-toast="Skins Ansicht folgt als Nächstes" aria-label="Skins"></button>
-        <button class="hotspot" style="left:1.7%;top:59.6%;width:12.7%;height:9.8%;" data-toast="Math Ame folgt als Nächstes" aria-label="Math Ame"></button>
-        <button class="hotspot" style="left:1.7%;top:70.1%;width:12.7%;height:9.8%;" data-toast="Ressourcen folgt als Nächstes" aria-label="Ressourcen"></button>
-        <button class="hotspot" style="left:1.7%;top:80.7%;width:12.7%;height:9.8%;" data-go="menu" aria-label="Sonstiges"></button>
-        <button class="hotspot" style="left:94.0%;top:2.3%;width:4.4%;height:7.0%;" data-go="menu" aria-label="Menü öffnen"></button>
-
-        <button class="hotspot" style="left:14.9%;top:19.1%;width:23.0%;height:72.3%;" data-toast="Starter-Paket ausgewählt" aria-label="Starter Paket"></button>
-        <button class="hotspot" style="left:37.4%;top:19.1%;width:18.5%;height:72.3%;" data-toast="Neuer Skin ausgewählt" aria-label="Neuer Skin"></button>
-        <button class="hotspot" style="left:56.0%;top:19.1%;width:19.0%;height:72.3%;" data-toast="Prof. Zahl ausgewählt" aria-label="Prof Zahl"></button>
-        <button class="hotspot" style="left:76.0%;top:26.7%;width:11.0%;height:35.6%;" data-toast="Münzen ausgewählt" aria-label="Münzen"></button>
-        <button class="hotspot" style="left:88.0%;top:26.7%;width:11.0%;height:35.6%;" data-toast="Powerpunkte ausgewählt" aria-label="Powerpunkte"></button>
-        <button class="hotspot" style="left:76.0%;top:64.3%;width:11.0%;height:26.0%;" data-toast="Box ausgewählt" aria-label="Box"></button>
-        <button class="hotspot" style="left:88.0%;top:64.3%;width:11.0%;height:26.0%;" data-toast="Große Box ausgewählt" aria-label="Große Box"></button>
-      </section>
-
-      <section class="screen" id="screen-brawler" aria-label="Brawler">
-        <img class="bg" src="assets/brawler.png" alt="Lessing Stars Brawler" />
-        <button class="hotspot" style="left:1.7%;top:17.3%;width:12.7%;height:9.8%;" data-go="shop" aria-label="Shop"></button>
-        <button class="hotspot" style="left:1.7%;top:27.9%;width:12.7%;height:9.8%;" data-toast="Du bist bereits bei den Brawlern" aria-label="Brawler aktiv"></button>
-        <button class="hotspot" style="left:1.7%;top:38.4%;width:12.7%;height:9.8%;" data-toast="Pass folgt als Nächstes" aria-label="Pass"></button>
-        <button class="hotspot" style="left:1.7%;top:49.0%;width:12.7%;height:9.8%;" data-toast="Quests folgt als Nächstes" aria-label="Quests"></button>
-        <button class="hotspot" style="left:1.7%;top:59.6%;width:12.7%;height:9.8%;" data-feature="Freunde" aria-label="Freunde"></button>
-        <button class="hotspot" style="left:1.7%;top:70.1%;width:12.7%;height:9.8%;" data-feature="Club" aria-label="Club"></button>
-        <button class="hotspot" style="left:1.7%;top:80.7%;width:12.7%;height:9.8%;" data-go="login" aria-label="Profil"></button>
-        <button class="hotspot" style="left:1.7%;top:91.2%;width:12.7%;height:7.8%;" data-toast="Einstellungen folgt als Nächstes" aria-label="Einstellungen"></button>
-        <button class="hotspot" style="left:94.0%;top:2.3%;width:4.4%;height:7.0%;" data-go="menu" aria-label="Menü öffnen"></button>
-        <button class="hotspot" style="left:15.2%;top:16.0%;width:16.3%;height:22.0%;" data-toast="Lex ausgewählt" aria-label="Lex"></button>
-        <button class="hotspot" style="left:31.8%;top:16.0%;width:16.3%;height:22.0%;" data-toast="Lina ausgewählt" aria-label="Lina"></button>
-        <button class="hotspot" style="left:48.4%;top:16.0%;width:16.3%;height:22.0%;" data-toast="Emre ausgewählt" aria-label="Emre"></button>
-      </section>
-
-      <section class="screen" id="screen-drops" aria-label="L-Drops und Mega Box">
-        <img class="bg" src="assets/drops.png" alt="Lessing Stars Drops und Mega Box" />
-        <button class="hotspot" style="left:1.7%;top:17.2%;width:12.7%;height:8.9%;" data-go="shop" aria-label="Shop"></button>
-        <button class="hotspot" style="left:1.7%;top:26.8%;width:12.7%;height:8.9%;" data-go="brawler" aria-label="Brawler"></button>
-        <button class="hotspot" style="left:1.7%;top:36.4%;width:12.7%;height:8.9%;" data-toast="Skins folgt als Nächstes" aria-label="Skins"></button>
-        <button class="hotspot" style="left:1.7%;top:46.1%;width:12.7%;height:8.9%;" data-toast="Du bist bereits bei den L-Drops" aria-label="L-Drops aktiv"></button>
-        <button class="hotspot" style="left:1.7%;top:55.8%;width:12.7%;height:8.9%;" data-toast="Mega Box Bereich ist rechts geöffnet" aria-label="Mega Box aktiv"></button>
-        <button class="hotspot" style="left:1.7%;top:65.4%;width:12.7%;height:8.9%;" data-toast="Tägliche Belohnungen folgt als Nächstes" aria-label="Tägliche Belohnungen"></button>
-        <button class="hotspot" style="left:1.7%;top:75.1%;width:12.7%;height:8.9%;" data-toast="Belohnungen folgt als Nächstes" aria-label="Belohnungen"></button>
-        <button class="hotspot" style="left:1.7%;top:84.8%;width:12.7%;height:8.9%;" data-toast="Quests / Freunde / Club / Profil folgen als Nächstes" aria-label="Weitere Menüs"></button>
-        <button class="hotspot" style="left:94.0%;top:2.2%;width:4.4%;height:7.0%;" data-go="menu" aria-label="Menü öffnen"></button>
-
-        <button class="hotspot" style="left:20.3%;top:88.0%;width:33.4%;height:10.1%;" data-toast="L-Drop öffnen kommt als Nächstes" aria-label="L-Drop öffnen"></button>
-        <button class="hotspot" style="left:58.8%;top:88.0%;width:13.0%;height:10.1%;" data-toast="1 Mega Box öffnen kommt als Nächstes" aria-label="1 Mega Box öffnen"></button>
-        <button class="hotspot" style="left:73.8%;top:88.0%;width:13.0%;height:10.1%;" data-toast="3 Mega Boxen öffnen kommt als Nächstes" aria-label="3 Mega Boxen öffnen"></button>
-        <button class="hotspot" style="left:88.2%;top:88.0%;width:11.0%;height:10.1%;" data-toast="10 Mega Boxen öffnen kommt als Nächstes" aria-label="10 Mega Boxen öffnen"></button>
-      </section>
-
-      <section class="screen" id="screen-feature" aria-label="Funktion">
-        <div style="position:absolute;inset:0;background:linear-gradient(180deg,#1263bf,#0a2f67);display:flex;align-items:center;justify-content:center;">
-          <div style="width:min(760px,86%);background:#0b2349;border:4px solid #4ca2ff;border-radius:28px;padding:42px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.45)">
-            <div id="featureTitle" style="font-size:clamp(34px,5vw,72px);font-weight:1000;color:#fff;text-shadow:0 5px 0 #061327;margin-bottom:16px">FUNKTION</div>
-            <div style="font-size:clamp(16px,2vw,28px);font-weight:800;color:#d9ebff;margin-bottom:30px">Diese Schaltfläche funktioniert. Die Detailansicht wird als eigener Spielbereich geöffnet.</div>
-            <button id="featureBack" style="font-size:clamp(18px,2.2vw,30px);font-weight:1000;background:linear-gradient(#ffe866,#ffba14);border:4px solid #091a38;border-radius:18px;padding:16px 34px;cursor:pointer">← ZUR LOBBY</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="screen" id="screen-login" aria-label="Anmeldung">
-        <img class="bg" src="assets/login.png" alt="Lessing Stars Anmeldung" />
-        <div class="login-overlay">
-          <label class="visually-hidden" for="username">Benutzername</label>
-          <input id="username" class="login-input" type="text" placeholder="Dein Benutzername ..." style="left:45.4%;top:36.4%;width:39.9%;height:7.8%;" />
-          <label class="visually-hidden" for="password">Passwort</label>
-          <input id="password" class="login-input" type="password" placeholder="Dein Passwort ..." style="left:45.4%;top:49.4%;width:39.9%;height:7.8%;" />
-        </div>
-        <button class="hotspot" style="left:45.2%;top:61.7%;width:40.9%;height:8.6%;" id="loginSubmit" aria-label="Anmelden"></button>
-        <button class="hotspot" style="left:45.0%;top:73.0%;width:18.2%;height:7.4%;" data-go="lobby" aria-label="Gast spielen"></button>
-        <button class="hotspot" style="left:64.5%;top:73.0%;width:21.3%;height:7.4%;" data-toast="Passwort Reset folgt als Nächstes" aria-label="Passwort vergessen"></button>
-        <button class="hotspot" style="left:45.0%;top:84.0%;width:40.8%;height:8.3%;" data-toast="Kontoregistrierung folgt als Nächstes" aria-label="Neues Konto erstellen"></button>
-      </section>
-
-    </div>
-  </div>
-
-  <div class="hint" id="screenLabel">Lobby</div>
-  <div class="toast" id="toast"></div>
-
-  <script>
-    const labels = {
-      lobby: 'Lobby',
-      menu: 'Seitenleiste',
-      shop: 'Shop',
-      brawler: 'Brawler',
-      drops: 'L-Drops / Mega Box',
-      login: 'Anmeldung',
-      feature: 'Funktion'
+// Schüler-Passwortschalter: nur die Verwaltung kann den Modus ändern.
+$('#saveStudentPassword').onclick=async()=>{
+ try{
+   const result=await send('admin/student-settings',{enabled:$('#studentPasswordToggle').checked},'PATCH');
+   toast(result.enabled?'Schüler-Passwort aktiviert':'Schüler-Passwort deaktiviert');
+ }catch(e){toast(e.message);}
+};
+// Big-Admin-Designer. Änderungen werden erst nach "Ansicht speichern" veröffentlicht.
+const designPages=['start','termine','ki','contact'];
+let designItems=[],designSelected=null;
+function designFor(page){
+ try{const a=JSON.parse(state.content['design_'+page]||'[]');return Array.isArray(a)?a:[];}catch{return [];}
+}
+function renderPublishedDesign(){
+ designPages.forEach(page=>{
+  const view=document.getElementById(page);if(!view)return;
+  view.querySelectorAll('.lessing-design-published').forEach(el=>el.remove());
+  const items=designFor(page);if(!items.length)return;
+  const layer=document.createElement('div');layer.className='lessing-design-published';
+  layer.style.height=Math.max(100,...items.map(i=>i.y+i.h+15))+'px';
+  items.forEach(i=>{
+    const el=document.createElement('div');el.className='lessing-design-item';
+    el.style.cssText=`left:${i.x}px;top:${i.y}px;width:${i.w}px;height:${i.h}px;color:${i.color};background:${i.type==='text'?'transparent':i.bg};font-size:${i.size}px`;
+    el.textContent=i.text;layer.append(el);
+  });
+  view.append(layer);
+ });
+}
+function designPaint(){
+ const layer=$('#designLayer');layer.replaceChildren();
+ designItems.forEach(i=>{
+  const el=document.createElement('div');el.className='design-element'+(designSelected===i.id?' chosen':'');
+  el.style.cssText=`left:${i.x}px;top:${i.y}px;width:${i.w}px;height:${i.h}px;color:${i.color};background:${i.type==='text'?'transparent':i.bg};font-size:${i.size}px`;
+  el.textContent=i.text;
+  const handle=document.createElement('span');handle.className='design-resize';el.append(handle);
+  el.onpointerdown=e=>{
+    e.preventDefault();designSelected=i.id;designSyncInputs();designPaint();
+    const originX=e.clientX,originY=e.clientY,old={...i},resize=e.target.classList.contains('design-resize');
+    const move=ev=>{
+      if(resize){i.w=Math.max(50,Math.min(1200,old.w+ev.clientX-originX));i.h=Math.max(30,Math.min(900,old.h+ev.clientY-originY));}
+      else{i.x=Math.max(0,Math.min(1600,old.x+ev.clientX-originX));i.y=Math.max(0,Math.min(2400,old.y+ev.clientY-originY));}
+      designPaint();
     };
+    const stop=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',stop);};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',stop,{once:true});
+  };
+  layer.append(el);
+ });
+}
+function designSyncInputs(){
+ const i=designItems.find(x=>x.id===designSelected);if(!i)return;
+ $('#designText').value=i.text;$('#designSize').value=i.size;$('#designColor').value=i.color;$('#designBg').value=i.bg;
+}
+function designLoad(){
+ if(state.session.role!=='big')return;
+ const page=$('#designPage').value;designItems=designFor(page).map(i=>({...i}));designSelected=null;
+ const frame=$('#designFrame');frame.src='/#'+page;
+ frame.onload=()=>{try{frame.contentWindow.document.querySelector('[data-page="'+page+'"]')?.click();}catch{}};
+ designPaint();
+}
+$('#designPage').onchange=designLoad;
+document.querySelector('[data-admin-tab="design"]').addEventListener('click',designLoad);
+function designAdd(type){
+ const i={id:crypto.randomUUID(),type,text:type==='text'?'Neuer Text':type==='box'?'Neues Feld':'Neuer Button',x:20,y:20+designItems.length*25,w:190,h:65,color:'#172554',bg:'#ffffff',size:20};
+ designItems.push(i);designSelected=i.id;designSyncInputs();designPaint();
+}
+$('#designAddText').onclick=()=>designAdd('text');
+$('#designAddBox').onclick=()=>designAdd('box');
+$('#designAddButton').onclick=()=>designAdd('button');
+for(const [selector,key,transform] of [['#designText','text',String],['#designSize','size',Number],['#designColor','color',String],['#designBg','bg',String]]){
+ $(selector).oninput=e=>{const i=designItems.find(x=>x.id===designSelected);if(!i)return;i[key]=transform(e.target.value);designPaint();};
+}
+$('#designDelete').onclick=()=>{designItems=designItems.filter(i=>i.id!==designSelected);designSelected=null;designPaint();};
+$('#designSave').onclick=async()=>{
+ try{
+  const page=$('#designPage').value;
+  await send('admin/design',{page,items:designItems},'PATCH');
+  state.content['design_'+page]=JSON.stringify(designItems);
+  renderPublishedDesign();toast('Ansicht gespeichert');
+ }catch(e){toast(e.message);}
+};
 
-    const screens = [...document.querySelectorAll('.screen')];
-    const toastEl = document.getElementById('toast');
-    const screenLabel = document.getElementById('screenLabel');
+function nextMaintenanceVideo(){
+ const clips=['/assets/maintenance-loop.mp4','/assets/maintenance-loop-violet.mp4','/assets/maintenance-loop-teal.mp4'];
+ let last=-1;try{last=Number(localStorage.getItem('lessing_background_clip')??-1);}catch{}
+ const next=(last+1)%clips.length;try{localStorage.setItem('lessing_background_clip',String(next));}catch{}return clips[next];
+}
+function startDvdGame(body){
+ body.replaceChildren();gameCleanup=createDvdScreensaver(body);
+}
 
-    function showToast(message) {
-      toastEl.textContent = message;
-      toastEl.classList.add('show');
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => toastEl.classList.remove('show'), 1900);
+function startMemory(root){
+ root.replaceChildren();let active=true,first=null,locked=false,moves=0,found=0,timer;
+ const status=document.createElement('p');status.setAttribute('role','status');
+ const grid=document.createElement('div');grid.className='memory-grid';
+ const restart=document.createElement('button');restart.type='button';restart.className='primary';restart.textContent='Neu starten';
+ root.append(status,grid,restart);
+ const update=message=>{status.textContent=`${found}/8 Paare · ${moves} Züge${message?' · '+message:''}`;};update('Wähle zwei Karten.');
+ const deck=['🚀','🎧','🎮','⚽','🧩','🎨','🛰️','🧪'].flatMap((symbol,id)=>[{symbol,id},{symbol,id}]);
+ for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+ for(const [index,item] of deck.entries()){
+  const b=document.createElement('button');b.type='button';b.className='memory-card';b.textContent='?';b.setAttribute('aria-label',`Karte ${index+1}, verdeckt`);
+  const card={b,id:item.id,open:false,matched:false};
+  function close(){card.open=false;b.textContent='?';b.classList.remove('revealed');b.setAttribute('aria-label',`Karte ${index+1}, verdeckt`);}card.close=close;
+  b.onclick=e=>{e.stopPropagation();if(!active||locked||card.open||card.matched)return;
+   card.open=true;b.textContent=item.symbol;b.classList.add('revealed');b.setAttribute('aria-label',item.symbol);
+   if(!first){first=card;update('Wähle die zweite Karte.');return;}
+   const other=first;first=null;moves++;
+   if(other.id===card.id){other.matched=card.matched=true;other.b.disabled=b.disabled=true;other.b.classList.add('matched');b.classList.add('matched');found++;update(found===8?'Geschafft! Alle Paare gefunden.':'Paar gefunden!');}
+   else{locked=true;update('Kein Paar – merke dir die Karten.');timer=setTimeout(()=>{if(!active)return;other.close();card.close();locked=false;update('Wähle zwei Karten.');},1100);}
+  };grid.append(b);
+ }
+ gameCleanup=()=>{active=false;clearTimeout(timer);};
+ restart.onclick=e=>{e.stopPropagation();gameCleanup();startMemory(root);};
+}
+
+const starsNavigation=document.querySelector('#starsNavigation');starsNavigation.onclick=()=>{if(maintenanceBlocked('stars'))showMaintenance('stars');else{closeMobileMenu();window.openLessingStars();}};
+window.addEventListener('lessing-coach-home',()=>navigate('start'));
+</script>
+<style id="coach-stars-integration">#coachStarsOverlay{position:fixed;inset:0;width:100%;height:100dvh;z-index:10000;background:#102945}#coachStarsOverlay[hidden]{display:none}#coachStarsFrame{display:block;border:0;width:100%;height:100%}body.coach-stars-open{overflow:hidden}</style>
+<section id="coachStarsOverlay" hidden aria-label="Lessing Stars"><iframe id="coachStarsFrame" title="Lessing Stars" allow="fullscreen; autoplay" referrerpolicy="same-origin"></iframe></section>
+<script id="coachStarsController">
+(function(){
+ const overlay=document.getElementById('coachStarsOverlay'),frame=document.getElementById('coachStarsFrame');let focusBefore;
+ window.openLessingStars=function(){focusBefore=document.activeElement;document.querySelector('.shell').inert=true;overlay.hidden=false;document.body.classList.add('coach-stars-open');frame.src='stars-embedded.html';frame.focus();};
+ window.closeLessingStars=function(){overlay.hidden=true;document.body.classList.remove('coach-stars-open');document.querySelector('.shell').inert=false;frame.removeAttribute('src');window.dispatchEvent(new Event('lessing-coach-home'));focusBefore?.focus();};
+ window.addEventListener('message',function(event){if(event.source===frame.contentWindow&&event.origin===location.origin&&event.data?.type==='lessing-coach-home')window.closeLessingStars();});
+})();
+</script>
+<script id="coach-nonpersonalized-ui">
+(function(){
+  function scrub(root=document){
+    root.querySelectorAll('.ai-main h1').forEach(el=>{
+      const html=el.innerHTML;
+      if(/^Hallo\s+[^!<]+!/i.test(el.textContent||'')) el.innerHTML='Hallo!<br><span class="gradient">Was möchtest du heute lernen?</span>';
+    });
+    const walker=document.createTreeWalker(root.body||root,NodeFilter.SHOW_TEXT);
+    let n; while(n=walker.nextNode()){
+      if(/by\s+Safa\s+Yildiz\s*7G2/i.test(n.nodeValue||'')) n.nodeValue='';
     }
-
-    function setScreen(name) {
-      screens.forEach(screen => screen.classList.toggle('active', screen.id === `screen-${name}`));
-      screenLabel.textContent = labels[name] || name;
-      location.hash = `#/screen/${name}`;
-    }
-
-    function navigate(name) { setScreen(name); }
-
-    function initFromHash() {
-      const match = location.hash.match(/#\/screen\/([a-z-]+)/i);
-      if (match && labels[match[1]]) setScreen(match[1]);
-      else setScreen('lobby');
-    }
-
-    document.querySelectorAll('[data-go]').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); navigate(btn.dataset.go); });
-    });
-
-    document.querySelectorAll('[data-toast]').forEach(btn => {
-      btn.addEventListener('click', () => showToast(btn.dataset.toast));
-    });
-
-    document.querySelectorAll('[data-feature]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        document.getElementById('featureTitle').textContent = btn.dataset.feature.toUpperCase();
-        navigate('feature');
-      });
-    });
-    document.getElementById('featureBack').addEventListener('click', () => navigate('lobby'));
-    document.getElementById('coachBackMenu').addEventListener('click', () => { try { location.href = '/'; } catch (_) {} });
-
-    document.getElementById('loginSubmit').addEventListener('click', () => {
-      const username = document.getElementById('username').value.trim() || 'Gast';
-      showToast(`Willkommen ${username}!`);
-      setTimeout(() => navigate('lobby'), 320);
-    });
-
-    document.getElementById('password').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('loginSubmit').click();
-    });
-    document.getElementById('username').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('loginSubmit').click();
-    });
-
-    window.addEventListener('hashchange', initFromHash);
-    initFromHash();
-  </script>
-</body>
-</html>
+    root.querySelectorAll('[data-personal-profile],.ai-user-profile,.ai-plan-badge').forEach(el=>el.remove());
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>scrub());else scrub();
+  new MutationObserver(()=>scrub()).observe(document.documentElement,{subtree:true,childList:true,characterData:true});
+})();
+</script>
+</body></html>
