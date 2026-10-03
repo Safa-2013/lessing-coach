@@ -1,25 +1,6 @@
-LESSING COACH + LESSING STARS – 50 BRAWLER UPDATE – 02.10.2026
-
-DIESE ZIP IST ALS UPDATE FÜR DASSELBE GITHUB/VERCEL-PROJEKT GEDACHT.
-Entpacken und die enthaltenen Dateien mit gleicher Ordnerstruktur in dein bestehendes Repository kopieren/ersetzen.
-
-WICHTIGE ÄNDERUNGEN
-- Terminplaner / Coaching / Lern-KI / Admin-Bereich bleiben enthalten.
-- Lessing Stars bleibt direkt im Terminplaner eingebaut.
-- 50 Brawler sind im Start-Katalog vorhanden.
-- Nur Hamza.S. ist beim neuen Spieler automatisch freigeschaltet (Starter).
-- Safa Yildiz ist ein JUNGE.
-- Safa Yildiz ist der stärkste Brawler und mit 4.000 Credits der teuerste Brawler.
-- Startguthaben bleibt: 1.500 Münzen, 1.000 Powerpunkte, 100 Gems, 100 Credits.
-- Admin kann Konten erstellen, Ressourcen verteilen, Brawler freischalten sowie Brawler/Maps verwalten.
-- Shop, Drops/Mega Boxen, Brawler, Skins, Quests, Belohnungen, Freunde/Club, Profil, Anmeldung, Spielmodi und Admin-Werkstätten bleiben vorhanden.
-
-GITHUB / VERCEL
-1. ZIP entpacken.
-2. index.html im Hauptordner ersetzen.
-3. Alle Dateien aus lib/ in den bestehenden lib/-Ordner kopieren und ersetzen.
-4. Committen und Vercel-Deployment abwarten.
-5. Bestehende Dateien, die nicht in dieser Update-ZIP enthalten sind (z. B. db.js, stars-maps.js, visual.css, package.json, api/), NICHT löschen.
-
-HINWEIS
-Diese Update-ZIP basiert direkt auf deiner Lessing_Coach_ADMIN_19_UPDATE-Datei. Sie ist deshalb absichtlich als sichere Ersatz-/Update-ZIP aufgebaut und löscht keine bestehenden Terminplaner-Dateien.
+Finale lokale Vorschau. Dateien in einen Ordner laden und index.html öffnen.
+Hinweise:
+- Startwerte: 1500 Münzen, 100 Gems, 1000 Powerpunkte.
+- Start-Brawler: Hamza. S.
+- Insgesamt 50 Brawler im Katalog.
+- Safa Yildiz ist als legendärer Brawler mit 4000 Credits hinterlegt.
