@@ -1,0 +1,14 @@
+LESSING STARS – VISUAL REAL FIX
+
+Diese Version ersetzt die alte simple blaue Stars-Ansicht sichtbar durch die neuen Referenz-Ansichten:
+- Lobby
+- Shop
+- Brawler
+- L-Drops / Mega-Boxen
+- Anmeldung
+- Rechte Seitenleiste
+
+WICHTIG:
+Der Lessing-Coach-Bereich selbst wurde nicht neu gestaltet.
+Die Lessing-Stars-Seiten verwenden die neuen Bild-Layouts und klickbare Hotspots.
+Die frühere funktionale Stars-Datei liegt als stars-functional-backup.html bei.
