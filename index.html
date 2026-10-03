@@ -65,6 +65,9 @@
 
     .hotspot {
       position: absolute;
+      z-index: 20;
+      pointer-events: auto;
+      touch-action: manipulation;
       background: transparent;
       border: 0;
       padding: 0;
@@ -135,6 +138,7 @@
 
     .login-input {
       position: absolute;
+      z-index: 25;
       border: none;
       border-radius: 18px;
       background: rgba(8, 32, 70, 0.15);
@@ -162,35 +166,35 @@
   </style>
 </head>
 <body>
-  <button class="floating-back" id="coachBack">← Lessing Coach</button>
   <div id="app">
     <div id="stageWrap">
 
       <section class="screen active" id="screen-lobby" aria-label="Lobby">
         <img class="bg" src="assets/lobby.png" alt="Lessing Stars Lobby" />
-        <button class="hotspot" style="left:1.7%;top:18.9%;width:12.7%;height:8.5%;" data-go="shop" aria-label="Shop"></button>
-        <button class="hotspot" style="left:1.7%;top:28.0%;width:12.7%;height:8.5%;" data-go="brawler" aria-label="Brawler"></button>
-        <button class="hotspot" style="left:1.7%;top:37.2%;width:12.7%;height:8.5%;" data-toast="Pass Ansicht folgt als Nächstes" aria-label="Pass"></button>
-        <button class="hotspot" style="left:1.7%;top:46.3%;width:12.7%;height:8.5%;" data-toast="Quests Ansicht folgt als Nächstes" aria-label="Quests"></button>
-        <button class="hotspot" style="left:1.7%;top:55.5%;width:12.7%;height:8.5%;" data-toast="Freunde folgt als Nächstes" aria-label="Freunde"></button>
-        <button class="hotspot" style="left:1.7%;top:64.6%;width:12.7%;height:8.5%;" data-toast="Club folgt als Nächstes" aria-label="Club"></button>
-        <button class="hotspot" style="left:1.7%;top:73.8%;width:12.7%;height:8.5%;" data-go="login" aria-label="Profil / Anmelden"></button>
-        <button class="hotspot" style="left:1.7%;top:82.8%;width:12.7%;height:11.6%;" data-toast="Einstellungen folgen als Nächstes" aria-label="Einstellungen"></button>
+        <button class="hotspot" style="left:1.45%;top:18.7%;width:12.95%;height:8.2%;" data-go="shop" aria-label="Shop"></button>
+        <button class="hotspot" style="left:1.45%;top:27.8%;width:12.95%;height:8.2%;" data-go="brawler" aria-label="Brawler"></button>
+        <button class="hotspot" style="left:1.45%;top:36.9%;width:12.95%;height:8.2%;" data-feature="Pass" aria-label="Pass"></button>
+        <button class="hotspot" style="left:1.45%;top:46.0%;width:12.95%;height:8.2%;" data-feature="Quests" aria-label="Quests"></button>
+        <button class="hotspot" style="left:1.45%;top:55.1%;width:12.95%;height:8.2%;" data-feature="Freunde" aria-label="Freunde"></button>
+        <button class="hotspot" style="left:1.45%;top:64.2%;width:12.95%;height:8.2%;" data-feature="Club" aria-label="Club"></button>
+        <button class="hotspot" style="left:1.45%;top:73.3%;width:12.95%;height:8.2%;" data-go="login" aria-label="Profil / Anmelden"></button>
+        <button class="hotspot" style="left:1.45%;top:82.4%;width:12.95%;height:8.6%;" data-feature="Einstellungen" aria-label="Einstellungen"></button>
 
-        <button class="hotspot" style="left:89.2%;top:19.6%;width:8.3%;height:11.5%;" data-toast="Events folgt als Nächstes" aria-label="Events"></button>
-        <button class="hotspot" style="left:89.2%;top:39.2%;width:8.3%;height:11.5%;" data-toast="Freunde folgt als Nächstes" aria-label="Freunde rechts"></button>
-        <button class="hotspot" style="left:89.2%;top:58.8%;width:8.3%;height:11.5%;" data-toast="Club folgt als Nächstes" aria-label="Club rechts"></button>
+        <button class="hotspot" style="left:89.2%;top:19.6%;width:8.3%;height:11.5%;" data-feature="Events" aria-label="Events"></button>
+        <button class="hotspot" style="left:89.2%;top:39.2%;width:8.3%;height:11.5%;" data-feature="Freunde" aria-label="Freunde rechts"></button>
+        <button class="hotspot" style="left:89.2%;top:58.8%;width:8.3%;height:11.5%;" data-feature="Club" aria-label="Club rechts"></button>
         <button class="hotspot" style="left:94.0%;top:2.2%;width:4.4%;height:7.2%;" data-go="menu" aria-label="Menü öffnen"></button>
 
-        <button class="hotspot" style="left:1.8%;top:81.2%;width:25.0%;height:13.2%;" data-toast="Tägliche Belohnung eingesammelt!" aria-label="Tägliche Belohnung"></button>
-        <button class="hotspot" style="left:29.0%;top:81.4%;width:18.2%;height:12.8%;" data-toast="Showdown Auswahl gespeichert" aria-label="Showdown"></button>
-        <button class="hotspot" style="left:47.9%;top:81.4%;width:18.2%;height:12.8%;" data-toast="Juwelenjagd Auswahl gespeichert" aria-label="Juwelenjagd"></button>
-        <button class="hotspot" style="left:66.9%;top:81.4%;width:18.2%;height:12.8%;" data-toast="Kontrolle Auswahl gespeichert" aria-label="Kontrolle"></button>
-        <button class="hotspot" style="left:81.0%;top:79.4%;width:17.8%;height:17.5%;" data-toast="Spielansicht kommt als Nächstes" aria-label="Spielen"></button>
+        <button class="hotspot" style="left:14.9%;top:81.0%;width:12.5%;height:13.5%;" data-toast="Tägliche Belohnung eingesammelt!" aria-label="Tägliche Belohnung"></button>
+        <button class="hotspot" style="left:28.8%;top:81.0%;width:18.3%;height:13.5%;" data-toast="Showdown Auswahl gespeichert" aria-label="Showdown"></button>
+        <button class="hotspot" style="left:47.8%;top:81.0%;width:18.3%;height:13.5%;" data-toast="Juwelenjagd Auswahl gespeichert" aria-label="Juwelenjagd"></button>
+        <button class="hotspot" style="left:66.8%;top:81.0%;width:18.3%;height:13.5%;" data-toast="Kontrolle Auswahl gespeichert" aria-label="Kontrolle"></button>
+        <button class="hotspot" style="left:75.0%;top:79.4%;width:23.3%;height:17.5%;" data-feature="Spielen" aria-label="Spielen"></button>
       </section>
 
       <section class="screen" id="screen-menu" aria-label="Rechtes Menü">
         <img class="bg" src="assets/menu.png" alt="Lessing Stars Seitenleiste rechts" />
+        <button id="coachBackMenu" style="position:absolute;z-index:30;left:73%;top:10%;width:24%;height:6.5%;border:3px solid #0a172e;border-radius:14px;background:linear-gradient(#2f6aa5,#143b6c);color:#fff;font-weight:1000;font-size:clamp(12px,1.3vw,22px);cursor:pointer">← LESSING COACH</button>
         <button class="hotspot" style="left:93.6%;top:2.1%;width:4.0%;height:7.3%;" data-go="lobby" aria-label="Menü schließen"></button>
 
         <button class="hotspot" style="left:72.8%;top:18.1%;width:24.8%;height:8.6%;" data-go="login" aria-label="Anmelden"></button>
@@ -202,9 +206,9 @@
         <button class="hotspot" style="left:72.8%;top:80.1%;width:24.8%;height:8.6%;" data-toast="Sprache folgt als Nächstes" aria-label="Sprache"></button>
         <button class="hotspot" style="left:72.8%;top:90.3%;width:24.8%;height:7.8%;" data-go="login" aria-label="Abmelden"></button>
 
-        <button class="hotspot" style="left:1.7%;top:18.9%;width:12.7%;height:8.5%;" data-go="shop" aria-label="Shop"></button>
-        <button class="hotspot" style="left:1.7%;top:28.0%;width:12.7%;height:8.5%;" data-go="brawler" aria-label="Brawler"></button>
-        <button class="hotspot" style="left:81.2%;top:79.4%;width:13.2%;height:15.2%;" data-toast="Spielansicht kommt als Nächstes" aria-label="Spielen"></button>
+        <button class="hotspot" style="left:1.45%;top:18.7%;width:12.95%;height:8.2%;" data-go="shop" aria-label="Shop"></button>
+        <button class="hotspot" style="left:1.45%;top:27.8%;width:12.95%;height:8.2%;" data-go="brawler" aria-label="Brawler"></button>
+        <button class="hotspot" style="left:81.2%;top:79.4%;width:13.2%;height:15.2%;" data-feature="Spielen" aria-label="Spielen"></button>
       </section>
 
       <section class="screen" id="screen-shop" aria-label="Shop">
@@ -233,8 +237,8 @@
         <button class="hotspot" style="left:1.7%;top:27.9%;width:12.7%;height:9.8%;" data-toast="Du bist bereits bei den Brawlern" aria-label="Brawler aktiv"></button>
         <button class="hotspot" style="left:1.7%;top:38.4%;width:12.7%;height:9.8%;" data-toast="Pass folgt als Nächstes" aria-label="Pass"></button>
         <button class="hotspot" style="left:1.7%;top:49.0%;width:12.7%;height:9.8%;" data-toast="Quests folgt als Nächstes" aria-label="Quests"></button>
-        <button class="hotspot" style="left:1.7%;top:59.6%;width:12.7%;height:9.8%;" data-toast="Freunde folgt als Nächstes" aria-label="Freunde"></button>
-        <button class="hotspot" style="left:1.7%;top:70.1%;width:12.7%;height:9.8%;" data-toast="Club folgt als Nächstes" aria-label="Club"></button>
+        <button class="hotspot" style="left:1.7%;top:59.6%;width:12.7%;height:9.8%;" data-feature="Freunde" aria-label="Freunde"></button>
+        <button class="hotspot" style="left:1.7%;top:70.1%;width:12.7%;height:9.8%;" data-feature="Club" aria-label="Club"></button>
         <button class="hotspot" style="left:1.7%;top:80.7%;width:12.7%;height:9.8%;" data-go="login" aria-label="Profil"></button>
         <button class="hotspot" style="left:1.7%;top:91.2%;width:12.7%;height:7.8%;" data-toast="Einstellungen folgt als Nächstes" aria-label="Einstellungen"></button>
         <button class="hotspot" style="left:94.0%;top:2.3%;width:4.4%;height:7.0%;" data-go="menu" aria-label="Menü öffnen"></button>
@@ -259,6 +263,16 @@
         <button class="hotspot" style="left:58.8%;top:88.0%;width:13.0%;height:10.1%;" data-toast="1 Mega Box öffnen kommt als Nächstes" aria-label="1 Mega Box öffnen"></button>
         <button class="hotspot" style="left:73.8%;top:88.0%;width:13.0%;height:10.1%;" data-toast="3 Mega Boxen öffnen kommt als Nächstes" aria-label="3 Mega Boxen öffnen"></button>
         <button class="hotspot" style="left:88.2%;top:88.0%;width:11.0%;height:10.1%;" data-toast="10 Mega Boxen öffnen kommt als Nächstes" aria-label="10 Mega Boxen öffnen"></button>
+      </section>
+
+      <section class="screen" id="screen-feature" aria-label="Funktion">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,#1263bf,#0a2f67);display:flex;align-items:center;justify-content:center;">
+          <div style="width:min(760px,86%);background:#0b2349;border:4px solid #4ca2ff;border-radius:28px;padding:42px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.45)">
+            <div id="featureTitle" style="font-size:clamp(34px,5vw,72px);font-weight:1000;color:#fff;text-shadow:0 5px 0 #061327;margin-bottom:16px">FUNKTION</div>
+            <div style="font-size:clamp(16px,2vw,28px);font-weight:800;color:#d9ebff;margin-bottom:30px">Diese Schaltfläche funktioniert. Die Detailansicht wird als eigener Spielbereich geöffnet.</div>
+            <button id="featureBack" style="font-size:clamp(18px,2.2vw,30px);font-weight:1000;background:linear-gradient(#ffe866,#ffba14);border:4px solid #091a38;border-radius:18px;padding:16px 34px;cursor:pointer">← ZUR LOBBY</button>
+          </div>
+        </div>
       </section>
 
       <section class="screen" id="screen-login" aria-label="Anmeldung">
@@ -288,13 +302,13 @@
       shop: 'Shop',
       brawler: 'Brawler',
       drops: 'L-Drops / Mega Box',
-      login: 'Anmeldung'
+      login: 'Anmeldung',
+      feature: 'Funktion'
     };
 
     const screens = [...document.querySelectorAll('.screen')];
     const toastEl = document.getElementById('toast');
     const screenLabel = document.getElementById('screenLabel');
-    const coachBack = document.getElementById('coachBack');
 
     function showToast(message) {
       toastEl.textContent = message;
@@ -318,12 +332,22 @@
     }
 
     document.querySelectorAll('[data-go]').forEach(btn => {
-      btn.addEventListener('click', () => navigate(btn.dataset.go));
+      btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); navigate(btn.dataset.go); });
     });
 
     document.querySelectorAll('[data-toast]').forEach(btn => {
       btn.addEventListener('click', () => showToast(btn.dataset.toast));
     });
+
+    document.querySelectorAll('[data-feature]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        document.getElementById('featureTitle').textContent = btn.dataset.feature.toUpperCase();
+        navigate('feature');
+      });
+    });
+    document.getElementById('featureBack').addEventListener('click', () => navigate('lobby'));
+    document.getElementById('coachBackMenu').addEventListener('click', () => { try { location.href = '/'; } catch (_) {} });
 
     document.getElementById('loginSubmit').addEventListener('click', () => {
       const username = document.getElementById('username').value.trim() || 'Gast';
@@ -336,19 +360,6 @@
     });
     document.getElementById('username').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') document.getElementById('loginSubmit').click();
-    });
-
-    coachBack.addEventListener('click', () => {
-      if (window.history.length > 1) {
-        history.back();
-        setTimeout(() => {
-          if (document.visibilityState === 'visible' && location.hash.includes('#/screen/')) {
-            try { location.href = '/'; } catch (_) {}
-          }
-        }, 120);
-      } else {
-        try { location.href = '/'; } catch (_) { showToast('Zurück zum Terminplaner'); }
-      }
     });
 
     window.addEventListener('hashchange', initFromHash);
