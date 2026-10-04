@@ -1,15 +1,22 @@
-LESSING COACH + LESSING STARS – FINAL KORREKTUREN
+LESSING COACH + LESSING STARS – KOMPLETT-FIX
 
-- Terminplaner bleibt vollständig enthalten (index.html + app.js + API/Server-Dateien).
-- Lessing Stars öffnet weiterhin aus dem Terminplaner heraus.
-- Rückkehr zum Terminplaner ist im rechten Schnellmenü integriert.
-- Doppelte Ressourcenanzeige auf den Bildschirmen entfernt.
-- Lobby-Buttons bleiben unsichtbare echte Klickflächen auf der gewünschten Grafik.
-- Brawler-Auswahl reagiert jetzt auf die sichtbaren Karten.
-- Spielen-Seite komplett im Lessing-Stars-Spielstil überarbeitet.
-- Pass, Quests, Freunde, Club, Profil, Einstellungen, Skins und Events optisch vereinheitlicht.
-- L-Drop- und Mega-Box-Öffnungsanimationen sind enthalten.
-- Mega-Box: mehrere Belohnungen.
-- Legendärer L-Drop: 1 bis maximal 3 Belohnungen.
-- Mobile/kleinere Desktop-Auflösungen verbessert.
-- Automatisierte Tests: bestanden.
+Behoben / verbessert:
+- Terminplaner bleibt vollständig enthalten und Lessing Stars öffnet als Overlay.
+- Rückkehr zum Terminplaner über das Schnellmenü und Einstellungen.
+- Keine doppelte Ressourcenleiste auf den bildbasierten Hauptseiten.
+- Lobby-, Shop-, Brawler-, Drops-, Login- und Schnellmenü-Flächen sind anklickbar.
+- L-Drop / Mega-Box Oberfläche nutzt die vorgesehenen visuellen Seiten.
+- Mega-Box: 1 / 3 / 10 Boxen können geöffnet werden, wenn genug vorhanden sind.
+- Mega-Boxen geben mehrere Belohnungen.
+- Legendärer L-Drop gibt 1 bis 3 Belohnungen.
+- Quests können erst nach Erfüllung abgeholt werden und nicht mehrfach.
+- Brawl-Pass-Belohnungen sind nicht unendlich mehrfach abholbar.
+- Gekaufte Skins können später kostenlos wieder ausgewählt werden.
+- Spielansicht visuell stärker an Lessing Stars angepasst.
+- Sekundärseiten besitzen einheitliche Spiel-Navigation und Ressourcenanzeige.
+- Fallback beim Zurücksetzen verbessert.
+- Desktop- und Querformat-Layout robuster gemacht.
+
+Tests:
+- JavaScript-Syntaxprüfung bestanden.
+- Projekt-Test-Suite: 3/3 bestanden.
