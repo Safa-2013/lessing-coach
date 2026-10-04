@@ -1,0 +1,109 @@
+LESSING COACH + LESSING STARS — FINAL CHECKLIST
+
+LESSING COACH
+[OK] Termin & Coaching bleibt erhalten
+[OK] Termine bleibt erhalten
+[OK] Lern-KI bleibt erhalten
+[OK] Kontakt/Chat bleibt erhalten
+[OK] Admin-/Serverdateien bleiben im Paket
+[OK] Lessing Stars öffnet im bestehenden Overlay
+[OK] Rückkehr zum Terminplaner über Schnellmenü/Einstellungen
+
+LESSING STARS — UI & NAVIGATION
+[OK] Lobby mit echter Navigation
+[OK] Shop
+[OK] 50 Brawler
+[OK] Skins
+[OK] Lessing Pass
+[OK] L-Drops und Mega-Boxen
+[OK] Tägliche Belohnung
+[OK] Quests + Trophäenpfad
+[OK] Belohnungsverlauf
+[OK] Events + Countdown
+[OK] Freunde
+[OK] Club
+[OK] Profil
+[OK] Einstellungen
+[OK] Postfach
+[OK] Ressourcen-Erklärung
+[OK] Hilfe/Datenschutz/Impressum-Platzhalter
+[OK] Loading Screen
+[OK] Onboarding
+[OK] Querformat-Hinweis für Mobilgeräte
+[OK] Hash-Routing / Browser-Zurück
+[OK] Fehler-Fallback auf Lobby
+
+BRAWLER
+[OK] Hamza.S. ist Starter
+[OK] Neue Spieler besitzen zuerst Hamza.S.
+[OK] Safa Yildiz ist männlich, legendär und mit 11.000 HP / 3.200 Angriff der stärkste Standard-Brawler
+[OK] Freischaltung über Credits
+[OK] Sortieren/Filtern
+[OK] Power-Level-Upgrades
+[OK] Trophäen pro Brawler
+[OK] Skins pro Brawler
+[OK] Detailwerte: Leben, Angriff, Reichweite, Geschwindigkeit, Super
+
+BELOHNUNGEN
+[OK] L-Drop-Raritäten
+[OK] Legendary L-Drop: 1–3 Belohnungen
+[OK] Mega-Box: 4–8 Belohnungen pro Box
+[OK] Mehrfachöffnung 1/3/5/10 Mega-Boxen
+[OK] Mehrfachöffnung 1/3 L-Drops
+[OK] Öffnungsanimation + sequentielle Anzeige
+[OK] Doppelte Brawler/Skins werden in Ersatzbelohnung umgewandelt
+[OK] Tägliche Belohnung nur einmal pro Tag
+[OK] Pass-Belohnungen nur einmal
+[OK] Trophäenpfad nur einmal
+
+SPIEL
+[OK] Modusauswahl
+[OK] Schnellspiel und Training
+[OK] Raumcode erstellen/beitreten (lokaler Demo-Ablauf)
+[OK] Desktop-Steuerung WASD/Pfeile
+[OK] Mobile virtuelle Steuerung
+[OK] Angriff
+[OK] Super-Ladebalken
+[OK] Trefferfeedback/Schadenszahlen
+[OK] Lebensbalken
+[OK] Countdown 3-2-1
+[OK] Bots
+[OK] Respawn
+[OK] Showdown-Zuschauermodus nach Ausscheiden
+[OK] Pause
+[OK] AFK-Hinweis
+[OK] Reconnect-Angebot bei abgebrochenem lokalen Match
+[OK] Sieg/Niederlage-Endscreen
+[OK] Trophäen/Quest/Pass-XP-Fortschritt
+
+ADMIN
+[OK] Ressourcenzuteilung
+[OK] Brawler freischalten
+[OK] Brawler erstellen
+[OK] Quest erstellen
+[OK] Event erstellen
+[OK] Shop-Angebot erstellen
+[OK] Zeitbelohnung/Post senden
+[OK] Spieler sperren/entsperren
+[OK] Audit-Protokoll
+[OK] Map-Editor mit Boden/Wand/Busch/Spawn/Ziel
+[OK] Map speichern/testen
+[OK] Adminbereich nicht in normaler Navigation sichtbar
+
+ACCOUNT / SPEICHER
+[OK] Lokale Kontoerstellung
+[OK] Lokale Anmeldung
+[OK] Gastmodus
+[OK] Passwort ändern
+[OK] Lokales Konto löschen
+[OK] Session/Spielstand wird gespeichert
+[OK] Profilname/Icon/Farbe durch Nutzer änderbar
+[OK] Keine festen persönlichen Namen im normalen Lessing-Coach-Bereich ergänzt
+
+TECHNIK
+[OK] JavaScript-Syntaxprüfung bestanden
+[OK] Projekt-Tests bestanden
+[OK] Relative Assets / Vercel-GitHub-Struktur erhalten
+
+HINWEIS:
+Echte serverseitige Multiplayer-Synchronisation, E-Mail-Passwort-Reset und sichere öffentliche Authentifizierung können nicht rein lokal im Browser simuliert werden. Der Build enthält dafür vollständige UI-/Demo-Abläufe; für Produktion muss die vorhandene Server/API-Datenbank entsprechend angebunden werden.
