@@ -1,7 +1,15 @@
-FINAL BUILD 2026-10-04
-Enthält Terminplaner + Lessing Stars.
-Lessing Stars: Lobby, Shop, Brawler, Skins, Quests, Freunde, Club, Profil, Einstellungen, Events, Spielen, Login, L-Drops/Mega-Boxen.
-Alle sichtbaren Hauptbuttons sind klickbar.
-L-Drop/Mega-Box Animationen und Belohnungen enthalten.
-Zurück zum Terminplaner über das Drei-Striche-Menü > Zurück zum Terminplaner.
-API-Tests: 3/3 bestanden.
+LESSING COACH + LESSING STARS – KOMPLETTE VERSION
+
+- Der bestehende Terminplaner bleibt erhalten.
+- Lessing Stars öffnet innerhalb der Website und kann über das Menü wieder zum Terminplaner zurückkehren.
+- Die Kernansichten Lobby, Shop, Brawler, Drops, Login und Schnellmenü nutzen die gewünschten visuellen Referenzbilder.
+- Die sichtbaren Hauptbuttons sind echte, klickbare Hotspots.
+- Sekundärseiten (Pass, Quests, Freunde, Club, Profil, Einstellungen, Skins, Events, Spielen) sind funktional und im passenden Spielstil gestaltet.
+- Startwerte: 1500 Münzen, 100 Juwelen, 1000 Powerpunkte, 45 Tickets.
+- Hamza.S. ist Start-Brawler.
+- L-Drop und Mega-Box besitzen Öffnungsanimationen.
+- Mega-Box: 4–8 Belohnungen.
+- Legendärer L-Drop: 1–3 Belohnungen.
+- Fortschritt wird lokal im Browser gespeichert.
+- Mobil im Hochformat erscheint eine Drehen-Hinweisansicht; Querformat ist optimiert.
+- Kein fest eingetragener Schülername in Terminplaner/Lern-KI.
