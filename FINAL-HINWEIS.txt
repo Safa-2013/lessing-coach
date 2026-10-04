@@ -1,0 +1,7 @@
+FINAL BUILD 2026-10-04
+Enthält Terminplaner + Lessing Stars.
+Lessing Stars: Lobby, Shop, Brawler, Skins, Quests, Freunde, Club, Profil, Einstellungen, Events, Spielen, Login, L-Drops/Mega-Boxen.
+Alle sichtbaren Hauptbuttons sind klickbar.
+L-Drop/Mega-Box Animationen und Belohnungen enthalten.
+Zurück zum Terminplaner über das Drei-Striche-Menü > Zurück zum Terminplaner.
+API-Tests: 3/3 bestanden.
