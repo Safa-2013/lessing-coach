@@ -1,0 +1,15 @@
+LESSING COACH + LESSING STARS – FINAL KORREKTUREN
+
+- Terminplaner bleibt vollständig enthalten (index.html + app.js + API/Server-Dateien).
+- Lessing Stars öffnet weiterhin aus dem Terminplaner heraus.
+- Rückkehr zum Terminplaner ist im rechten Schnellmenü integriert.
+- Doppelte Ressourcenanzeige auf den Bildschirmen entfernt.
+- Lobby-Buttons bleiben unsichtbare echte Klickflächen auf der gewünschten Grafik.
+- Brawler-Auswahl reagiert jetzt auf die sichtbaren Karten.
+- Spielen-Seite komplett im Lessing-Stars-Spielstil überarbeitet.
+- Pass, Quests, Freunde, Club, Profil, Einstellungen, Skins und Events optisch vereinheitlicht.
+- L-Drop- und Mega-Box-Öffnungsanimationen sind enthalten.
+- Mega-Box: mehrere Belohnungen.
+- Legendärer L-Drop: 1 bis maximal 3 Belohnungen.
+- Mobile/kleinere Desktop-Auflösungen verbessert.
+- Automatisierte Tests: bestanden.
