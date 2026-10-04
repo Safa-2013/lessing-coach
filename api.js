@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID, createHash, pbkdf2Sync, timingSafeEqual } from 'node:crypto';
 import { database } from './db.js';
 import starsApi from './stars-api.js';
+import {askAI} from './ai-provider.js';
 
 const now = () => Date.now();
 const id = () => randomUUID();
@@ -42,7 +43,7 @@ async function seed(db) {
   }
   await db.query("UPDATE accounts SET permissions=$1 WHERE role='admin'", [JSON.stringify(['appointments','chats','content'])]);
 }
-async function sessionFor(req, res, db) {
+async function sessionFor(req, res, db, renewStaff = false) {
   const token = /(?:^|;\s*)lessing_session=([^;]+)/.exec(req.headers.cookie || '')?.[1];
   let session;
   if (token) session = (await db.query('SELECT s.visitor_id, s.account_id, a.role, a.permissions FROM sessions s LEFT JOIN accounts a ON a.id=s.account_id WHERE s.token_hash=$1 AND s.expires_at>$2', [digest(token), now()]))[0];
@@ -51,6 +52,11 @@ async function sessionFor(req, res, db) {
     await issue(req, res, db, session);
   }
   session.permissions = JSON.parse(session.permissions || '[]');
+  // Only actual navigation/actions renew staff access; background status polling
+  // must not keep an unattended administration session alive indefinitely.
+  if (token && session.account_id && renewStaff) {
+    await db.query('UPDATE sessions SET expires_at=$1 WHERE token_hash=$2', [now() + 15 * 60 * 1000, digest(token)]);
+  }
   return session;
 }
 async function issue(req, res, db, session) {
@@ -58,7 +64,7 @@ async function issue(req, res, db, session) {
   const staff = Boolean(session.account_id);
   const seconds = staff ? 15 * 60 : 30 * 86400;
   await db.query('INSERT INTO sessions (token_hash,visitor_id,account_id,expires_at) VALUES ($1,$2,$3,$4)', [digest(token), session.visitor_id, session.account_id, now() + seconds * 1000]);
-  // Staff cookies expire with the browser session as well as on the server after 15 minutes.
+  // Staff cookies expire with the browser session and after 15 minutes without use.
   res.setHeader('Set-Cookie', `lessing_session=${token}; HttpOnly; SameSite=Lax; Path=/${staff ? '' : `; Max-Age=${seconds}`}${process.env.VERCEL || req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''}`);
 }
 function bodyOf(req) { if (typeof req.body === 'object' && req.body) return req.body; try { return JSON.parse(req.body || '{}'); } catch { fail(400, 'Ungültige Daten'); } }
@@ -77,12 +83,13 @@ export default async function api(req, res) {
     const db = await database();
     if(path.startsWith('/stars/'))return starsApi(req,res,db,path);
     await seed(db);
-    let session = await sessionFor(req, res, db);
+    let session = await sessionFor(req, res, db, path !== '/maintenance');
     const body = req.method === 'GET' ? {} : bodyOf(req);
     const maintenanceRow=(await db.query('SELECT value FROM content WHERE key=$1',['maintenance']))[0];
     let maintenance={}; try {maintenance=JSON.parse(maintenanceRow?.value||'{}');} catch {}
-    if(path==='/maintenance' && req.method==='GET') return json(res,200,{maintenance});
+    if(path==='/maintenance' && req.method==='GET') return json(res,200,{maintenance,session:scope(session)});
     if(path==='/admin/maintenance' && req.method==='PATCH') {
+      if(!session.account_id) fail(403,'Nur Big Admin');
       if(session.role!=='big') fail(403,'Nur Big Admin');
       const next={all:body.all===true,games:body.games!==false,title:clean(body.title,100),message:clean(body.message,700),sections:{},enabledGames:{}};
       for(const key of ['start','coaching','termine','ki','contact','planner','stars']) next.sections[key]=body.sections?.[key]===true;
@@ -279,31 +286,7 @@ export default async function api(req, res) {
       const count = await db.query('SELECT id FROM ai_messages WHERE visitor_id=$1 AND role=$2 AND created_at>$3 LIMIT 11', [session.visitor_id, 'user', now() - 60000]);
       if (count.length >= 10) fail(429, 'Bitte eine Minute warten, bevor du weitere Fragen sendest.');
       const instructions = 'Du bist ein freundlicher deutschsprachiger Lerncoach für Schüler. Erkläre verständlich und altersgerecht. Unterstütze beim selbstständigen Lernen; bei Hausaufgaben erst den Lösungsweg erklären. Keine erfundenen Fakten. Gib bei Unsicherheit diese an. Verwende keine persönlichen Namen.';
-      let upstream = process.env.GEMINI_API_KEY
-        ? await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(process.env.GEMINI_MODEL || 'gemini-2.0-flash')}:generateContent`, { method:'POST', headers:{ 'x-goog-api-key':process.env.GEMINI_API_KEY, 'Content-Type':'application/json' }, body:JSON.stringify({ system_instruction:{parts:[{text:instructions}]}, contents:[...recent.reverse().map(r=>({role:r.role==='assistant'?'model':'user',parts:[{text:r.body}]})),{role:'user',parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:900} }), signal:AbortSignal.timeout(25000) })
-        : await fetch('https://api.openai.com/v1/responses', { method: 'POST', headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4.1-mini', store: false, max_output_tokens: 900, instructions, input: [...recent.reverse().map(r => ({ role: r.role, content: r.body })), { role: 'user', content: prompt }] }), signal: AbortSignal.timeout(25000) });
-      if (!upstream.ok && process.env.GEMINI_API_KEY && upstream.status === 404 && (process.env.GEMINI_MODEL || 'gemini-2.0-flash') !== 'gemini-2.0-flash') {
-        // Retry once with a known fallback model if a custom model name is unavailable.
-        const retryModel = 'gemini-2.0-flash';
-        upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${retryModel}:generateContent`, { method:'POST', headers:{ 'x-goog-api-key':process.env.GEMINI_API_KEY, 'Content-Type':'application/json' }, body:JSON.stringify({ contents:[{role:'user',parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:900} }), signal:AbortSignal.timeout(25000) });
-      }
-      if (!upstream.ok) {
-        const provider = process.env.GEMINI_API_KEY ? 'Gemini' : 'OpenAI';
-        // Record only the status; never log the API key, student question or provider response.
-        console.error('[ai/ask] upstream error', { provider, status:upstream.status });
-        const errors = {
-          400:'Die KI-Anfrage wurde vom Anbieter abgelehnt. Bitte später erneut versuchen.',
-          401:'Der KI-API-Schlüssel wird vom Anbieter nicht akzeptiert. Bitte die Server-Einstellung prüfen.',
-          402:'Das Guthaben beim KI-Anbieter reicht derzeit nicht aus.',
-          403:'Der KI-API-Schlüssel hat keine Berechtigung oder das Kontingent ist gesperrt. Bitte die Server-Einstellung prüfen.',
-          404:'Das eingestellte KI-Modell ist nicht verfügbar. Bitte die Server-Einstellung prüfen.',
-          429:'Das Kontingent des KI-Anbieters ist ausgeschöpft. Bitte später erneut versuchen.'
-        };
-        fail(upstream.status === 429 ? 429 : 502, errors[upstream.status] || 'KI-Dienst ist gerade nicht erreichbar. Bitte später erneut versuchen.');
-      }
-      const result = await upstream.json();
-      const answer = (process.env.GEMINI_API_KEY ? result.candidates?.[0]?.content?.parts?.map(part=>part.text || '').join('\n') : result.output?.flatMap(o => o.content || []).filter(c => c.type === 'output_text').map(c => c.text).join('\n'))?.trim();
-      if (!answer) fail(502, 'Die KI hat keine Antwort zurückgegeben.');
+      const answer = await askAI({instructions,input:[...recent.reverse().map(r=>({role:r.role,content:r.body})),{role:'user',content:prompt}]});
       await db.query('INSERT INTO ai_messages (id,thread_id,visitor_id,role,body,created_at) VALUES ($1,$2,$3,$4,$5,$6)', [id(), threadId, session.visitor_id, 'user', prompt, now()]);
       await db.query('INSERT INTO ai_messages (id,thread_id,visitor_id,role,body,created_at) VALUES ($1,$2,$3,$4,$5,$6)', [id(), threadId, session.visitor_id, 'assistant', answer, now()]);
       return json(res, 200, { answer });

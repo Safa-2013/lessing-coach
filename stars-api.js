@@ -2,6 +2,9 @@ import { randomBytes, randomUUID, createHash, pbkdf2Sync, timingSafeEqual } from
 import { fresh,normalize } from './stars-game.js';
 import { schema,catalog,action,fighterEdit,roomAction } from './stars-services.js';
 import {maps,editMap} from './stars-maps.js';
+import {skins,editSkin} from './stars-skins.js';
+import {generateStarsDraft} from './stars-ai.js';
+import {brawlerImage} from './stars-image.js';
 const sha=x=>createHash('sha256').update(x).digest('hex');
 const passwordHash=p=>{const salt=randomBytes(16).toString('hex');return salt+':'+pbkdf2Sync(p,salt,120000,32,'sha256').toString('hex')};
 const verify=(p,h)=>{const [salt,digest]=h.split(':');return timingSafeEqual(Buffer.from(digest,'hex'),pbkdf2Sync(p,salt,120000,32,'sha256'))};
@@ -21,9 +24,20 @@ export default async function starsApi(req,res,db,path){
  const user=token?(await db.query('SELECT u.* FROM stars_users u JOIN stars_sessions s ON s.username=u.username WHERE s.token=$1 AND s.expires_at>$2',[sha(token),Date.now()]))[0]:null;
  const readMaintenance=async()=>{const row=(await db.query('SELECT value FROM content WHERE key=$1',['maintenance']))[0];let m={};try{m=JSON.parse(row?.value||'{}')}catch{}return m};
  if(path==='/stars/catalog'&&req.method==='GET')return reply(res,200,{catalog:await catalog(db,user?.role==='admin')});
+ if(path==='/stars/skins'&&req.method==='GET')return reply(res,200,{skins:await skins(db,user?.role==='admin')});
  if(path==='/stars/maps'&&req.method==='GET')return reply(res,200,{maps:await maps(db,user?.role==='admin')});
  const m=await readMaintenance();const maintenance={maintenance:!!(m.all||m.sections?.stars),message:m.message||'Lessing Stars wird gerade gewartet.',all:!!m.all};
  if(path==='/stars/status'&&req.method==='GET')return reply(res,200,{...maintenance,user:user?{name:user.username,role:user.role,blocked:!!user.blocked,reason:user.reason}:null,progress:user?JSON.parse(user.progress):null});
+ if(path==='/stars/guest'&&req.method==='POST'){
+  if(user?.blocked)return reply(res,403,{error:'Konto gesperrt'});
+  if(maintenance.maintenance&&user?.role!=='admin')return reply(res,503,{error:maintenance.message});
+  if(user)return reply(res,200,{...maintenance,user:{name:user.username,role:user.role},progress:JSON.parse(user.progress)});
+  const username='gast_'+randomBytes(6).toString('hex'),progress=fresh('Gast');
+  await db.query('INSERT INTO stars_users(username,password_hash,role,progress) VALUES($1,$2,$3,$4)',[username,passwordHash(randomBytes(32).toString('hex')),'guest',JSON.stringify(progress)]);
+  const newToken=randomBytes(32).toString('hex');await db.query('INSERT INTO stars_sessions(token,username,expires_at) VALUES($1,$2,$3)',[sha(newToken),username,Date.now()+7*86400000]);
+  res.setHeader('Set-Cookie',`stars_session=${newToken}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800${process.env.VERCEL?'; Secure':''}`);
+  return reply(res,200,{...maintenance,user:{name:username,role:'guest'},progress});
+ }
  if(['/stars/login','/stars/register'].includes(path)&&req.method==='POST'){
  const username=String(body.username||'').trim().toLowerCase(),password=String(body.password||'');if(!/^[\p{L}\p{N}_ -]{2,18}$/u.test(username)||password.length<4||password.length>200)return reply(res,400,{error:'Name oder Passwort ungültig'});
  let found=(await db.query('SELECT * FROM stars_users WHERE username=$1',[username]))[0];
@@ -45,10 +59,44 @@ export default async function starsApi(req,res,db,path){
  }
  if(path==='/stars/password'&&req.method==='POST'){if(!verify(String(body.current||''),user.password_hash))return reply(res,403,{error:'Aktuelles Passwort falsch'});const next=String(body.next||'');if(next.length<6||next.length>200)return reply(res,400,{error:'Neues Passwort: mindestens 6 Zeichen'});await db.query('UPDATE stars_users SET password_hash=$1 WHERE username=$2',[passwordHash(next),user.username]);await db.query('DELETE FROM stars_sessions WHERE username=$1 AND token<>$2',[user.username,sha(token)]);return reply(res,200,{ok:true})}
  if(user.role!=='admin')return reply(res,403,{error:'Nur Admin'});
+ if(path==='/stars/admin/account/create'&&req.method==='POST'){
+  const username=String(body.username||'').trim().toLowerCase(),password=String(body.password||'');
+  if(!/^[\p{L}\p{N}_ -]{2,18}$/u.test(username)||['admin','guest'].includes(username)||password.length<6||password.length>200)return reply(res,400,{error:'Name: 2–18 Zeichen. Passwort: mindestens 6 Zeichen.'});
+  const result=await db.transaction(async tx=>{
+   const created=await tx.query('INSERT INTO stars_users(username,password_hash,role,progress) VALUES($1,$2,$3,$4) ON CONFLICT(username) DO NOTHING RETURNING username',[username,passwordHash(password),'player',JSON.stringify(fresh(String(body.username).trim()))]);
+   if(!created.length){const e=Error('Name bereits vergeben');e.status=409;throw e}
+   await tx.query('INSERT INTO stars_audit(id,actor,action,created_at) VALUES($1,$2,$3,$4)',[randomUUID(),user.username,'Spielerkonto erstellt: '+username,Date.now()]);return {username,role:'player'};
+  });return reply(res,200,{account:result});
+ }
+ if(path==='/stars/admin/account/grant'&&req.method==='POST'){
+  const username=String(body.username||'').trim().toLowerCase(),requestId=String(body.requestId||'');
+  if(!/^[a-zA-Z0-9_-]{16,80}$/.test(requestId))return reply(res,400,{error:'Gültige Vorgangs-ID fehlt'});
+  const resourceKeys=['coins','power','gems','credits','ldrop','mega'],amounts={};
+  if(!body.amounts||typeof body.amounts!=='object'||Array.isArray(body.amounts)||Object.keys(body.amounts).some(k=>!resourceKeys.includes(k)))return reply(res,400,{error:'Ungültige Ressourcen'});
+  for(const key of resourceKeys){const value=body.amounts[key]??0;if(typeof value!=='number'||!Number.isInteger(value)||value<0||value>1000000)return reply(res,400,{error:'Mengen müssen ganze Zahlen zwischen 0 und 1.000.000 sein'});amounts[key]=value}
+  const fighter=String(body.fighter||'');if(fighter&&!(await catalog(db,true)).some(f=>f.id===fighter&&f.published))return reply(res,400,{error:'Brawler muss existieren und für Spieler freigegeben sein'});
+  if(!fighter&&!Object.values(amounts).some(Boolean))return reply(res,400,{error:'Wähle einen Brawler oder eine positive Menge'});
+  const auditId='grant_'+sha(user.username+':'+requestId),fingerprint=sha(JSON.stringify({username,amounts,fighter}));
+  const result=await db.transaction(async tx=>{
+   const target=(await tx.query('SELECT * FROM stars_users WHERE username=$1'+(db.dialect==='postgres'?' FOR UPDATE':''),[username]))[0];
+   if(!target){const e=Error('Konto nicht gefunden');e.status=404;throw e}if(target.role==='admin'){const e=Error('Admin hat bereits unbegrenzte Ressourcen');e.status=400;throw e}
+   const old=(await tx.query('SELECT action FROM stars_audit WHERE id=$1',[auditId]))[0];const p=normalize(JSON.parse(target.progress),target.username);
+   if(old){if(!old.action.endsWith(' #'+fingerprint)){const e=Error('Vorgangs-ID gehört zu einer anderen Verteilung');e.status=409;throw e}return {username,progress:p,repeated:true}}
+   for(const [key,value] of Object.entries(amounts)){const bucket=key==='credits'?p.views:['ldrop','mega'].includes(key)?p.collection:p.wallet;const max=['ldrop','mega'].includes(key)?10000:1000000000;if(bucket[key]+value>max){const e=Error('Bestandsgrenze überschritten: '+key);e.status=400;throw e}bucket[key]+=value}
+   if(fighter&&!p.collection.brawlers.includes(fighter))p.collection.brawlers.push(fighter);
+   await tx.query('UPDATE stars_users SET progress=$1 WHERE username=$2',[JSON.stringify(p),username]);
+   const changes=resourceKeys.filter(k=>amounts[k]).map(k=>k+' +'+amounts[k]).concat(fighter?['Brawler '+fighter]:[]).join(', ');
+   await tx.query('INSERT INTO stars_audit(id,actor,action,created_at) VALUES($1,$2,$3,$4)',[auditId,user.username,'Verteilt an '+username+': '+changes+' #'+fingerprint,Date.now()]);return {username,progress:p,repeated:false};
+  });return reply(res,200,result);
+ }
+ if(path==='/stars/admin/skin'&&req.method==='POST')return reply(res,200,await editSkin(db,user,body));
+ if(path==='/stars/admin/image'&&req.method==='POST'){const count=await db.query('SELECT id FROM stars_audit WHERE actor=$1 AND action=$2 AND created_at>$3',[user.username,'Bild-KI',Date.now()-120000]);if(count.length>=2)return reply(res,429,{error:'Bitte zwei Minuten warten.'});await db.query('INSERT INTO stars_audit(id,actor,action,created_at) VALUES($1,$2,$3,$4)',[randomUUID(),user.username,'Bild-KI',Date.now()]);return reply(res,200,await brawlerImage(body));}
+ if(path==='/stars/admin/ai'&&req.method==='POST'){const count=await db.query('SELECT id FROM stars_audit WHERE actor=$1 AND action=$2 AND created_at>$3',[user.username,'KI-Entwurf',Date.now()-60000]);if(count.length>=5)return reply(res,429,{error:'Bitte eine Minute warten.'});await db.query('INSERT INTO stars_audit(id,actor,action,created_at) VALUES($1,$2,$3,$4)',[randomUUID(),user.username,'KI-Entwurf',Date.now()]);return reply(res,200,await generateStarsDraft(body));}
+ if(path==='/stars/admin/fighter/delete'&&req.method==='POST'){const id=String(body.id||'');if(id==='lex')return reply(res,400,{error:'Der Start-Brawler bleibt erhalten. Du kannst ihn bearbeiten.'});const found=(await catalog(db,true)).find(f=>f.id===id);if(!found)return reply(res,404,{error:'Brawler fehlt'});await db.transaction(async tx=>{await tx.query('INSERT INTO stars_fighters(id,data) VALUES($1,$2) ON CONFLICT(id) DO UPDATE SET data=$2',[id,JSON.stringify({...found,deleted:true,published:false})]);for(const row of await tx.query('SELECT username,progress FROM stars_users ORDER BY username'+(db.dialect==='postgres'?' FOR UPDATE':''))){const p=normalize(JSON.parse(row.progress),row.username);p.collection.brawlers=p.collection.brawlers.filter(f=>f!==id);if(p.fighters.selected===id)p.fighters.selected='lex';delete p.fighters.levels[id];delete p.fighters.trophies[id];await tx.query('UPDATE stars_users SET progress=$1 WHERE username=$2',[JSON.stringify(p),row.username])}});const saved=(await db.query('SELECT progress FROM stars_users WHERE username=$1',[user.username]))[0];return reply(res,200,{catalog:await catalog(db,true),progress:JSON.parse(saved.progress)})}
  if(path==='/stars/admin/fighter'&&req.method==='POST')return reply(res,200,await fighterEdit(db,user,body));
  if(path==='/stars/admin/map'&&req.method==='POST')return reply(res,200,await editMap(db,user,body));
  if(path==='/stars/admin/audit'&&req.method==='GET')return reply(res,200,{events:await db.query('SELECT actor,action,created_at FROM stars_audit ORDER BY created_at DESC LIMIT 100')});
- if(path==='/stars/admin/accounts'&&req.method==='GET')return reply(res,200,{accounts:await db.query('SELECT username,role,blocked,reason FROM stars_users')});
+ if(path==='/stars/admin/accounts'&&req.method==='GET')return reply(res,200,{accounts:(await db.query('SELECT username,role,blocked,reason,progress FROM stars_users ORDER BY username')).map(row=>{const p=normalize(JSON.parse(row.progress),row.username);return {username:row.username,role:row.role,blocked:row.blocked,reason:row.reason,name:p.name,wallet:p.wallet,credits:p.views.credits,brawlers:p.collection.brawlers,ldrop:p.collection.ldrop,mega:p.collection.mega}})});
  if(path==='/stars/admin/block'&&req.method==='PATCH'){if(body.username==='admin')return reply(res,400,{error:'Admin kann nicht gesperrt werden'});await db.query('UPDATE stars_users SET blocked=$1,reason=$2 WHERE username=$3',[body.blocked?1:0,String(body.reason||'').slice(0,150),String(body.username)]);return reply(res,200,{ok:true})}
  if(path==='/stars/admin/maintenance'&&req.method==='PATCH'){m.sections={...m.sections,stars:body.maintenance===true};if(body.message)m.message=String(body.message).trim().slice(0,700);await db.query('INSERT INTO content(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=$2',['maintenance',JSON.stringify(m)]);return reply(res,200,{maintenance:!!(m.all||m.sections.stars),message:m.message,all:!!m.all})}
  return reply(res,404,{error:'Nicht gefunden'});
