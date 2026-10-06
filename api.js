@@ -120,10 +120,14 @@ export default async function api(req, res) {
       return json(res, 200, { session: { role: 'visitor', permissions: [] } });
     }
     if (path === '/appointments' && req.method === 'POST') {
-      const fields = ['first_name','last_name','class_name','topic','requested_at'].map(k => clean(body[k], k === 'topic' ? 500 : 100));
+      const fields = ['first_name','last_name','class_name','topic'].map(k => clean(body[k], k === 'topic' ? 500 : 100));
       if (fields.some(x => !x)) fail(400, 'Bitte alle Felder ausfüllen');
+      const rawRequesterType = clean(body.requester_type, 20);
+      const requesterType = rawRequesterType === 'parent' ? 'parent' : rawRequesterType === 'student' ? 'student' : 'legacy';
+      const childName = requesterType === 'parent' ? clean(body.child_name, 150) : '';
+      if (requesterType === 'parent' && !childName) fail(400, 'Bitte den Namen des Kindes angeben');
       const schoolEnd = clean(body.school_end, 20);
-      if (!['13:20', '15:50', 'later'].includes(schoolEnd)) fail(400, 'Bitte wähle aus, wann du Schule aus hast');
+      if (!['13:20', '15:50', 'later'].includes(schoolEnd)) fail(400, requesterType === 'parent' ? 'Bitte wähle aus, wann dein Kind Schule aus hat' : 'Bitte wähle aus, wann du Schule aus hast');
       const categoryId = clean(body.category_id, 80);
       const teacherId = clean(body.teacher_id, 80);
       const category = categoryId ? (await db.query('SELECT id,name,color FROM categories WHERE id=$1 AND active=1', [categoryId]))[0] : null;
@@ -132,21 +136,26 @@ export default async function api(req, res) {
       if (!teacher) fail(400, 'Bitte wähle eine Lehrkraft aus');
       const assigned = (await db.query('SELECT category_id FROM teacher_categories WHERE teacher_id=$1 AND category_id=$2', [teacher.id, category.id])).length > 0;
       if (!assigned) fail(400, 'Diese Lehrkraft ist für den gewählten Bereich nicht eingetragen.');
-      const date = fields[4];
-      const requestedTime = clean(body.requested_time, 5);
-      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(requestedTime)) fail(400, 'Bitte wähle eine gültige Uhrzeit');
-      const conflict = await db.query("SELECT id FROM appointments WHERE teacher_id=$1 AND requested_at=$2 AND appointment_time=$3 AND status NOT IN ('Abgelehnt','Erledigt','Nicht erschienen') LIMIT 1", [teacher.id,date,requestedTime]);
-      if (conflict.length) fail(409, 'Diese Lehrkraft ist zu dieser Zeit bereits belegt.');
-      const berlin = new Intl.DateTimeFormat('en-GB', { timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit' }).formatToParts(new Date());
-      const part = type => berlin.find(p => p.type === type).value;
-      const today = `${part('year')}-${part('month')}-${part('day')}`;
-      const maxDate = new Date(`${today}T00:00:00Z`); maxDate.setUTCMonth(maxDate.getUTCMonth() + 6);
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date)) || new Date(date).toISOString().slice(0,10) !== date || date < today || date > maxDate.toISOString().slice(0,10)) fail(400, 'Bitte einen gültigen Tag innerhalb der nächsten sechs Monate wählen');
+      let requestedAt = '', requestedTime = '';
+      const choosesOwnSlot = requesterType !== 'student';
+      if (choosesOwnSlot) {
+        requestedAt = clean(body.requested_at, 10);
+        requestedTime = clean(body.requested_time, 5);
+        if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(requestedTime)) fail(400, 'Bitte wähle eine gültige Uhrzeit');
+        const berlin = new Intl.DateTimeFormat('en-GB', { timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit' }).formatToParts(new Date());
+        const part = type => berlin.find(p => p.type === type).value;
+        const today = `${part('year')}-${part('month')}-${part('day')}`;
+        const maxDate = new Date(`${today}T00:00:00Z`); maxDate.setUTCMonth(maxDate.getUTCMonth() + 6);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedAt) || Number.isNaN(Date.parse(requestedAt)) || new Date(requestedAt).toISOString().slice(0,10) !== requestedAt || requestedAt < today || requestedAt > maxDate.toISOString().slice(0,10)) fail(400, 'Bitte einen gültigen Tag innerhalb der nächsten sechs Monate wählen');
+        const conflict = await db.query("SELECT id FROM appointments WHERE teacher_id=$1 AND requested_at=$2 AND appointment_time=$3 AND status NOT IN ('Abgelehnt','Erledigt','Nicht erschienen') LIMIT 1", [teacher.id,requestedAt,requestedTime]);
+        if (conflict.length) fail(409, 'Diese Lehrkraft ist zu dieser Zeit bereits belegt.');
+      }
       const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       let code='';
       do { let random=randomBytes(4).readUInt32BE(0); code=''; for(let i=0;i<6;i++){ code=alphabet[random%32]+code; random=Math.floor(random/32); } } while ((await db.query('SELECT id FROM appointments WHERE code=$1',[code])).length);
-      await db.query('INSERT INTO appointments (id,code,visitor_id,first_name,last_name,class_name,subject,topic,requested_at,appointment_time,status,note,created_at,updated_at,school_end,category_id,teacher_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)', [id(), code, session.visitor_id, fields[0], fields[1], fields[2], category.name, fields[3], fields[4], requestedTime, 'Anfrage eingegangen', '', now(), now(), schoolEnd, category.id, teacher.id]);
-      return json(res, 201, { code, status: 'Anfrage eingegangen' });
+      const storedType = requesterType === 'parent' ? 'parent' : 'student';
+      await db.query('INSERT INTO appointments (id,code,visitor_id,first_name,last_name,class_name,subject,topic,requested_at,appointment_time,status,note,created_at,updated_at,school_end,category_id,teacher_id,requester_type,child_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)', [id(), code, session.visitor_id, fields[0], fields[1], fields[2], category.name, fields[3], requestedAt, requestedTime, 'Anfrage eingegangen', '', now(), now(), schoolEnd, category.id, teacher.id, storedType, childName]);
+      return json(res, 201, { code, status: 'Anfrage eingegangen', requester_type:storedType });
     }
     if (path === '/appointments/calendar' && req.method === 'GET') {
       const month = clean(url.searchParams.get('month'), 7);
@@ -164,13 +173,13 @@ export default async function api(req, res) {
       return json(res, 200, { days:Object.values(days) });
     }
     if (path === '/appointments/mine' && req.method === 'GET') {
-      const appointments=await db.query(`SELECT code,subject,topic,requested_at,appointment_time,status,note,updated_at FROM appointments WHERE visitor_id=$1 ORDER BY requested_at DESC,created_at DESC LIMIT 100`,[session.visitor_id]);
+      const appointments=await db.query(`SELECT code,subject,topic,requested_at,appointment_time,status,note,updated_at,requester_type,child_name FROM appointments WHERE visitor_id=$1 ORDER BY created_at DESC LIMIT 100`,[session.visitor_id]);
       return json(res,200,{appointments});
     }
     if (path === '/appointments' && req.method === 'GET') {
       const code = clean(url.searchParams.get('code'), 40).toUpperCase();
       if (!code) fail(400, 'Anfragecode fehlt');
-      const appointment = (await db.query('SELECT code,first_name,last_name,class_name,subject,topic,requested_at,appointment_time,school_end,status,note,updated_at FROM appointments WHERE code=$1 AND visitor_id=$2', [code, session.visitor_id]))[0];
+      const appointment = (await db.query('SELECT code,first_name,last_name,class_name,subject,topic,requested_at,appointment_time,school_end,status,note,updated_at,requester_type,child_name FROM appointments WHERE code=$1 AND visitor_id=$2', [code, session.visitor_id]))[0];
       if (!appointment) fail(404, 'Kein Termin zu diesem Code in dieser Sitzung gefunden. Verwende das Gerät, auf dem die Anfrage erstellt wurde.');
       return json(res, 200, { appointment });
     }
@@ -370,7 +379,7 @@ export default async function api(req, res) {
       const from = clean(url.searchParams.get('from'), 10), to = clean(url.searchParams.get('to'), 10);
       const valid = day => /^\d{4}-\d{2}-\d{2}$/.test(day) && !Number.isNaN(Date.parse(day)) && new Date(day).toISOString().slice(0,10) === day;
       if (!valid(from) || !valid(to) || from > to || Date.parse(to) - Date.parse(from) > 370 * 86400000) fail(400, 'Ungültiger Kalenderzeitraum');
-      return json(res, 200, { appointments: await db.query(`SELECT a.id,a.code,a.first_name,a.last_name,a.class_name,a.topic,a.school_end,a.requested_at,a.appointment_time,a.status,a.note,a.category_id,a.teacher_id,
+      return json(res, 200, { appointments: await db.query(`SELECT a.id,a.code,a.first_name,a.last_name,a.class_name,a.topic,a.school_end,a.requested_at,a.appointment_time,a.status,a.note,a.category_id,a.teacher_id,a.requester_type,a.child_name,
         c.name AS category_name,c.color AS category_color,t.name AS teacher_name
         FROM appointments a
         LEFT JOIN categories c ON c.id=a.category_id
@@ -420,6 +429,7 @@ export default async function api(req, res) {
       const teacherId=clean(body.teacher_id,80)||current.teacher_id||'';
       if(appointmentTime && !/^([01]\d|2[0-3]):[0-5]\d$/.test(appointmentTime)) fail(400,'Ungültige Uhrzeit');
       if(requestedAt && !/^\d{4}-\d{2}-\d{2}$/.test(requestedAt)) fail(400,'Ungültiges Datum');
+      if(body.status==='Bestätigt' && (!requestedAt || !appointmentTime)) fail(400,'Bitte zuerst Datum und Uhrzeit für den Termin festlegen.');
       if(teacherId && appointmentTime){ const conflict=await db.query("SELECT id FROM appointments WHERE teacher_id=$1 AND requested_at=$2 AND appointment_time=$3 AND id<>$4 AND status NOT IN ('Abgelehnt','Erledigt','Nicht erschienen') LIMIT 1",[teacherId,requestedAt,appointmentTime,target]); if(conflict.length) fail(409,'Diese Lehrkraft ist zu dieser Zeit bereits belegt.'); }
       await db.query('UPDATE appointments SET status=$1,note=$2,requested_at=$3,appointment_time=$4,category_id=$5,teacher_id=$6,subject=COALESCE((SELECT name FROM categories WHERE id=$5),subject),updated_at=$7 WHERE id=$8',[body.status,clean(body.note,500),requestedAt,appointmentTime,categoryId,teacherId,now(),target]);
       return json(res,200,{ok:true});
