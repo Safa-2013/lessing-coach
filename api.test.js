@@ -141,6 +141,14 @@ test('student requests, private contact chats, admin roles and AI setup', async 
       assert.equal((await call('ai/threads/'+threads.data.thread.id,'GET',null,learner.cookie)).data.messages.length,4);
     }
   } finally { globalThis.fetch=oldFetch; delete process.env.OPENAI_API_KEY; delete process.env.GEMINI_API_KEY; }
+  // Admins can permanently delete categories. Existing appointments keep their stored subject name.
+  const deletedCategory = await call('admin/categories/'+categoryId,'DELETE',null,normal.cookie);
+  assert.equal(deletedCategory.status,200);
+  assert.equal(deletedCategory.data.deleted,true);
+  assert.equal((await call('admin/categories','GET',null,normal.cookie)).data.categories.some(c=>c.id===categoryId),false);
+  assert.equal((await call('catalog','GET',null,first.cookie)).data.categories.some(c=>c.id===categoryId),false);
+  const afterCategoryDelete = await call('admin/appointments','GET',null,normal.cookie);
+  assert.equal(afterCategoryDelete.data.appointments.find(a=>a.code===created.data.code).subject,'Beratung');
   const loggedOut = await call('logout','POST',{},normal.cookie);
   assert.equal(loggedOut.data.session.role,'visitor');
   assert.match(loggedOut.setCookie,/Max-Age=2592000/);
