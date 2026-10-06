@@ -1,0 +1,19 @@
+SAFARI-UPDATE 8
+
+Enthält die komplette Lessing-Coach-Website mit eingebundenem Lessing Stars.
+Die Terminplaner-Ansicht wurde nicht verändert.
+
+Korrigiert: Das Spiel wartet beim Start höchstens 1,8 Sekunden auf Bilder.
+Ein verweigerter oder voller Browser-Speicher blockiert keine Spielaktionen
+mehr. In diesem Fall wird Fortschritt nur vorübergehend gespeichert und kann
+beim Schließen der Seite verloren gehen.
+Der Coach-Zurück-Aufruf aus dem Spiel erreicht jetzt den Website-Controller.
+Die Spiel-Adresse verwendet eine neue Versionskennung gegen alte Caches.
+
+Die ZIP muss vollständig entpackt und als Website bereitgestellt werden.
+Eine ZIP-Datei allein im GitHub-Repository aktualisiert die Website nicht.
+Die vorhandene index.html gehört in die Website-Wurzel; sämtliche anderen
+Dateien und Unterordner bleiben an ihren mitgelieferten Positionen.
+
+Prüfung: automatisierte Tests einschließlich Speicherfehler und Lade-Timeout.
+Kein Test auf einem physischen iPhone. Keine automatische Veröffentlichung.

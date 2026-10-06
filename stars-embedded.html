@@ -288,6 +288,18 @@ html,body,#app{height:100dvh;overflow:hidden}
 <div id="rotate"><div class="rotate-card"><div class="rotate-phone"></div><h2>Bitte Gerät drehen</h2><p>Lessing Stars ist als Querformat-Spiel gestaltet. Im Querformat sind Spielfeld und Buttons vollständig sichtbar.</p></div></div>
 <script>
 'use strict';
+// Safari may deny storage access or exceed its quota. Keep controls usable
+// with a session-only fallback, without discarding existing saved data.
+function resilientStorage(name){
+ const memory=new Map();let native=null;
+ try{native=window[name];if(!native)window.lessingStorageTemporary=true}catch{window.lessingStorageTemporary=true}
+ return {
+  getItem(key){if(memory.has(key))return memory.get(key);try{return native?.getItem(key)??null}catch{return null}},
+  setItem(key,value){value=String(value);memory.set(key,value);try{native?.setItem(key,value)}catch{window.lessingStorageTemporary=true}},
+  removeItem(key){memory.set(key,null);try{native?.removeItem(key)}catch{window.lessingStorageTemporary=true}}
+ };
+}
+const localStorage=resilientStorage('localStorage'),sessionStorage=resilientStorage('sessionStorage');
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const LS='lessingStarsCompleteStateV4', USERS='lessingStarsAccountsV2', AUDIT='lessingStarsAuditV2', PROFILES='lessingStarsProfilesV1', GUEST='lessingStarsGuestV1';
 const VERSION='1.4.3-art';
@@ -332,7 +344,7 @@ function route(){const m=location.hash.match(/^#\/stars\/([\w-]+)/);go(m?.[1]||'
 function wireCommon(root=document){$$('[data-go]',root).forEach(b=>b.onclick=()=>go(b.dataset.go));$$('[data-drawer]',root).forEach(b=>b.onclick=openDrawer);$$('[data-mode]',root).forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;state.selectedEvent=b.dataset.mode;save();go('play')})}
 function openDrawer(){const items=[['login',state.session.loggedIn?'Konto':'Anmelden',state.session.loggedIn?(state.session.user||'Konto'):'Konto verknüpfen und sichern'],['drops','L-Drops & Mega-Boxen','Drops und Boxen öffnen'],['skins','Skins','Brawler-Skins auswählen'],['daily','Tägliche Belohnung','Tagesbonus abholen'],['rewards','Belohnungen','Trophy Road und Verlauf'],['inbox','Post','Nachrichten und Belohnungen'],['events','Events','Modi und Karten'],['resources','Ressourcen','Währungen erklären'],['help','Hilfe & Datenschutz','Anleitungen, Sicherheit und Impressum'],['settings','Einstellungen','Sound, Sprache, Steuerung'],['home','Lobby','Zurück zum Spiel']];$('#drawerItems').innerHTML=items.map(([id,t,s])=>`<button class="drawer-item" data-drawer-go="${id}"><b>${t}</b><small>${s}</small></button>`).join('')+(state.session.admin?`<button class="drawer-item" data-drawer-go="admin"><b>Admin</b><small>Spiel verwalten</small></button>`:'');$('#drawerOverlay').classList.add('show');$$('[data-drawer-go]').forEach(b=>b.onclick=()=>{closeDrawer();if(b.dataset.drawerGo==='coach')returnCoach();else go(b.dataset.drawerGo)});$('[data-close-drawer]').onclick=closeDrawer}
 function closeDrawer(){$('#drawerOverlay').classList.remove('show')}
-function returnCoach(){go('home')}
+function returnCoach(){if(window.parent!==window){window.parent.postMessage({type:'lessing-coach-home'},location.origin)}else go('home')}
 function modal(title,body,actions=''){const w=$('#modalWrap'),m=$('#modal');m.innerHTML=`<h2>${title}</h2>${body}<div class="modal-foot">${actions||'<button class="btn" data-close-modal>SCHLIESSEN</button>'}</div>`;w.classList.add('show');$$('[data-close-modal]',m).forEach(b=>b.onclick=()=>w.classList.remove('show'));return m}
 function closeModal(){$('#modalWrap').classList.remove('show')}
 function renderPage(id){const g=$('#screen-generic');let body='';
@@ -464,7 +476,17 @@ window.addEventListener('hashchange',()=>{const m=location.hash.match(/^#\/stars
 $('#drawerOverlay').onclick=e=>{if(e.target===$('#drawerOverlay'))closeDrawer()};
 $('#modalWrap').onclick=e=>{if(e.target===$('#modalWrap'))closeModal()};
 renderNav($('#homeNav'),'');wireCommon($('#screen-home'));renderHud();
-preload().finally(()=>{setTimeout(()=>$('#loading').classList.add('hide'),350);setTimeout(()=>{const old=sessionStorage.getItem('LESSING_STARS_MATCH');if(old&&!state.onboarded)return onboard();if(old){const m=modal('Match wiederherstellen','<p>Ein vorheriges Match wurde nicht sauber beendet. Möchtest du wieder einsteigen?</p>','<button class="btn" id="discardMatch">VERWERFEN</button><button class="btn green" id="reconnectMatch">WIEDER VERBINDEN</button>');$('#discardMatch').onclick=()=>{sessionStorage.removeItem('LESSING_STARS_MATCH');closeModal()};$('#reconnectMatch').onclick=()=>{sessionStorage.removeItem('LESSING_STARS_MATCH');closeModal();startMatch(false)}}else onboard()},500)});
+let bootFinished=false;
+function finishBoot(){
+ if(bootFinished)return;bootFinished=true;
+ $('#loading').classList.add('hide');
+ const old=sessionStorage.getItem('LESSING_STARS_MATCH');
+ if(old&&!state.onboarded)return onboard();
+ if(old){modal('Match wiederherstellen','<p>Ein vorheriges Match wurde nicht sauber beendet. Möchtest du wieder einsteigen?</p>','<button class="btn" id="discardMatch">VERWERFEN</button><button class="btn green" id="reconnectMatch">WIEDER VERBINDEN</button>');$('#discardMatch').onclick=()=>{sessionStorage.removeItem('LESSING_STARS_MATCH');closeModal()};$('#reconnectMatch').onclick=()=>{sessionStorage.removeItem('LESSING_STARS_MATCH');closeModal();startMatch(false)}}else onboard();
+}
+// Image decoding is not a prerequisite for button interaction.
+setTimeout(finishBoot,1800);
+preload().then(()=>setTimeout(finishBoot,350),finishBoot);
 if(location.hash.startsWith('#/stars/')){const m=location.hash.match(/^#\/stars\/([\w-]+)/);if(m)go(m[1])}
 </script>
 <script>
