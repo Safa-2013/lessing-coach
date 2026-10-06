@@ -778,10 +778,13 @@ const starsNavigation=document.querySelector('#starsNavigation');if(starsNavigat
 window.addEventListener('lessing-coach-home',()=>navigate('start'));</script>
 <style id="coach-stars-integration">#coachStarsOverlay{position:fixed;inset:0;width:100%;height:100dvh;z-index:10000;background:#102945}#coachStarsOverlay[hidden]{display:none}#coachStarsFrame{display:block;border:0;width:100%;height:100%}#coachStarsClose{position:fixed;z-index:10002;bottom:21vh;left:max(10px,env(safe-area-inset-left));min-height:44px;border:1px solid #ffffff45;border-radius:12px;background:#0b2449e8;color:#fff;padding:8px 13px;font-weight:800}body.coach-stars-open{overflow:hidden}</style>
 <section id="coachStarsOverlay" hidden aria-label="Lessing Stars"><button type="button" id="coachStarsClose" aria-label="Zurück zu Lessing Coach">← Coach</button><iframe id="coachStarsFrame" title="Lessing Stars" allow="fullscreen; autoplay" referrerpolicy="same-origin"></iframe></section>
+<style id="coach-stars-touch-fix">
+#coachStarsOverlay>#coachStarsClose{top:auto!important;right:auto!important;bottom:22vh!important;left:max(8px,env(safe-area-inset-left))!important;width:auto!important;height:44px!important;min-height:44px!important;max-height:44px!important;max-width:120px!important;display:inline-flex!important;align-items:center;justify-content:center;box-sizing:border-box;line-height:1;font-size:14px;touch-action:manipulation}
+</style>
 <script id="coachStarsController">
 (function(){
  const overlay=document.getElementById('coachStarsOverlay'),frame=document.getElementById('coachStarsFrame');let focusBefore;
- window.openLessingStars=function(){focusBefore=document.activeElement;const shell=document.querySelector('.shell');if(shell)shell.inert=true;overlay.hidden=false;document.body.classList.add('coach-stars-open');frame.src='stars-embedded.html?v=20261006-safari8';frame.focus();};
+ window.openLessingStars=function(){focusBefore=document.activeElement;const shell=document.querySelector('.shell');if(shell)shell.inert=true;overlay.hidden=false;document.body.classList.add('coach-stars-open');frame.src='stars-embedded.html?v=20261006-safari9';frame.focus();};
  window.closeLessingStars=function(){overlay.hidden=true;document.body.classList.remove('coach-stars-open');const shell=document.querySelector('.shell');if(shell)shell.inert=false;frame.removeAttribute('src');window.dispatchEvent(new Event('lessing-coach-home'));focusBefore?.focus();};
  document.getElementById('coachStarsClose')?.addEventListener('click',()=>window.closeLessingStars());
  window.addEventListener('message',function(event){if(event.source===frame.contentWindow&&event.origin===location.origin&&event.data?.type==='lessing-coach-home')window.closeLessingStars();});

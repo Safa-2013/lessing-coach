@@ -1,4 +1,10 @@
-SAFARI-UPDATE 8
+SAFARI-UPDATE 9
+
+Zusätzlich: Coach-Zurück-Button auf 44 Pixel Höhe begrenzt. Die geerbte
+Top-Position ist aufgehoben, damit der Button nicht mehr die linke Seite
+überdeckt. Einführung und Dialoge haben einen getrennten scrollbaren Inhalt
+und eine sichtbare Aktionszeile. Die Einführungsgrafik ist auf kleinen
+Querformat-Bildschirmen kompakt.
 
 Enthält die komplette Lessing-Coach-Website mit eingebundenem Lessing Stars.
 Die Terminplaner-Ansicht wurde nicht verändert.
