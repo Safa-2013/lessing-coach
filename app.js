@@ -22,9 +22,9 @@ const APPOINTMENT_CONFIG_DEFAULTS = {
   studentRequestTitle:'Schüler-Anfrage', parentRequestTitle:'Eltern-Anfrage',
   studentFirstNameLabel:'Vorname', studentLastNameLabel:'Nachname',
   parentFirstNameLabel:'Vorname (Elternteil)', parentLastNameLabel:'Nachname (Elternteil)',
-  childNameLabel:'Name des Kindes', classLabel:'Klasse', topicLabel:'Thema',
-  studentCategoryLabel:'Bereich', parentCategoryLabel:'Bereich',
-  studentContactLabel:'Lehrkraft / Ansprechperson', parentContactLabel:'Lehrkraft / Ansprechperson',
+  childNameLabel:'Name des Kindes', classLabel:'Klasse', topicLabel:'Grund / Anliegen',
+  studentCategoryLabel:'Bereich / Kategorie', parentCategoryLabel:'Bereich / Kategorie',
+  studentContactLabel:'Lehrkraft / Ansprechperson', parentContactLabel:'Person, mit der du sprechen möchtest',
   studentSchoolEndLabel:'Wann hast du Schule aus?', parentSchoolEndLabel:'Wann hat dein Kind Schule aus?',
   studentSubmitLabel:'Anfrage senden', parentSubmitLabel:'Termin anfragen',
   studentNoticeTitle:'Du musst keinen Termin auswählen.',
@@ -127,7 +127,10 @@ function renderAppointmentCatalog(){
   const oldCategory=categorySelect?.value||'';
   if(categorySelect){categorySelect.innerHTML=`<option value="">${safe(categoryWord)} auswählen …</option>`+visibleCategories.map(c=>`<option value="${safe(c.id)}">${safe(c.name)}</option>`).join('');if(visibleCategories.some(c=>c.id===oldCategory))categorySelect.value=oldCategory;}
   const renderPeople=()=>{if(!teacherSelect)return;const cid=categorySelect?.value;const available=cid?teachers.filter(t=>(t.category_ids||[]).includes(cid)&&visibleFor(cfg.teacherAudience,t.id,role)):[];teacherSelect.innerHTML=cid?(available.length?`<option value="">${safe(contactWord)} auswählen …</option>`+available.map(t=>`<option value="${safe(t.id)}">${safe(t.name)}</option>`).join(''):`<option value="">Keine passende Ansprechperson hinterlegt</option>`):`<option value="">Erst ${safe(categoryWord)} auswählen …</option>`;const hint=$('#categoryTeacherHint');const category=visibleCategories.find(c=>c.id===cid);if(hint)hint.textContent=category?(available.length?`${category.name}: ${available.map(t=>t.name).join(' · ')}`:`${category.name}: Noch keine passende Ansprechperson hinterlegt`):'';if(available.length===1)teacherSelect.value=available[0].id;};
-  if(categorySelect)categorySelect.onchange=renderPeople; renderPeople();
+  if(categorySelect)categorySelect.onchange=()=>{
+    renderPeople();
+    if(role==='parent'){const form=$('#appointmentForm');if(form){form.elements.requested_at.value='';form.elements.requested_time.value='';}loadCalendar();}
+  }; renderPeople();
   if(legend) legend.innerHTML=visibleCategories.map(c=>`<span class="category-chip" style="--category-color:${safe(c.color)}"><i></i>${safe(c.name)}</span>`).join('');
 }
 
@@ -192,13 +195,17 @@ function setRequesterRole(role){
   if(!form||!choice)return;
   const cfg=appointmentConfig();
   const type=form.elements.requester_type, child=form.elements.child_name, date=form.elements.requested_at, time=form.elements.requested_time;
+  const schoolEndFieldset=$('#schoolEndFieldset');
+  const schoolEndInputs=[...form.querySelectorAll('input[name="school_end"]')];
   if(!requesterRole){
     type.value=''; form.reset(); type.value='';
     document.querySelectorAll('[data-requester-role]').forEach(button=>button.setAttribute('aria-pressed','false'));
     form.classList.add('hidden'); choice.classList.remove('hidden');
     $('#parentChildField').classList.add('hidden'); $('#parentSchedulePicker').classList.add('hidden'); $('#studentAppointmentNotice').classList.add('hidden');
-    child.required=false; child.disabled=true; date.disabled=true; time.required=false; time.disabled=true;
-    $('#appointmentResult').innerHTML=''; renderAppointmentCatalog();
+    schoolEndFieldset?.classList.remove('hidden');
+    schoolEndInputs.forEach(input=>{input.disabled=false;input.required=true;});
+    child.required=false; child.disabled=true; date.disabled=true; time.disabled=true;
+    $('#appointmentResult').innerHTML=''; renderAppointmentCatalog(); renderParentTimeSlots();
     return;
   }
   type.value=requesterRole; choice.classList.add('hidden'); form.classList.remove('hidden');
@@ -211,18 +218,33 @@ function setRequesterRole(role){
   setLabelText($('#appointmentCategoryLabel'),parent?cfg.parentCategoryLabel:cfg.studentCategoryLabel);
   setLabelText($('#appointmentTeacherLabel'),parent?cfg.parentContactLabel:cfg.studentContactLabel);
   $('#parentChildField').classList.toggle('hidden',!parent); child.required=parent; child.disabled=!parent;
-  $('#parentSchedulePicker').classList.toggle('hidden',!parent); date.disabled=!parent; time.disabled=!parent; time.required=parent;
+  $('#parentSchedulePicker').classList.toggle('hidden',!parent); date.disabled=!parent; time.disabled=!parent;
   $('#studentAppointmentNotice').classList.toggle('hidden',parent);
-  $('#schoolEndLegend').textContent=parent?cfg.parentSchoolEndLabel:cfg.studentSchoolEndLabel;
+  schoolEndFieldset?.classList.toggle('hidden',parent);
+  schoolEndInputs.forEach(input=>{input.disabled=parent;input.required=!parent;if(parent)input.checked=false;});
+  $('#schoolEndLegend').textContent=cfg.studentSchoolEndLabel;
   $('#appointmentSubmit').textContent=parent?cfg.parentSubmitLabel:cfg.studentSubmitLabel;
   renderAppointmentCatalog();
-  if(parent) loadCalendar(); else { date.value=''; time.value=''; }
+  if(parent) loadCalendar(); else { date.value=''; time.value=''; renderParentTimeSlots(); }
   if(options.scroll!==false)requestAnimationFrame(()=>form.scrollIntoView({block:'start',behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
 }
 document.querySelectorAll('[data-requester-role]').forEach(button=>button.addEventListener('click',()=>setRequesterRole(button.dataset.requesterRole)));
 $('#changeRequesterRole').onclick=()=>setRequesterRole(null);
 let calendarOffset = 0, calendarRequest = 0, calendarDays = {};
 const monthAt = offset => { const today=berlinToday(); return new Date(Date.UTC(Number(today.slice(0,4)),Number(today.slice(5,7))-1+offset,1)); };
+const timeLabel = minutes => `${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
+const berlinMinutesNow = () => { const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());const get=t=>Number(parts.find(p=>p.type===t)?.value||0);return get('hour')*60+get('minute'); };
+function renderParentTimeSlots(){
+  const box=$('#parentTimeSlots'), form=$('#appointmentForm'); if(!box||!form)return;
+  const role=form.elements.requester_type?.value; if(role!=='parent'){box.innerHTML='';return;}
+  const date=form.elements.requested_at?.value||'', teacherId=form.elements.teacher_id?.value||'', selected=form.elements.requested_time?.value||'';
+  if(!teacherId){box.innerHTML='<p class="muted">Wähle zuerst die Person aus, mit der du sprechen möchtest.</p>';return;}
+  if(!date){box.innerHTML='<p class="muted">Wähle zuerst ein Datum im Kalender.</p>';return;}
+  const busy=new Set((calendarDays[date]?.busyTimes||[]).map(String));
+  const today=berlinToday(), nowMinutes=berlinMinutesNow();
+  const slots=[]; for(let m=7*60;m<=16*60;m+=15)slots.push({label:timeLabel(m),past:date===today&&m<=nowMinutes});
+  box.innerHTML=`<div class="time-slot-grid">${slots.map(({label:t,past})=>{const unavailable=busy.has(t)||past;return `<button type="button" class="time-slot ${selected===t?'selected':''}" data-time="${t}" ${unavailable?'disabled':''} aria-pressed="${selected===t}">${t}<small>${past?'vorbei':busy.has(t)?'belegt':'frei'}</small></button>`;}).join('')}</div>`;
+}
 function renderCalendar() {
   const month = monthAt(calendarOffset), today=berlinToday(), max= new Date(`${today}T00:00:00Z`);
   max.setUTCMonth(max.getUTCMonth()+6);
@@ -232,26 +254,29 @@ function renderCalendar() {
   const count = new Date(Date.UTC(month.getUTCFullYear(),month.getUTCMonth()+1,0)).getUTCDate();
   const spaces = (month.getUTCDay()+6)%7;
   const weekdays = ['Mo','Di','Mi','Do','Fr','Sa','So'].map(day=>`<span class="calendar-weekday">${day}</span>`).join('');
-  const selected = $('#appointmentForm').elements.requested_at.value;
+  const form=$('#appointmentForm'), selected = form.elements.requested_at.value;
+  const needsTeacher=form.elements.requester_type?.value==='parent'&&!form.elements.teacher_id?.value;
   $('#calendarDays').innerHTML = weekdays + Array.from({length:spaces},()=>'<span></span>').join('') + Array.from({length:count},(_,i)=>{
     const date=`${month.getUTCFullYear()}-${String(month.getUTCMonth()+1).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
     const info=calendarDays[date], holiday=holidayOn(date), weekday=new Date(`${date}T12:00:00Z`).getUTCDay();
     const weekend=weekday===0||weekday===6;
     const availability=weekend?'Wochenende':holiday?holiday:info?.hasAppointments?'Es gibt bereits Termine – andere Uhrzeiten können trotzdem frei sein':info?.hasRequests?'Es liegen Anfragen vor':'Verfügbar';
-    const disabled=date<today||date>max.toISOString().slice(0,10)||weekend||Boolean(holiday);
+    const disabled=needsTeacher||date<today||date>max.toISOString().slice(0,10)||weekend||Boolean(holiday);
     return `<button type="button" data-date="${date}" class="calendar-day ${weekend?'busy':holiday?'holiday':info?.hasAppointments?'busy':info?.hasRequests?'pending':'free'} ${selected===date?'selected':''}" aria-label="${dayLabel(date)}: ${availability}" aria-pressed="${selected===date}" ${disabled?'disabled':''}><span>${i+1}</span><span class="calendar-dot" aria-hidden="true"></span></button>`;
   }).join('');
   if (selected) {
     const info=calendarDays[selected];
-    $('#calendarStatus').textContent=`Gewählt: ${dayLabel(selected)} · ${holidayOn(selected)?holidayOn(selected)+' · ':''}Wähle darunter noch eine Uhrzeit.`;
+    $('#calendarStatus').textContent=`Gewählt: ${dayLabel(selected)} · ${holidayOn(selected)?holidayOn(selected)+' · ':''}Wähle darunter noch eine freie Uhrzeit.`;
   }
+  renderParentTimeSlots();
 }
 async function loadCalendar() {
   const month=monthAt(calendarOffset).toISOString().slice(0,7), current=++calendarRequest;
+  const form=$('#appointmentForm'), teacherId=form?.elements?.teacher_id?.value||'';
   calendarDays={}; renderCalendar();
+  if(form?.elements?.requester_type?.value==='parent'&&!teacherId){$('#calendarStatus').textContent='Wähle zuerst eine Kategorie und die Person aus, mit der du sprechen möchtest.';renderParentTimeSlots();return;}
   $('#calendarStatus').textContent='Kalender wird geladen …';
   try {
-    const teacherId=$('#appointmentForm')?.elements?.teacher_id?.value||'';
     const {days}=await request('appointments/calendar?month='+encodeURIComponent(month)+(teacherId?'&teacher_id='+encodeURIComponent(teacherId):''));
     if (current !== calendarRequest) return;
     calendarDays=Object.fromEntries(days.map(day=>[day.date,day])); renderCalendar();
@@ -263,14 +288,19 @@ $('#calendarNext').onclick=()=>{ if(calendarOffset<6){calendarOffset++;loadCalen
 $('#calendarDays').onclick=e=>{
   const day=e.target.closest('[data-date]:not(:disabled)'); if (!day) return;
   $('#appointmentForm').elements.requested_at.value=day.dataset.date;
+  $('#appointmentForm').elements.requested_time.value='';
   renderCalendar();
 };
-$('#appointmentTeacher')?.addEventListener('change',()=>{ if($('#appointmentForm')?.elements?.requester_type?.value==='parent') loadCalendar(); });
+$('#appointmentTeacher')?.addEventListener('change',()=>{
+  const form=$('#appointmentForm'); if(form?.elements?.requester_type?.value==='parent'){form.elements.requested_time.value='';loadCalendar();}
+});
+$('#parentTimeSlots')?.addEventListener('click',e=>{const button=e.target.closest('[data-time]:not(:disabled)');if(!button)return;const form=$('#appointmentForm');form.elements.requested_time.value=button.dataset.time;renderParentTimeSlots();});
 $('#appointmentForm').onsubmit = async e => {
   e.preventDefault(); const form = e.currentTarget, button = form.querySelector('button[type="submit"]');
   const role=form.elements.requester_type.value;
   if (!role) { setRequesterRole(null); return; }
   if (role==='parent' && !form.elements.requested_at.value) { $('#calendarStatus').textContent='Bitte wähle zuerst einen Tag im Kalender.'; $('#bookingCalendar').scrollIntoView({block:'center'}); return; }
+  if (role==='parent' && !form.elements.requested_time.value) { $('#calendarStatus').textContent='Bitte wähle nach dem Datum auch eine freie Uhrzeit aus.'; $('#parentTimeSlots').scrollIntoView({block:'center'}); return; }
   const originalText=button.textContent;
   button.disabled = true; button.textContent='Wird gesendet …';
   try {
@@ -287,7 +317,7 @@ $('#appointmentForm').onsubmit = async e => {
 };
 $('#lookupForm').onsubmit = async e => {
   e.preventDefault(); const code = String(new FormData(e.currentTarget).get('code')||'').trim().toUpperCase();
-  try { const {appointment:a} = await request('appointments?code=' + encodeURIComponent(code)); const when=a.requested_at?`<p>Termin: ${safe(dayLabel(a.requested_at))}${a.appointment_time?' · '+safe(a.appointment_time)+' Uhr':''}</p>`:'<p><strong>Der Termin wird von der Schule noch zugeteilt.</strong></p>'; $('#lookupResult').innerHTML = `<div class="result"><strong>${safe(a.status)}</strong><p>${safe(a.subject==='Coaching'?'Coaching · ':a.subject+' · ')}${safe(a.topic)}</p>${when}<p>${a.requester_type==='parent'?'Schule aus (Kind)':'Schule aus'}: ${safe(schoolEndLabel(a.school_end))}</p>${a.requester_type==='parent'&&a.child_name?`<p>Kind: ${safe(a.child_name)}</p>`:''}${a.note ? `<p>Rückmeldung: ${safe(a.note)}</p>` : ''}<small>Zuletzt aktualisiert: ${new Date(Number(a.updated_at)).toLocaleString('de-DE')}</small></div>`; }
+  try { const {appointment:a} = await request('appointments?code=' + encodeURIComponent(code)); const when=a.requested_at?`<p>Termin: ${safe(dayLabel(a.requested_at))}${a.appointment_time?' · '+safe(a.appointment_time)+' Uhr':''}</p>`:'<p><strong>Der Termin wird von der Schule noch zugeteilt.</strong></p>'; $('#lookupResult').innerHTML = `<div class="result"><strong>${safe(a.status)}</strong><p>${safe(a.subject==='Coaching'?'Coaching · ':a.subject+' · ')}${safe(a.topic)}</p>${when}${a.requester_type==='parent'?'':`<p>Schule aus: ${safe(schoolEndLabel(a.school_end))}</p>`}${a.requester_type==='parent'&&a.child_name?`<p>Kind: ${safe(a.child_name)}</p>`:''}${a.note ? `<p>Rückmeldung: ${safe(a.note)}</p>` : ''}<small>Zuletzt aktualisiert: ${new Date(Number(a.updated_at)).toLocaleString('de-DE')}</small></div>`; }
   catch(err) { $('#lookupResult').innerHTML = `<div class="result notice">${safe(err.message)}</div>`; }
 };
 function bubbles(messages, target) {
@@ -366,7 +396,7 @@ async function loadAdmin() {
       const total=Object.values(totals).reduce((sum,count)=>sum+count,0);
       $('#adminStats').innerHTML=[['Alle Anfragen',total],['Kommende Termine',upcoming],['Offene Anfragen',(totals['Anfrage eingegangen']||0)+(totals['In Bearbeitung']||0)],['Bestätigt',totals['Bestätigt']||0]].map(([label,value])=>`<div class="admin-stat"><span>${label}</span><strong>${value}</strong></div>`).join('');
       $('#adminOverviewList').innerHTML=`<div class="panel"><h3>Neueste Anfragen</h3>${appointments.length?appointments.slice(0,5).map(a=>`<div class="admin-overview-item"><span>${safe(dayLabel(a.requested_at))}</span><strong>${safe(a.category_name||a.topic)}</strong><span class="pill">${safe(a.status)}</span></div>`).join(''):'<p class="muted">Noch keine Anfragen vorhanden.</p>'}</div>`;
-            $('#appointmentList').innerHTML=appointments.length?appointments.map(a=>`<div class="list-item appointment-admin-card" style="--category-color:${safe(a.category_color||'#3B82F6')}"><div class="row"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong><span class="pill">${safe(a.requester_type==='parent'?'Elternteil':'Schüler/in')}</span><span class="pill">${safe(a.status)}</span><span class="category-chip" style="--category-color:${safe(a.category_color||'#3B82F6')}"><i></i>${safe(a.category_name||a.subject)}</span></div><p class="small">${a.requester_type==='parent'?`Kind: ${safe(a.child_name||'nicht angegeben')} · `:''}Klasse ${safe(a.class_name)} · ${safe(a.teacher_name||'Lehrkraft nicht gesetzt')} · ${safe(dayLabel(a.requested_at))} · ${safe(a.appointment_time||'Uhrzeit offen')} · Schule aus: ${safe(schoolEndLabel(a.school_end))}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="grid2"><label class="field">Datum<input type="date" name="requested_at" value="${safe(a.requested_at)}"></label><label class="field">Uhrzeit<input type="time" name="appointment_time" value="${safe(a.appointment_time||'')}"></label><label class="field">Bereich<select name="category_id" class="category-edit" data-current="${safe(a.category_id||'')}"></select></label><label class="field">Lehrkraft<select name="teacher_id" class="teacher-edit" data-current="${safe(a.teacher_id||'')}"></select></label></div><label class="field">Status<select name="status"><option ${a.status==='Anfrage eingegangen'?'selected':''}>Anfrage eingegangen</option><option ${a.status==='In Bearbeitung'?'selected':''}>In Bearbeitung</option><option ${a.status==='Bestätigt'?'selected':''}>Bestätigt</option><option ${a.status==='Abgelehnt'?'selected':''}>Abgelehnt</option><option ${a.status==='Erledigt'?'selected':''}>Erledigt</option><option ${a.status==='Nicht erschienen'?'selected':''}>Nicht erschienen</option></select></label><label class="field">Rückmeldung / Notiz<input name="note" maxlength="500" placeholder="z. B. Termin bestätigt / verschoben" value="${safe(a.note)}"></label><div class="row"><button type="button" class="primary" data-accept="${safe(a.id)}">Anfrage annehmen</button><button type="button" class="primary" data-reschedule="${safe(a.id)}">Termin verschieben</button><button type="button" class="primary danger" data-reject="${safe(a.id)}">Ablehnen</button><button class="primary">Speichern</button></div></form></div>`).join(''):'<p class="muted">Noch keine Anfragen.</p>';
+            $('#appointmentList').innerHTML=appointments.length?appointments.map(a=>`<div class="list-item appointment-admin-card" style="--category-color:${safe(a.category_color||'#3B82F6')}"><div class="row"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong><span class="pill">${safe(a.requester_type==='parent'?'Elternteil':'Schüler/in')}</span><span class="pill">${safe(a.status)}</span><span class="category-chip" style="--category-color:${safe(a.category_color||'#3B82F6')}"><i></i>${safe(a.category_name||a.subject)}</span></div><p class="small">${a.requester_type==='parent'?`Kind: ${safe(a.child_name||'nicht angegeben')} · `:''}Klasse ${safe(a.class_name)} · ${safe(a.teacher_name||'Lehrkraft nicht gesetzt')} · ${safe(dayLabel(a.requested_at))} · ${safe(a.appointment_time||'Uhrzeit offen')}${a.requester_type==='parent'?'':` · Schule aus: ${safe(schoolEndLabel(a.school_end))}`}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="grid2"><label class="field">Datum<input type="date" name="requested_at" value="${safe(a.requested_at)}"></label><label class="field">Uhrzeit<input type="time" name="appointment_time" value="${safe(a.appointment_time||'')}"></label><label class="field">Bereich<select name="category_id" class="category-edit" data-current="${safe(a.category_id||'')}"></select></label><label class="field">Lehrkraft<select name="teacher_id" class="teacher-edit" data-current="${safe(a.teacher_id||'')}"></select></label></div><label class="field">Status<select name="status"><option ${a.status==='Anfrage eingegangen'?'selected':''}>Anfrage eingegangen</option><option ${a.status==='In Bearbeitung'?'selected':''}>In Bearbeitung</option><option ${a.status==='Bestätigt'?'selected':''}>Bestätigt</option><option ${a.status==='Abgelehnt'?'selected':''}>Abgelehnt</option><option ${a.status==='Erledigt'?'selected':''}>Erledigt</option><option ${a.status==='Nicht erschienen'?'selected':''}>Nicht erschienen</option></select></label><label class="field">Rückmeldung / Notiz<input name="note" maxlength="500" placeholder="z. B. Termin bestätigt / verschoben" value="${safe(a.note)}"></label><div class="row"><button type="button" class="primary" data-accept="${safe(a.id)}">Anfrage annehmen</button><button type="button" class="primary" data-reschedule="${safe(a.id)}">Termin verschieben</button><button type="button" class="primary danger" data-reject="${safe(a.id)}">Ablehnen</button><button class="primary">Speichern</button></div></form></div>`).join(''):'<p class="muted">Noch keine Anfragen.</p>';
       const catalog=window.lessingCatalog||{categories:[],teachers:[]}; document.querySelectorAll('.appointment-admin-card').forEach(card=>{const cf=card.querySelector('.category-edit'),tf=card.querySelector('.teacher-edit');if(!cf||!tf)return;const currentC=cf.dataset.current,currentT=tf.dataset.current;cf.innerHTML=catalog.categories.map(c=>`<option value="${safe(c.id)}" ${c.id===currentC?'selected':''}>${safe(c.name)}</option>`).join('');const fill=()=>{const cid=cf.value,ts=catalog.teachers.filter(t=>(t.category_ids||[]).includes(cid));tf.innerHTML=ts.map(t=>`<option value="${safe(t.id)}" ${t.id===currentT?'selected':''}>${safe(t.name)}</option>`).join('')||'<option value="">Keine Lehrkraft</option>';};cf.onchange=fill;fill();});
       }
     if (can('chats')) {

@@ -1,0 +1,6 @@
+UPDATE 2026-10-06 – Eltern-Terminwahl
+• Eltern wählen Kategorie, Gesprächsperson und Grund.
+• Danach wählen Eltern Datum und eine freie 15-Minuten-Uhrzeit.
+• Belegte und bereits vergangene Uhrzeiten sind nicht auswählbar.
+• Bei Eltern wird keine Schulschluss-Uhrzeit des Kindes abgefragt.
+• Schüler wählen weiterhin keinen Termin; die Schule teilt ihn zu.

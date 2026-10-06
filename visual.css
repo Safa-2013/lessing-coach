@@ -369,3 +369,15 @@ button{-webkit-tap-highlight-color:transparent}
   #appointmentForm .category-legend{display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}
   #appointmentForm .category-chip{flex:0 0 auto}
 }
+
+/* Parent appointment picker: real selectable date + free time slots */
+.parent-time-slots{min-height:44px}
+.time-slot-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.time-slot{border:1px solid #b9cee7;background:#fff;color:#17375e;border-radius:11px;min-height:52px;padding:8px 6px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:manipulation}
+.time-slot small{font-size:10px;font-weight:650;color:#66809b}
+.time-slot:hover:not(:disabled),.time-slot.selected{border-color:#0868e8;background:#e8f2ff;box-shadow:0 0 0 2px #0868e822}
+.time-slot.selected{background:#0868e8;color:#fff}
+.time-slot.selected small{color:#eaf3ff}
+.time-slot:disabled{background:#f3f5f8;color:#96a4b4;text-decoration:line-through;opacity:.68;cursor:not-allowed}
+@media(max-width:700px){.time-slot-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.time-slot{min-height:50px;font-size:15px}#parentSchedulePicker .booking-calendar{overflow:visible}#appointmentForm{padding:18px}.school-end label{min-height:48px}}
+@media(max-width:390px){.time-slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

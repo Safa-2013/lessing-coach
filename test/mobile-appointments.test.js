@@ -53,7 +53,7 @@ test('mobile student request needs no slot; parent chooses a school-day slot; st
   assert.equal((await call('admin/appointments','PATCH',{id:studentRow.id,status:'Bestätigt',requested_at:assignedDay,appointment_time:'14:00',category_id:category.id,teacher_id:teacher.id,note:'Termin zugeteilt'},login.cookie)).status,200);
 
   const parentDay=nextSchoolDay();
-  const parentBase={requester_type:'parent',first_name:'Mara',last_name:'Eltern',child_name:'Nela Eltern',class_name:'8a',topic:'Beratung',school_end:'15:50',category_id:category.id,teacher_id:teacher.id,requested_at:parentDay,requested_time:'15:00'};
+  const parentBase={requester_type:'parent',first_name:'Mara',last_name:'Eltern',child_name:'Nela Eltern',class_name:'8a',topic:'Beratung',category_id:category.id,teacher_id:teacher.id,requested_at:parentDay,requested_time:'15:00'};
   assert.equal((await call('appointments','POST',{...parentBase,child_name:''},parent.cookie)).status,400);
   assert.equal((await call('appointments','POST',{...parentBase,requested_time:'17:00'},parent.cookie)).status,400);
   const parentCreated=await call('appointments','POST',parentBase,parent.cookie);
@@ -62,6 +62,7 @@ test('mobile student request needs no slot; parent chooses a school-day slot; st
   assert.equal(parentLookup.data.appointment.child_name,'Nela Eltern');
   assert.equal(parentLookup.data.appointment.requested_at,parentDay);
   assert.equal(parentLookup.data.appointment.appointment_time,'15:00');
+  assert.equal(parentLookup.data.appointment.school_end,'');
 });
 
 test('critical mobile UI is immediately usable and role controller is actually shipped in index.html',()=>{
@@ -72,6 +73,9 @@ test('critical mobile UI is immediately usable and role controller is actually s
   assert.match(html,/function setRequesterRole\(role\)/);
   assert.match(html,/const dayLabel = value => value \?/);
   assert.match(html,/class="mobile-quick-nav"/);
+  assert.match(html,/id="schoolEndFieldset"/);
+  assert.match(html,/id="parentTimeSlots"/);
+  assert.match(html,/Bei Eltern wird keine Schulschluss-Uhrzeit des Kindes abgefragt/);
   assert.doesNotMatch(html,/html\[data-loading="true"\] \.shell\{visibility:hidden;pointer-events:none\}/);
   assert.match(css,/MOBILE-FIRST APPOINTMENTS/);
   assert.match(css,/#appointmentSubmit\{width:100%/);
