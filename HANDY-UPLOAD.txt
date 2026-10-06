@@ -1,28 +1,17 @@
-UPLOAD VOM HANDY
+HANDY-UPLOAD – 06.10.2026
 
-Die ZIP ist absichtlich so gebaut, dass index.html DIREKT oben liegt.
-Nach dem Entpacken NICHT noch einen zusätzlichen Projektordner in GitHub anlegen.
+Diese Version wurde extra für den GitHub-Upload am Handy verkleinert.
+Sie enthält weniger als 100 Dateien. Die Brawler-Bilder sind direkt in Lessing Stars eingebettet und müssen nicht als 51 einzelne Bilddateien hochgeladen werden.
 
-In GitHub oben hochladen:
-index.html
-app.js
-calendar-ui.js
-holidays.js
-server.js
-package.json
-package-lock.json
-vercel.json
-visual.css
-stars-embedded.html
+Wichtig:
+1. ZIP in der Dateien-App entpacken.
+2. Den Inhalt dieses Ordners in dein GitHub-Repository hochladen.
+3. index.html muss direkt oben im Repository liegen.
+4. Alte Dateien im Repository am besten durch diese Version ersetzen.
+5. Nach dem Commit Vercel neu deployen lassen und Safari einmal komplett neu laden.
 
-Danach die Ordner mit gleicher Struktur hochladen:
-api/
-lib/
-test/
-assets/
-
-Wichtig: In assets/ auch die Unterordner ui/, brawlers/ und visual/ vollständig übernehmen.
-Wenn GitHub/Vercel bereits verbunden ist, nach dem Commit das neue Deployment abwarten und die Seite einmal vollständig neu laden.
-
-MOBILE-HINWEIS 2026-10-06:
-Nach dem neuen Deployment Safari einmal neu laden. Die CSS-/Stars-Dateien haben neue Versionsparameter, damit nicht die alte Handy-Ansicht aus dem Cache benutzt wird.
+Admin-Neu:
+- Terminformular-Texte für Schüler und Eltern getrennt änderbar.
+- Ansprechpersonen frei benennbar (z. B. Frau Müller, Herr Schmidt, Beratung usw.).
+- Jede Ansprechperson kann nur für Schüler, nur für Eltern oder für beide sichtbar sein.
+- Kategorien frei anlegen, umbenennen, färben und ebenfalls getrennt für Schüler/Eltern sichtbar machen.

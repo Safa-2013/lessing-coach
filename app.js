@@ -1,5 +1,6 @@
 import { holidayOn } from './holidays.js';
 import { makeSchedule } from './calendar-ui.js';
+window.lessingAppReady = true;
 
 const $ = selector => document.querySelector(selector);
 function showManagedCopy(key, value) { const target = $('#' + key + 'Copy'); target.textContent = value || ''; target.classList.toggle('hidden', !value); }
@@ -13,14 +14,64 @@ const cap = document.createElement('img'); cap.src = 'assets/ai-cap.png'; cap.al
 aiMain.insertAdjacentHTML('beforeend', '<div class="ai-footer">„Wissen ist der Schlüssel zu deiner Zukunft.“</div>');
 const safe = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
 const state = { session: { role:'visitor', permissions:[] }, content:{}, threadId:null, currentChat:null };
+const APPOINTMENT_CONFIG_DEFAULTS = {
+  studentChoiceTitle:'Ich bin Schüler/in',
+  studentChoiceHint:'Du stellst eine Anfrage. Den Termin bekommst du anschließend von der Schule.',
+  parentChoiceTitle:'Ich bin ein Elternteil',
+  parentChoiceHint:'Du kannst für dein Kind direkt einen verfügbaren Termin auswählen.',
+  studentRequestTitle:'Schüler-Anfrage', parentRequestTitle:'Eltern-Anfrage',
+  studentFirstNameLabel:'Vorname', studentLastNameLabel:'Nachname',
+  parentFirstNameLabel:'Vorname (Elternteil)', parentLastNameLabel:'Nachname (Elternteil)',
+  childNameLabel:'Name des Kindes', classLabel:'Klasse', topicLabel:'Thema',
+  studentCategoryLabel:'Bereich', parentCategoryLabel:'Bereich',
+  studentContactLabel:'Lehrkraft / Ansprechperson', parentContactLabel:'Lehrkraft / Ansprechperson',
+  studentSchoolEndLabel:'Wann hast du Schule aus?', parentSchoolEndLabel:'Wann hat dein Kind Schule aus?',
+  studentSubmitLabel:'Anfrage senden', parentSubmitLabel:'Termin anfragen',
+  studentNoticeTitle:'Du musst keinen Termin auswählen.',
+  studentNoticeBody:'Nach dem Absenden bekommt die Schule deine Anfrage und teilt dir einen Termin zu. Den Status kannst du später mit deinem Anfragecode unter „Termine“ prüfen.',
+  teacherAudience:{}, categoryAudience:{}
+};
+function appointmentConfig(){
+  let custom={}; try{custom=JSON.parse(state.content.appointment_form_config||'{}')||{};}catch{}
+  return {...APPOINTMENT_CONFIG_DEFAULTS,...custom,teacherAudience:(custom.teacherAudience&&typeof custom.teacherAudience==='object')?custom.teacherAudience:{},categoryAudience:(custom.categoryAudience&&typeof custom.categoryAudience==='object')?custom.categoryAudience:{}};
+}
+function audienceFor(map,id){const a=map?.[id];return Array.isArray(a)&&a.length?a:['student','parent'];}
+function visibleFor(map,id,role){return !role||audienceFor(map,id).includes(role);}
+function setLabelText(el,text){if(!el)return;const node=[...el.childNodes].find(n=>n.nodeType===Node.TEXT_NODE);if(node)node.nodeValue=String(text||'')+' ';else el.prepend(document.createTextNode(String(text||'')+' '));}
+function applyAppointmentFormConfig(){
+  const cfg=appointmentConfig();
+  const studentBtn=document.querySelector('[data-requester-role="student"]'), parentBtn=document.querySelector('[data-requester-role="parent"]');
+  if(studentBtn){studentBtn.querySelector('strong').textContent=cfg.studentChoiceTitle;studentBtn.querySelector('small').textContent=cfg.studentChoiceHint;}
+  if(parentBtn){parentBtn.querySelector('strong').textContent=cfg.parentChoiceTitle;parentBtn.querySelector('small').textContent=cfg.parentChoiceHint;}
+  const notice=$('#studentAppointmentNotice'); if(notice){notice.querySelector('strong').textContent=cfg.studentNoticeTitle;notice.querySelector('span').textContent=cfg.studentNoticeBody;}
+  setLabelText($('#parentChildField'),cfg.childNameLabel); setLabelText($('#appointmentClassLabel'),cfg.classLabel); setLabelText($('#appointmentTopicLabel'),cfg.topicLabel);
+  if(requesterRole) setRequesterRole(requesterRole,{scroll:false});
+}
+async function saveAppointmentConfig(config,{reload=true}={}){
+  const value=JSON.stringify(config); await send('admin/content',{key:'appointment_form_config',value},'PATCH'); state.content.appointment_form_config=value; applyAppointmentFormConfig(); if(reload)await loadCatalog();
+}
+
 let toastTimer;
 function toast(message) { const el = $('#toast'); el.textContent = message; el.classList.remove('hidden'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.add('hidden'), 6000); }
 async function request(path, options = {}) {
-  const response = await fetch('/api/' + path, { credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, signal:AbortSignal.timeout(12000), ...options });
-  let result;
-  try { result = await response.json(); } catch { throw new Error('Serverantwort konnte nicht gelesen werden'); }
-  if (!response.ok) throw new Error(result.error || 'Anfrage fehlgeschlagen');
-  return result;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch('/api/' + path, { credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, ...options, signal:options.signal || controller.signal });
+    let result;
+    try { result = await response.json(); } catch { throw new Error('Serverantwort konnte nicht gelesen werden'); }
+    if (!response.ok) {
+      if(response.status===401&&path!=='login'){
+        state.session={role:'visitor',permissions:[]};renderAuth();
+        if(document.querySelector('.view.active')?.id==='adminPanel')navigate('login');
+      }
+      throw new Error(result.error || 'Anfrage fehlgeschlagen');
+    }
+    return result;
+  } catch (error) {
+    if (error?.name === 'AbortError') throw new Error('Die Verbindung dauert zu lange. Bitte prüfe dein Internet und versuche es erneut.');
+    throw error;
+  } finally { clearTimeout(timer); }
 }
 const send = (path, data, method='POST') => request(path, { method, body:JSON.stringify(data) });
 const studentSchedule = makeSchedule($('#studentSchedule'),request);async function loadMyAppointments(){const box=$('#myAppointments');if(!box)return;try{const {appointments}=await request('appointments/mine');box.innerHTML=appointments.length?appointments.map(a=>`<div class="list-item"><div class="row"><strong>${safe(a.subject)}</strong><span class="pill">${safe(a.status)}</span></div><p>${a.requested_at?safe(dayLabel(a.requested_at))+(a.appointment_time?' · '+safe(a.appointment_time)+' Uhr':''):'Termin wird von der Schule zugeteilt.'}</p>${a.requester_type==='parent'&&a.child_name?`<p class="small"><strong>Für:</strong> ${safe(a.child_name)}</p>`:''}<p class="small">${safe(a.topic)}</p><small>Dein Code: ${safe(a.code)}</small></div>`).join(''):'<p class="muted">Du hast auf diesem Gerät noch keine eigenen Terminanfragen.</p>';}catch(e){box.innerHTML='<p class="muted">Eigene Termine konnten nicht geladen werden.</p>';}}
@@ -37,7 +88,7 @@ function showAdminTab(tab) {
   if(tab==='maintenance')renderMaintenanceForm();
 }
 const pageScroll={};
-function closeMobileMenu(){ $('#sidebar').classList.remove('open');$('#scrim').classList.remove('open');document.body.classList.remove('menu-open');$('#menuToggle').setAttribute('aria-expanded','false'); }
+function closeMobileMenu(){ const side=$('#sidebar'),scrim=$('#scrim'),toggle=$('#menuToggle');side?.classList.remove('open');scrim?.classList.remove('open');document.body.classList.remove('menu-open');toggle?.setAttribute('aria-expanded','false'); }
 function navigate(page,options={}) {
   if (page === 'adminPanel' && state.session.role === 'visitor') page = 'login';
   if(maintenanceBlocked(page)){showMaintenance(page);return;}
@@ -50,7 +101,7 @@ function navigate(page,options={}) {
   document.body.classList.toggle('ai-mode', page === 'ki');
   $('.view.active')?.classList.remove('active');
   $('#' + page)?.classList.add('active');
-  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  document.querySelectorAll('.nav button,.mobile-quick-nav button[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === page));
   closeMobileMenu();
   requestAnimationFrame(()=>window.scrollTo({top:options.restore?(pageScroll[page]||0):0,behavior:'auto'}));
   if (page === 'contact') initChat();
@@ -64,13 +115,22 @@ function navigate(page,options={}) {
 async function loadCatalog() {
   try {
     const {categories, teachers} = await request('catalog'); window.lessingCatalog={categories,teachers};
-    const categorySelect=$('#appointmentCategory'), teacherSelect=$('#appointmentTeacher'), legend=$('#categoryLegend');
-    if(categorySelect) categorySelect.innerHTML='<option value="">Bereich auswählen …</option>'+categories.map(c=>`<option value="${safe(c.id)}">${safe(c.name)}</option>`).join('');
-    const renderTeachers=()=>{if(!teacherSelect)return;const cid=categorySelect?.value;const available=cid?teachers.filter(t=>(t.category_ids||[]).includes(cid)):[];teacherSelect.innerHTML=cid?(available.length?'<option value="">Lehrkraft auswählen …</option>'+available.map(t=>`<option value="${safe(t.id)}">${safe(t.name)}</option>`).join(''):'<option value="">Keine Lehrkraft für diesen Bereich hinterlegt</option>'):'<option value="">Erst Bereich auswählen …</option>';const hint=$('#categoryTeacherHint');const category=categories.find(c=>c.id===cid);if(hint)hint.textContent=category?(available.length?`${category.name}: ${available.map(t=>t.name).join(' · ')}`:`${category.name}: Noch keine Lehrkraft hinterlegt`):'';if(available.length===1)teacherSelect.value=available[0].id;};
-    categorySelect?.addEventListener('change',renderTeachers); renderTeachers();
-    if(legend) legend.innerHTML=categories.map(c=>`<span class="category-chip" style="--category-color:${safe(c.color)}"><i></i>${safe(c.name)}</span>`).join('');
+    renderAppointmentCatalog();
   } catch(e){toast(e.message);}
 }
+function renderAppointmentCatalog(){
+  const {categories=[],teachers=[]}=window.lessingCatalog||{}; const cfg=appointmentConfig(); const role=requesterRole;
+  const categorySelect=$('#appointmentCategory'), teacherSelect=$('#appointmentTeacher'), legend=$('#categoryLegend');
+  const visibleCategories=categories.filter(c=>visibleFor(cfg.categoryAudience,c.id,role));
+  const categoryWord=role==='parent'?cfg.parentCategoryLabel:cfg.studentCategoryLabel;
+  const contactWord=role==='parent'?cfg.parentContactLabel:cfg.studentContactLabel;
+  const oldCategory=categorySelect?.value||'';
+  if(categorySelect){categorySelect.innerHTML=`<option value="">${safe(categoryWord)} auswählen …</option>`+visibleCategories.map(c=>`<option value="${safe(c.id)}">${safe(c.name)}</option>`).join('');if(visibleCategories.some(c=>c.id===oldCategory))categorySelect.value=oldCategory;}
+  const renderPeople=()=>{if(!teacherSelect)return;const cid=categorySelect?.value;const available=cid?teachers.filter(t=>(t.category_ids||[]).includes(cid)&&visibleFor(cfg.teacherAudience,t.id,role)):[];teacherSelect.innerHTML=cid?(available.length?`<option value="">${safe(contactWord)} auswählen …</option>`+available.map(t=>`<option value="${safe(t.id)}">${safe(t.name)}</option>`).join(''):`<option value="">Keine passende Ansprechperson hinterlegt</option>`):`<option value="">Erst ${safe(categoryWord)} auswählen …</option>`;const hint=$('#categoryTeacherHint');const category=visibleCategories.find(c=>c.id===cid);if(hint)hint.textContent=category?(available.length?`${category.name}: ${available.map(t=>t.name).join(' · ')}`:`${category.name}: Noch keine passende Ansprechperson hinterlegt`):'';if(available.length===1)teacherSelect.value=available[0].id;};
+  if(categorySelect)categorySelect.onchange=renderPeople; renderPeople();
+  if(legend) legend.innerHTML=visibleCategories.map(c=>`<span class="category-chip" style="--category-color:${safe(c.color)}"><i></i>${safe(c.name)}</span>`).join('');
+}
+
 function renderAuth() {
   const isStaff = state.session.role !== 'visitor';
   $('#maintenanceTab').hidden=state.session.role!=='big';
@@ -89,7 +149,7 @@ function renderAuth() {
 }
 async function boot() {
   try {
-    const data = await request('bootstrap'); state.session = data.session; state.content = data.content; try { maintenance=JSON.parse(data.content.maintenance||'{}'); } catch {} await loadCatalog();
+    const data = await request('bootstrap'); state.session = data.session; state.content = data.content; try { maintenance=JSON.parse(data.content.maintenance||'{}'); } catch {} applyAppointmentFormConfig(); await loadCatalog();
     $('#heroText').textContent = data.content.hero || $('#heroText').textContent;
     showManagedCopy('about', data.content.about);
     showManagedCopy('help', data.content.help);
@@ -113,8 +173,9 @@ document.addEventListener('click', e => {
   if (subject) { $('#aiForm input[name="message"]').value = `Hilf mir beim Lernen für ${subject}. Frage zuerst, was ich üben möchte.`; $('#aiForm input[name="message"]').focus(); }
 });
 $('.admin-tabs').onclick=e=>{const tab=e.target.closest('[data-admin-tab]:not(.hidden)')?.dataset.adminTab;if(tab)showAdminTab(tab);};
-$('#menuToggle').onclick=e=>{e.stopPropagation();const open=!$('#sidebar').classList.contains('open');$('#sidebar').classList.toggle('open',open);$('#scrim').classList.toggle('open',open);document.body.classList.toggle('menu-open',open);$('#menuToggle').setAttribute('aria-expanded',String(open));};
-$('#scrim').onclick=closeMobileMenu;
+const menuToggle=$('#menuToggle'),scrimEl=$('#scrim');
+if(menuToggle)menuToggle.onclick=e=>{e.stopPropagation();const side=$('#sidebar');const open=!side?.classList.contains('open');side?.classList.toggle('open',open);scrimEl?.classList.toggle('open',open);document.body.classList.toggle('menu-open',open);menuToggle.setAttribute('aria-expanded',String(open));};
+if(scrimEl)scrimEl.onclick=closeMobileMenu;
 window.addEventListener('popstate',()=>{const raw=location.hash.slice(1)||'start';const p=/^[A-Za-z][A-Za-z0-9_-]*$/.test(raw)?raw:'start';const view=document.getElementById(p);if(view?.classList.contains('view'))navigate(p,{history:true,restore:true});else navigate('start',{history:true,restore:true});});
 const berlinToday = () => {
   const parts = new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
@@ -125,30 +186,38 @@ const dayLabel = value => value ? new Date(`${String(value).slice(0,10)}T12:00:0
 const schoolEndLabel = value => ({'13:20':'13:20 Uhr','15:50':'15:50 Uhr',later:'später als 15:50 Uhr'})[value] || 'nicht angegeben';
 let requesterRole = null;
 function setRequesterRole(role){
+  const options=arguments[1]||{};
   requesterRole = role === 'parent' ? 'parent' : role === 'student' ? 'student' : null;
   const form=$('#appointmentForm'), choice=$('#requesterChoice');
   if(!form||!choice)return;
+  const cfg=appointmentConfig();
   const type=form.elements.requester_type, child=form.elements.child_name, date=form.elements.requested_at, time=form.elements.requested_time;
   if(!requesterRole){
     type.value=''; form.reset(); type.value='';
+    document.querySelectorAll('[data-requester-role]').forEach(button=>button.setAttribute('aria-pressed','false'));
     form.classList.add('hidden'); choice.classList.remove('hidden');
     $('#parentChildField').classList.add('hidden'); $('#parentSchedulePicker').classList.add('hidden'); $('#studentAppointmentNotice').classList.add('hidden');
     child.required=false; child.disabled=true; date.disabled=true; time.required=false; time.disabled=true;
-    $('#appointmentResult').innerHTML='';
+    $('#appointmentResult').innerHTML=''; renderAppointmentCatalog();
     return;
   }
   type.value=requesterRole; choice.classList.add('hidden'); form.classList.remove('hidden');
+  document.querySelectorAll('[data-requester-role]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.requesterRole===requesterRole)));
   const parent=requesterRole==='parent';
-  $('#requesterRoleLabel').textContent=parent?'Eltern-Anfrage':'Schüler-Anfrage';
-  $('#appointmentFirstNameLabel').childNodes[0].nodeValue=parent?'Vorname (Elternteil)':'Vorname';
-  $('#appointmentLastNameLabel').childNodes[0].nodeValue=parent?'Nachname (Elternteil)':'Nachname';
+  $('#requesterRoleLabel').textContent=parent?cfg.parentRequestTitle:cfg.studentRequestTitle;
+  setLabelText($('#appointmentFirstNameLabel'),parent?cfg.parentFirstNameLabel:cfg.studentFirstNameLabel);
+  setLabelText($('#appointmentLastNameLabel'),parent?cfg.parentLastNameLabel:cfg.studentLastNameLabel);
+  setLabelText($('#parentChildField'),cfg.childNameLabel); setLabelText($('#appointmentClassLabel'),cfg.classLabel); setLabelText($('#appointmentTopicLabel'),cfg.topicLabel);
+  setLabelText($('#appointmentCategoryLabel'),parent?cfg.parentCategoryLabel:cfg.studentCategoryLabel);
+  setLabelText($('#appointmentTeacherLabel'),parent?cfg.parentContactLabel:cfg.studentContactLabel);
   $('#parentChildField').classList.toggle('hidden',!parent); child.required=parent; child.disabled=!parent;
   $('#parentSchedulePicker').classList.toggle('hidden',!parent); date.disabled=!parent; time.disabled=!parent; time.required=parent;
   $('#studentAppointmentNotice').classList.toggle('hidden',parent);
-  $('#schoolEndLegend').textContent=parent?'Wann hat dein Kind Schule aus?':'Wann hast du Schule aus?';
-  $('#appointmentSubmit').textContent=parent?'Termin anfragen':'Anfrage senden';
+  $('#schoolEndLegend').textContent=parent?cfg.parentSchoolEndLabel:cfg.studentSchoolEndLabel;
+  $('#appointmentSubmit').textContent=parent?cfg.parentSubmitLabel:cfg.studentSubmitLabel;
+  renderAppointmentCatalog();
   if(parent) loadCalendar(); else { date.value=''; time.value=''; }
-  requestAnimationFrame(()=>form.scrollIntoView({block:'start',behavior:'smooth'}));
+  if(options.scroll!==false)requestAnimationFrame(()=>form.scrollIntoView({block:'start',behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
 }
 document.querySelectorAll('[data-requester-role]').forEach(button=>button.addEventListener('click',()=>setRequesterRole(button.dataset.requesterRole)));
 $('#changeRequesterRole').onclick=()=>setRequesterRole(null);
@@ -166,10 +235,11 @@ function renderCalendar() {
   const selected = $('#appointmentForm').elements.requested_at.value;
   $('#calendarDays').innerHTML = weekdays + Array.from({length:spaces},()=>'<span></span>').join('') + Array.from({length:count},(_,i)=>{
     const date=`${month.getUTCFullYear()}-${String(month.getUTCMonth()+1).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
-    const info=calendarDays[date], holiday=holidayOn(date), availability=info?.hasAppointments||info?.hasRequests?'Nicht verfügbar':'Verfügbar';
-    const status=holiday?`${holiday} · ${availability}`:availability;
-    const disabled=date<today||date>max.toISOString().slice(0,10)||Boolean(info?.hasAppointments);
-    return `<button type="button" data-date="${date}" class="calendar-day ${holiday?'holiday':info?.hasAppointments?'busy':info?.hasRequests?'pending':'free'} ${selected===date?'selected':''}" aria-label="${dayLabel(date)}: ${status}" aria-pressed="${selected===date}" ${disabled?'disabled':''}><span>${i+1}</span><span class="calendar-dot" aria-hidden="true"></span></button>`;
+    const info=calendarDays[date], holiday=holidayOn(date), weekday=new Date(`${date}T12:00:00Z`).getUTCDay();
+    const weekend=weekday===0||weekday===6;
+    const availability=weekend?'Wochenende':holiday?holiday:info?.hasAppointments?'Es gibt bereits Termine – andere Uhrzeiten können trotzdem frei sein':info?.hasRequests?'Es liegen Anfragen vor':'Verfügbar';
+    const disabled=date<today||date>max.toISOString().slice(0,10)||weekend||Boolean(holiday);
+    return `<button type="button" data-date="${date}" class="calendar-day ${weekend?'busy':holiday?'holiday':info?.hasAppointments?'busy':info?.hasRequests?'pending':'free'} ${selected===date?'selected':''}" aria-label="${dayLabel(date)}: ${availability}" aria-pressed="${selected===date}" ${disabled?'disabled':''}><span>${i+1}</span><span class="calendar-dot" aria-hidden="true"></span></button>`;
   }).join('');
   if (selected) {
     const info=calendarDays[selected];
@@ -181,10 +251,11 @@ async function loadCalendar() {
   calendarDays={}; renderCalendar();
   $('#calendarStatus').textContent='Kalender wird geladen …';
   try {
-    const {days}=await request('appointments/calendar?month='+month);
+    const teacherId=$('#appointmentForm')?.elements?.teacher_id?.value||'';
+    const {days}=await request('appointments/calendar?month='+encodeURIComponent(month)+(teacherId?'&teacher_id='+encodeURIComponent(teacherId):''));
     if (current !== calendarRequest) return;
     calendarDays=Object.fromEntries(days.map(day=>[day.date,day])); renderCalendar();
-    if (!$('#appointmentForm').elements.requested_at.value) $('#calendarStatus').textContent='Grün: verfügbar · Grau: nicht verfügbar · Lila: Ferien BW. Wähle einen Tag.';
+    if (!$('#appointmentForm').elements.requested_at.value) $('#calendarStatus').textContent='Wähle Montag bis Freitag. Ferien und Wochenenden sind gesperrt. Belegte Termine sperren nicht automatisch den ganzen Tag.';
   } catch(e) { if (current===calendarRequest) { renderCalendar(); $('#calendarStatus').textContent='Kalenderdaten konnten nicht geladen werden: '+e.message; } }
 }
 $('#calendarPrev').onclick=()=>{ if(calendarOffset>0){calendarOffset--;loadCalendar();} };
@@ -194,12 +265,14 @@ $('#calendarDays').onclick=e=>{
   $('#appointmentForm').elements.requested_at.value=day.dataset.date;
   renderCalendar();
 };
+$('#appointmentTeacher')?.addEventListener('change',()=>{ if($('#appointmentForm')?.elements?.requester_type?.value==='parent') loadCalendar(); });
 $('#appointmentForm').onsubmit = async e => {
   e.preventDefault(); const form = e.currentTarget, button = form.querySelector('button[type="submit"]');
   const role=form.elements.requester_type.value;
   if (!role) { setRequesterRole(null); return; }
   if (role==='parent' && !form.elements.requested_at.value) { $('#calendarStatus').textContent='Bitte wähle zuerst einen Tag im Kalender.'; $('#bookingCalendar').scrollIntoView({block:'center'}); return; }
-  button.disabled = true;
+  const originalText=button.textContent;
+  button.disabled = true; button.textContent='Wird gesendet …';
   try {
     const data = await send('appointments', Object.fromEntries(new FormData(form)));
     const message=role==='student'?'Die Schule teilt dir einen Termin zu. Prüfe den Status später unter „Termine“.':'Deine Terminanfrage wurde gesendet.';
@@ -208,11 +281,12 @@ $('#appointmentForm').onsubmit = async e => {
     form.reset(); form.elements.requester_type.value=role;
     if(role==='parent') await loadCalendar();
     $('#appointmentResult').innerHTML=resultHtml;
+    $('#appointmentResult').scrollIntoView({block:'center',behavior:'smooth'});
   }
-  catch(err) { toast(err.message); } finally { button.disabled = false; }
+  catch(err) { toast(err.message); } finally { button.disabled = false; button.textContent=originalText; }
 };
 $('#lookupForm').onsubmit = async e => {
-  e.preventDefault(); const code = new FormData(e.currentTarget).get('code');
+  e.preventDefault(); const code = String(new FormData(e.currentTarget).get('code')||'').trim().toUpperCase();
   try { const {appointment:a} = await request('appointments?code=' + encodeURIComponent(code)); const when=a.requested_at?`<p>Termin: ${safe(dayLabel(a.requested_at))}${a.appointment_time?' · '+safe(a.appointment_time)+' Uhr':''}</p>`:'<p><strong>Der Termin wird von der Schule noch zugeteilt.</strong></p>'; $('#lookupResult').innerHTML = `<div class="result"><strong>${safe(a.status)}</strong><p>${safe(a.subject==='Coaching'?'Coaching · ':a.subject+' · ')}${safe(a.topic)}</p>${when}<p>${a.requester_type==='parent'?'Schule aus (Kind)':'Schule aus'}: ${safe(schoolEndLabel(a.school_end))}</p>${a.requester_type==='parent'&&a.child_name?`<p>Kind: ${safe(a.child_name)}</p>`:''}${a.note ? `<p>Rückmeldung: ${safe(a.note)}</p>` : ''}<small>Zuletzt aktualisiert: ${new Date(Number(a.updated_at)).toLocaleString('de-DE')}</small></div>`; }
   catch(err) { $('#lookupResult').innerHTML = `<div class="result notice">${safe(err.message)}</div>`; }
 };
@@ -318,8 +392,11 @@ async function loadAccounts() {
 }
 async function loadStaffManagement() {
   const [{teachers},{categories}] = await Promise.all([request('admin/teachers'),request('admin/categories')]);
-  $('#teacherList').innerHTML=teachers.length?teachers.map(t=>`<div class="list-item teacher-card"><div class="row"><input class="field teacher-name" data-id="${safe(t.id)}" value="${safe(t.name)}"><button class="primary" data-save-teacher="${safe(t.id)}">Speichern</button><button class="primary danger" data-delete-teacher="${safe(t.id)}">Entfernen</button></div><div class="teacher-categories"><strong>Bereiche:</strong><div class="row">${categories.map(c=>`<label><input type="checkbox" class="teacher-category" data-teacher="${safe(t.id)}" data-category="${safe(c.id)}" ${(t.category_ids||[]).includes(c.id)?'checked':''}> ${safe(c.name)}</label>`).join('')}</div></div></div>`).join(''):'<p class="muted">Noch keine Lehrkräfte.</p>';
-  $('#categoryList').innerHTML=categories.map(c=>`<div class="list-item row"><input class="field category-name" data-id="${safe(c.id)}" value="${safe(c.name)}"><input type="color" class="category-color" data-id="${safe(c.id)}" value="${safe(c.color)}" title="Farbe"><button class="primary" data-save-category="${safe(c.id)}">Speichern</button><button class="primary danger" type="button" data-delete-category="${safe(c.id)}">Deaktivieren</button></div>`).join('');
+  const cfg=appointmentConfig();
+  const form=$('#appointmentConfigForm');
+  if(form){for(const el of form.elements){if(el.name&&Object.hasOwn(cfg,el.name)&&typeof cfg[el.name]==='string')el.value=cfg[el.name];}}
+  $('#teacherList').innerHTML=teachers.length?teachers.map(t=>{const aud=audienceFor(cfg.teacherAudience,t.id);return `<div class="list-item teacher-card"><div class="row"><input class="field teacher-name" data-id="${safe(t.id)}" value="${safe(t.name)}"><button class="primary" data-save-teacher="${safe(t.id)}">Speichern</button><button class="primary danger" data-delete-teacher="${safe(t.id)}">Entfernen</button></div><div class="audience-editor"><strong>Sichtbar für:</strong> <label><input type="checkbox" class="teacher-audience" data-teacher="${safe(t.id)}" data-role="student" ${aud.includes('student')?'checked':''}> Schüler/in</label> <label><input type="checkbox" class="teacher-audience" data-teacher="${safe(t.id)}" data-role="parent" ${aud.includes('parent')?'checked':''}> Elternteil</label></div><div class="teacher-categories"><strong>Kategorien:</strong><div class="row">${categories.filter(c=>c.active!==0).map(c=>`<label><input type="checkbox" class="teacher-category" data-teacher="${safe(t.id)}" data-category="${safe(c.id)}" ${(t.category_ids||[]).includes(c.id)?'checked':''}> ${safe(c.name)}</label>`).join('')}</div></div></div>`}).join(''):'<p class="muted">Noch keine Ansprechpersonen.</p>';
+  $('#categoryList').innerHTML=categories.map(c=>{const aud=audienceFor(cfg.categoryAudience,c.id);return `<div class="list-item category-card"><div class="row"><input class="field category-name" data-id="${safe(c.id)}" value="${safe(c.name)}"><input type="color" class="category-color" data-id="${safe(c.id)}" value="${safe(c.color)}" title="Farbe"><button class="primary" data-save-category="${safe(c.id)}">Speichern</button><button class="primary danger" type="button" data-delete-category="${safe(c.id)}">Deaktivieren</button></div><div class="audience-editor"><strong>Sichtbar für:</strong> <label><input type="checkbox" class="category-audience" data-category="${safe(c.id)}" data-role="student" ${aud.includes('student')?'checked':''}> Schüler/in</label> <label><input type="checkbox" class="category-audience" data-category="${safe(c.id)}" data-role="parent" ${aud.includes('parent')?'checked':''}> Elternteil</label></div></div>`}).join('');
 }
 async function loadAppointmentNotes() {
   const box=$('#appointmentNotesList'); if(!box) return;
@@ -418,40 +495,41 @@ $('#adminAccounts').onclick = async e => {
 };
 document.querySelector('[data-admin-section="staff"]').onclick = async e => {
   const teacherId=e.target.dataset.deleteTeacher;
-  if (teacherId) { try { await request('admin/teachers/'+teacherId,{method:'DELETE'}); await loadStaffManagement(); await loadCatalog(); toast('Lehrkraft deaktiviert'); } catch(err){toast(err.message);} return; }
+  if (teacherId) { try { await request('admin/teachers/'+teacherId,{method:'DELETE'}); await loadStaffManagement(); await loadCatalog(); toast('Ansprechperson deaktiviert'); } catch(err){toast(err.message);} return; }
   const saveTeacher=e.target.dataset.saveTeacher;
-  if (saveTeacher) { const input=document.querySelector(`.teacher-name[data-id="${CSS.escape(saveTeacher)}"]`); const category_ids=[...document.querySelectorAll(`.teacher-category[data-teacher="${CSS.escape(saveTeacher)}"]:checked`)].map(x=>x.dataset.category); try { await send('admin/teachers/'+saveTeacher,{name:input.value,category_ids},'PATCH'); await loadStaffManagement(); await loadCatalog(); toast('Lehrkraft gespeichert'); } catch(err){toast(err.message);} return; }
+  if (saveTeacher) { const input=document.querySelector(`.teacher-name[data-id="${CSS.escape(saveTeacher)}"]`); const category_ids=[...document.querySelectorAll(`.teacher-category[data-teacher="${CSS.escape(saveTeacher)}"]:checked`)].map(x=>x.dataset.category); try { await send('admin/teachers/'+saveTeacher,{name:input.value,category_ids},'PATCH'); await loadStaffManagement(); await loadCatalog(); toast('Ansprechperson gespeichert'); } catch(err){toast(err.message);} return; }
   const deleteCategory=e.target.dataset.deleteCategory;
   if (deleteCategory) { try { await request('admin/categories/'+deleteCategory,{method:'DELETE'}); await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Bereich deaktiviert'); } catch(err){toast(err.message);} return; }
   const saveCategory=e.target.dataset.saveCategory;
   if (saveCategory) { const name=document.querySelector(`.category-name[data-id="${CSS.escape(saveCategory)}"]`).value; const color=document.querySelector(`.category-color[data-id="${CSS.escape(saveCategory)}"]`).value; try { await send('admin/categories/'+saveCategory,{name,color},'PATCH'); await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Bereich gespeichert'); } catch(err){toast(err.message);} }
 };
-// Bereichszuordnungen beim Anklicken speichern, ohne die Ansicht neu aufzubauen.
+// Zuordnungen und Sichtbarkeit direkt speichern.
 $('#teacherList').addEventListener('change', async e => {
-  if (!e.target.matches('.teacher-category')) return;
-  const checkbox=e.target, teacherId=checkbox.dataset.teacher;
-  const card=checkbox.closest('.teacher-card');
-  const name=card.querySelector('.teacher-name').value;
-  const category_ids=[...card.querySelectorAll('.teacher-category:checked')].map(x=>x.dataset.category);
-  const boxes=[...card.querySelectorAll('.teacher-category')];
-  boxes.forEach(x=>x.disabled=true);
-  try {
-    await send('admin/teachers/'+encodeURIComponent(teacherId),{name,category_ids},'PATCH');
-    await loadCatalog();
-    toast('Bereiche gespeichert');
-  } catch(err) {
-    checkbox.checked=!checkbox.checked;
-    toast(err.message);
-  } finally {
-    boxes.forEach(x=>x.disabled=false);
+  if (e.target.matches('.teacher-category')) {
+    const checkbox=e.target, teacherId=checkbox.dataset.teacher; const card=checkbox.closest('.teacher-card');
+    const name=card.querySelector('.teacher-name').value; const category_ids=[...card.querySelectorAll('.teacher-category:checked')].map(x=>x.dataset.category);
+    const boxes=[...card.querySelectorAll('.teacher-category')]; boxes.forEach(x=>x.disabled=true);
+    try { await send('admin/teachers/'+encodeURIComponent(teacherId),{name,category_ids},'PATCH'); await loadCatalog(); toast('Kategorien gespeichert'); }
+    catch(err){checkbox.checked=!checkbox.checked;toast(err.message);} finally{boxes.forEach(x=>x.disabled=false);} return;
+  }
+  if(e.target.matches('.teacher-audience')){
+    const id=e.target.dataset.teacher, cfg=appointmentConfig(); const checks=[...e.target.closest('.teacher-card').querySelectorAll('.teacher-audience:checked')].map(x=>x.dataset.role);
+    if(!checks.length){e.target.checked=true;toast('Mindestens eine Zielgruppe muss ausgewählt bleiben.');return;}
+    cfg.teacherAudience={...cfg.teacherAudience,[id]:checks}; try{await saveAppointmentConfig(cfg);toast('Sichtbarkeit gespeichert');}catch(err){toast(err.message);} return;
   }
 });
-$('#teacherCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/teachers',{name:e.target.elements.name.value});e.target.reset();await loadStaffManagement();await loadCatalog();toast('Lehrkraft hinzugefügt');}catch(err){toast(err.message);}};
-$('#categoryCreate').onsubmit=async e=>{e.preventDefault();try{await send('admin/categories',{name:e.target.elements.name.value,color:e.target.elements.color.value});e.target.reset();e.target.elements.color.value='#3B82F6';await loadStaffManagement();await loadCatalog();adminSchedule.refresh();toast('Bereich hinzugefügt');}catch(err){toast(err.message);}};
+$('#categoryList').addEventListener('change', async e=>{
+  if(!e.target.matches('.category-audience'))return; const id=e.target.dataset.category,cfg=appointmentConfig(); const checks=[...e.target.closest('.category-card').querySelectorAll('.category-audience:checked')].map(x=>x.dataset.role);
+  if(!checks.length){e.target.checked=true;toast('Mindestens eine Zielgruppe muss ausgewählt bleiben.');return;}
+  cfg.categoryAudience={...cfg.categoryAudience,[id]:checks}; try{await saveAppointmentConfig(cfg);toast('Kategorie-Sichtbarkeit gespeichert');}catch(err){toast(err.message);}
+});
+$('#appointmentConfigForm').onsubmit=async e=>{e.preventDefault();const cfg=appointmentConfig();for(const [k,v] of new FormData(e.target))if(Object.hasOwn(APPOINTMENT_CONFIG_DEFAULTS,k)&&typeof APPOINTMENT_CONFIG_DEFAULTS[k]==='string')cfg[k]=String(v).trim()||APPOINTMENT_CONFIG_DEFAULTS[k];try{await saveAppointmentConfig(cfg);toast('Terminformular gespeichert');await loadStaffManagement();}catch(err){toast(err.message);}};
+$('#teacherCreate').onsubmit=async e=>{e.preventDefault();const aud=[...e.target.querySelectorAll('input[name="audience"]:checked')].map(x=>x.value);if(!aud.length){toast('Bitte Schüler/in, Elternteil oder beide auswählen.');return;}try{const result=await send('admin/teachers',{name:e.target.elements.name.value});const cfg=appointmentConfig();if(result.id){cfg.teacherAudience={...cfg.teacherAudience,[result.id]:aud};await saveAppointmentConfig(cfg,{reload:false});}e.target.reset();e.target.querySelectorAll('input[name="audience"]').forEach(x=>x.checked=true);await loadStaffManagement();await loadCatalog();toast('Ansprechperson hinzugefügt');}catch(err){toast(err.message);}};
+$('#categoryCreate').onsubmit=async e=>{e.preventDefault();const aud=[...e.target.querySelectorAll('input[name="audience"]:checked')].map(x=>x.value);if(!aud.length){toast('Bitte Schüler/in, Elternteil oder beide auswählen.');return;}try{const result=await send('admin/categories',{name:e.target.elements.name.value,color:e.target.elements.color.value});const cfg=appointmentConfig();if(result.id){cfg.categoryAudience={...cfg.categoryAudience,[result.id]:aud};await saveAppointmentConfig(cfg,{reload:false});}e.target.reset();e.target.elements.color.value='#3B82F6';e.target.querySelectorAll('input[name="audience"]').forEach(x=>x.checked=true);await loadStaffManagement();await loadCatalog();adminSchedule.refresh();toast('Kategorie hinzugefügt');}catch(err){toast(err.message);}};
 $('#passwordForm').onsubmit = async e => { e.preventDefault(); const form=e.target; try { await send('admin/password',Object.fromEntries(new FormData(form)),'PATCH'); form.reset(); toast('Passwort geändert'); }catch(err){toast(err.message);} };
 
 let maintenance={};
-const maintenanceLabels={start:'Startseite',coaching:'Termin & Coaching',termine:'Termine',ki:'Lern-KI',contact:'Chat',planner:'Lernplaner'};
+const maintenanceLabels={start:'Startseite',coaching:'Termin & Coaching',termine:'Termine',ki:'Lern-KI',contact:'Chat',planner:'Lernplaner',stars:'Lessing Stars'};
 const gameLabels={math:'Mathe-Quiz',vocab:'Vokabeltrainer',memory:'Memory',reaction:'Reaktionsspiel',logic:'Logik-Quiz',dvd:'DVD-Video'};
 let gameCleanup=()=>{};
 let maintenanceOrigin='start';
@@ -486,7 +564,7 @@ function startGame(kind){
  body.innerHTML=`<p>Aufgabe ${n+1}/10 · Punkte ${score}</p><p><strong>${safe(q)}</strong></p><form id="gameAnswer"><label class="field">Deine Antwort<input required autocomplete="off" aria-label="Deine Antwort"></label><button class="primary">Prüfen</button></form><p id="gameFeedback" role="status"></p>`;
  const f=$('#gameAnswer');f.onsubmit=e=>{e.preventDefault();if(f.querySelector('button').disabled)return;const norm=x=>x.trim().toLowerCase().replace(/^(der|die|das) /,'').replace(',', '.');const correct=(kind==='vocab'?[answer,...({Gelegenheit:['Chance'],Leistung:['Erfolg'],Beweis:['Nachweis','Belege'],Folge:['Konsequenz'],Nachbar:['Nachbarin'],Bibliothek:['Bücherei']}[answer]||[])]:[answer]).some(a=>norm(f.querySelector('input').value)===norm(a));if(correct)score++;n++;f.querySelector('button').disabled=true;f.querySelector('input').disabled=true;$('#gameFeedback').textContent=correct?'Richtig!':`Richtige Antwort: ${answer}`;const b=document.createElement('button');b.className='primary';b.textContent='Weiter';b.onclick=next;body.append(b);};}next();
 }
-setInterval(async()=>{try{maintenance=(await request('maintenance')).maintenance;const page=document.querySelector('.view.active')?.id;if(page&&maintenanceBlocked(page))showMaintenance(page);else if(page==='maintenancePage'&&!maintenanceBlocked(maintenanceOrigin))navigate(maintenanceOrigin==='planner'?'ki':maintenanceOrigin);}catch{}},15000);
+setInterval(async()=>{try{const data=await request('maintenance');maintenance=data.maintenance;if(data.session&&data.session.role!==state.session.role){const wasStaff=state.session.role!=='visitor';state.session=data.session;renderAuth();if(wasStaff&&state.session.role==='visitor'&&document.querySelector('.view.active')?.id==='adminPanel'){navigate('login');toast('Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.');}}const page=document.querySelector('.view.active')?.id;if(page&&maintenanceBlocked(page))showMaintenance(page);else if(page==='maintenancePage'&&!maintenanceBlocked(maintenanceOrigin))navigate(maintenanceOrigin==='planner'?'ki':maintenanceOrigin);}catch{}},15000);
 queueMicrotask(()=>boot().catch(e=>{document.documentElement.removeAttribute('data-loading');toast('Seite konnte nicht vollständig geladen werden: '+e.message);}));
 
 // Schüler-Passwortschalter: nur die Verwaltung kann den Modus ändern.
@@ -605,3 +683,6 @@ function startMemory(root){
  gameCleanup=()=>{active=false;clearTimeout(timer);};
  restart.onclick=e=>{e.stopPropagation();gameCleanup();startMemory(root);};
 }
+
+const starsNavigation=document.querySelector('#starsNavigation');if(starsNavigation)starsNavigation.onclick=()=>{if(maintenanceBlocked('stars'))showMaintenance('stars');else{closeMobileMenu();window.openLessingStars?.();}};
+window.addEventListener('lessing-coach-home',()=>navigate('start'));

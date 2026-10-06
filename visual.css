@@ -310,3 +310,62 @@ button{-webkit-tap-highlight-color:transparent}
   .calendar-weekday{font-size:10px!important}.calendar-day{min-height:34px!important;font-size:12px!important}
   .subjects{grid-template-columns:1fr 1fr!important;gap:7px!important}
 }
+
+/* === MOBILE-FIRST APPOINTMENTS + IPAD ADMIN 2026-10-06 === */
+.mobile-quick-nav{display:none}
+#appointmentSubmit{min-height:50px}
+#lookupForm input[name="code"]{text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+#coachStarsClose{position:fixed;z-index:10002;top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));min-height:44px;border:1px solid #ffffff45;border-radius:12px;background:#0b2449e8;color:#fff;padding:8px 13px;font-weight:800;box-shadow:0 8px 24px #0005}
+
+@media(max-width:900px){
+  body{padding-bottom:calc(70px + env(safe-area-inset-bottom))!important}
+  .main{padding-bottom:0!important}
+  .view{padding-bottom:calc(92px + env(safe-area-inset-bottom))!important}
+  .mobile-quick-nav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:68;background:#0f2948f4;border-top:1px solid #ffffff2b;padding:6px max(6px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));box-shadow:0 -8px 24px #06172b26;backdrop-filter:blur(12px)}
+  .mobile-quick-nav button{border:0;background:transparent;color:#d9e8f8;border-radius:12px;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;touch-action:manipulation}
+  .mobile-quick-nav button:active,.mobile-quick-nav button.active{background:#1672e5;color:#fff}
+  .mobile-quick-nav button span{font-size:21px;line-height:1}.mobile-quick-nav button small{font-size:11px;font-weight:800}
+  #coaching{padding-top:16px!important}
+  #coaching>h1{font-size:clamp(29px,8vw,39px)!important}
+  #coaching>.muted{font-size:14px;margin-bottom:12px}
+  #requesterChoice{margin-top:12px!important}
+  .requester-choice-button{width:100%!important;min-height:96px!important}
+  #appointmentForm{margin-top:10px!important}
+  #appointmentForm .grid2{display:grid!important;grid-template-columns:1fr!important;gap:0!important}
+  #appointmentForm .field{margin-bottom:13px!important}
+  #appointmentForm textarea{min-height:88px!important}
+  #appointmentSubmit{width:100%!important;min-height:54px!important;font-size:16px!important;margin-top:8px!important}
+  .student-appointment-notice{margin:8px 0 14px!important}
+  .school-end{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;padding:12px!important;margin:12px 0!important}
+  .school-end label{width:100%!important;display:flex!important;align-items:center!important;gap:10px!important;border:1px solid #dbe7f5;border-radius:12px;padding:10px 12px!important;background:#fff}
+  .school-end input{width:20px!important;height:20px!important;flex:0 0 auto}
+  #parentSchedulePicker .booking-calendar{width:100%!important;margin:0!important}
+  #lookupForm .primary{width:100%!important;min-height:50px!important}
+  #lookupForm input[name="code"]{font-size:18px!important;text-align:center!important}
+  .my-appointments-panel .list-item{padding:14px 0!important}
+  .toast{bottom:calc(82px + env(safe-area-inset-bottom))!important}
+}
+
+/* iPad portrait: compact teacher view without shrinking controls. */
+@media(min-width:701px) and (max-width:1100px){
+  #adminPanel{padding:22px 18px 110px!important}
+  #adminPanel .admin-header{align-items:flex-start!important;gap:10px!important}
+  #adminPanel .admin-grid{grid-template-columns:1fr 1fr!important}
+  #adminPanel .grid2{grid-template-columns:1fr 1fr!important}
+  #adminPanel input,#adminPanel select,#adminPanel textarea,#adminPanel button{min-height:44px}
+  #adminPanel .appointment-admin-card{border-radius:14px;background:#fff;padding:16px!important;margin-bottom:12px;box-shadow:0 4px 14px #1029450d}
+  #adminPanel .statusForm>.row{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #adminPanel .statusForm>.row button{width:100%!important}
+}
+
+@media(max-width:520px){
+  .mobile-top{min-height:54px!important}
+  .topbar{height:46px!important}
+  .topbar button{font-size:12px!important;padding:8px 12px!important}
+  .requester-choice-icon{font-size:30px!important}
+  .requester-choice-button{gap:10px!important;padding:13px!important}
+  .calendar-grid{gap:2px!important}
+  .calendar-day{min-height:40px!important}
+  #appointmentForm .category-legend{display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}
+  #appointmentForm .category-chip{flex:0 0 auto}
+}

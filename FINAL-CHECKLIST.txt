@@ -28,7 +28,7 @@ GEPRÜFT / BEHOBEN
 - Browser-Routen/Aliase für Lobby/Brawler/L-Drops geprüft.
 - Alle statisch/dynamisch referenzierten Lessing-Stars-Bildassets sind vorhanden.
 - HTML/JavaScript-Syntaxprüfung bestanden.
-- Projekt-Test-Suite: 3/3 Tests bestanden.
+- Projekt-Test-Suite: 5/5 Tests bestanden.
 
 TECHNISCHE GRENZE
 Echtes geräteübergreifendes Live-Multiplayer und ein echter E-Mail-Passwort-Reset benötigen einen laufenden Server/Auth-Dienst. Die enthaltene lokale Spiel-/Raum-/Account-Demo funktioniert ohne diesen externen Dienst.
@@ -40,3 +40,16 @@ MOBILE-FIX TECHNISCH
 - Behoben: Vollbild-Drehhinweis in Lessing Stars blockierte im Hochformat sämtliche Touchs.
 - Behoben: Server liefert CSS mit Versions-Query sowie stars-embedded.html und UI-Assets korrekt aus.
 - Cache-Busting für mobile CSS- und Lessing-Stars-Datei aktualisiert.
+
+
+MOBILE-FIRST TERMIN-FIX 2026-10-06
+- Kritischer Fehler behoben: index.html hatte eine veraltete eingebettete App-Version ohne Schüler/Eltern-Rollenlogik. index.html und app.js sind jetzt synchron.
+- Schüler können auf dem Handy die komplette Anfrage ausfüllen und absenden; Datum/Uhrzeit bleiben bei Schülern deaktiviert.
+- Eltern können auf dem Handy einen Termin Montag–Freitag bis 16:00 Uhr wählen; Ferien/Wochenenden sind gesperrt.
+- Ein vorhandener Termin sperrt nicht mehr fälschlich den ganzen Tag; Konflikte werden pro Lehrkraft/Uhrzeit geprüft.
+- Mobile Schnellnavigation unten: Start / Termin / Status / Lern-KI.
+- Die Seite wird beim Laden nicht mehr unsichtbar und unklickbar.
+- Anfragecode-Feld ist für Handys optimiert.
+- Lehrer-/Adminansicht auf iPad hat größere Touchflächen und zweispaltige Terminbearbeitung, wo Platz vorhanden ist.
+- Lessing Stars besitzt zusätzlich einen immer erreichbaren „← Coach“-Button, damit man auf dem Handy nicht im Vollbild hängen bleibt.
+- Neue Tests prüfen ausdrücklich Schüler-Anfrage ohne Termin, Eltern-Terminwahl und Admin-Zuteilung.
