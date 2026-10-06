@@ -1,0 +1,11 @@
+LESSING COACH + LESSING STARS – 06.10.2026
+
+Die Startseite ist Lessing Coach. Lessing Stars wird über die linke Navigation geöffnet. Mit ← Coach kommst du zur Coach-Startseite zurück.
+
+Das Spiel enthält die aktuelle Lobby-Version 7. Grafiken sind eingebettet.
+
+Zum Hochladen das ZIP entpacken und den kompletten Inhalt mit unveränderten Unterordnern in das Website-Projekt übernehmen. Die index.html im Hauptordner ist die Coach-Website; stars-embedded.html ist das Spiel.
+
+Lokaler Start mit Node.js: npm install, anschließend npm start.
+
+Die Coach-Serverfunktionen benötigen dieselben Server- und Datenbank-Einstellungen wie bisher. Das Spiel speichert seinen Fortschritt lokal in diesem Browser.
