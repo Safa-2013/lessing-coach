@@ -63,15 +63,24 @@ async function connect() {
   await query('CREATE TABLE IF NOT EXISTS chat_staff_notes(visitor_id TEXT PRIMARY KEY,note TEXT NOT NULL,updated_at BIGINT NOT NULL)');
   try { await query('ALTER TABLE chat_profiles ADD COLUMN password_hash TEXT'); } catch(e) { if(!/duplicate column|already exists/i.test(String(e.message))) throw e; }
   await query("CREATE TABLE IF NOT EXISTS appointment_notes (id TEXT PRIMARY KEY, appointment_id TEXT, code TEXT NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, class_name TEXT NOT NULL, category_name TEXT NOT NULL, teacher_name TEXT NOT NULL, requested_at TEXT NOT NULL, appointment_time TEXT NOT NULL, note TEXT NOT NULL, reason TEXT NOT NULL, created_at BIGINT NOT NULL)");
-  const categorySeeds = [
-    ['beratung','Beratung','#F59E0B'],
-    ['schulleitung','Schulleitung','#8B5CF6'],
-    ['lerncoaching','Lerncoaching','#10B981'],
-    ['konflikte','Konflikte klären','#EF4444'],
-    ['sonstiges','Sonstiges','#3B82F6']
-  ];
-  for (const [cid,name,color] of categorySeeds) {
-    await query("INSERT INTO categories (id,name,color,active,created_at) VALUES ($1,$2,$3,1,$4) ON CONFLICT (id) DO NOTHING", [cid,name,color,Date.now()]);
+  // Seed the default categories only once. A marker in `content` ensures that
+  // categories an admin deletes later stay deleted, including after restarts.
+  const seedMarker = (await query('SELECT value FROM content WHERE key=$1', ['categories_seeded_v1']))[0];
+  if (!seedMarker) {
+    const existingCategory = (await query('SELECT id FROM categories LIMIT 1'))[0];
+    if (!existingCategory) {
+      const categorySeeds = [
+        ['beratung','Beratung','#F59E0B'],
+        ['schulleitung','Schulleitung','#8B5CF6'],
+        ['lerncoaching','Lerncoaching','#10B981'],
+        ['konflikte','Konflikte klären','#EF4444'],
+        ['sonstiges','Sonstiges','#3B82F6']
+      ];
+      for (const [cid,name,color] of categorySeeds) {
+        await query("INSERT INTO categories (id,name,color,active,created_at) VALUES ($1,$2,$3,1,$4) ON CONFLICT (id) DO NOTHING", [cid,name,color,Date.now()]);
+      }
+    }
+    await query('INSERT INTO content (key,value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2', ['categories_seeded_v1','1']);
   }
   return { query };
 }

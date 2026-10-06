@@ -2,6 +2,7 @@ import { randomBytes, randomUUID, createHash, pbkdf2Sync, timingSafeEqual } from
 import { database } from './db.js';
 import starsApi from './stars-api.js';
 import {askAI} from './ai-provider.js';
+import { holidayOn } from '../holidays.js';
 
 const now = () => Date.now();
 const id = () => randomUUID();
@@ -126,8 +127,11 @@ export default async function api(req, res) {
       const requesterType = rawRequesterType === 'parent' ? 'parent' : rawRequesterType === 'student' ? 'student' : 'legacy';
       const childName = requesterType === 'parent' ? clean(body.child_name, 150) : '';
       if (requesterType === 'parent' && !childName) fail(400, 'Bitte den Namen des Kindes angeben');
-      const schoolEnd = clean(body.school_end, 20);
-      if (!['13:20', '15:50', 'later'].includes(schoolEnd)) fail(400, requesterType === 'parent' ? 'Bitte wähle aus, wann dein Kind Schule aus hat' : 'Bitte wähle aus, wann du Schule aus hast');
+      let schoolEnd = '';
+      if (requesterType !== 'parent') {
+        schoolEnd = clean(body.school_end, 20);
+        if (!['13:20', '15:50', 'later'].includes(schoolEnd)) fail(400, 'Bitte wähle aus, wann du Schule aus hast');
+      }
       const categoryId = clean(body.category_id, 80);
       const teacherId = clean(body.teacher_id, 80);
       const category = categoryId ? (await db.query('SELECT id,name,color FROM categories WHERE id=$1 AND active=1', [categoryId]))[0] : null;
@@ -142,11 +146,25 @@ export default async function api(req, res) {
         requestedAt = clean(body.requested_at, 10);
         requestedTime = clean(body.requested_time, 5);
         if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(requestedTime)) fail(400, 'Bitte wähle eine gültige Uhrzeit');
+        if (requesterType === 'parent' && (requestedTime < '07:00' || requestedTime > '16:00')) fail(400, 'Termine können nur zwischen 07:00 und 16:00 Uhr gewählt werden.');
+        if (requesterType === 'parent' && Number(requestedTime.slice(3,5)) % 15 !== 0) fail(400, 'Bitte wähle eine angebotene 15-Minuten-Uhrzeit aus.');
         const berlin = new Intl.DateTimeFormat('en-GB', { timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit' }).formatToParts(new Date());
         const part = type => berlin.find(p => p.type === type).value;
         const today = `${part('year')}-${part('month')}-${part('day')}`;
+        if (requesterType === 'parent' && requestedAt === today) {
+          const timeParts = new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
+          const currentMinutes=Number(timeParts.find(p=>p.type==='hour')?.value||0)*60+Number(timeParts.find(p=>p.type==='minute')?.value||0);
+          const requestedMinutes=Number(requestedTime.slice(0,2))*60+Number(requestedTime.slice(3,5));
+          if(requestedMinutes<=currentMinutes) fail(400,'Bitte wähle eine Uhrzeit, die noch nicht vorbei ist.');
+        }
         const maxDate = new Date(`${today}T00:00:00Z`); maxDate.setUTCMonth(maxDate.getUTCMonth() + 6);
         if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedAt) || Number.isNaN(Date.parse(requestedAt)) || new Date(requestedAt).toISOString().slice(0,10) !== requestedAt || requestedAt < today || requestedAt > maxDate.toISOString().slice(0,10)) fail(400, 'Bitte einen gültigen Tag innerhalb der nächsten sechs Monate wählen');
+        if (requesterType === 'parent') {
+          const weekday = new Date(`${requestedAt}T12:00:00Z`).getUTCDay();
+          if (weekday === 0 || weekday === 6) fail(400, 'Termine können nur von Montag bis Freitag gewählt werden.');
+          const holiday = holidayOn(requestedAt);
+          if (holiday) fail(400, `An diesem Tag ist schulfrei (${holiday}). Bitte wähle einen anderen Tag.`);
+        }
         const conflict = await db.query("SELECT id FROM appointments WHERE teacher_id=$1 AND requested_at=$2 AND appointment_time=$3 AND status NOT IN ('Abgelehnt','Erledigt','Nicht erschienen') LIMIT 1", [teacher.id,requestedAt,requestedTime]);
         if (conflict.length) fail(409, 'Diese Lehrkraft ist zu dieser Zeit bereits belegt.');
       }
@@ -161,13 +179,16 @@ export default async function api(req, res) {
       const month = clean(url.searchParams.get('month'), 7);
       if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) fail(400, 'Ungültiger Kalendermonat');
       const next = new Date(`${month}-01T00:00:00Z`); next.setUTCMonth(next.getUTCMonth() + 1);
-      const rows = await db.query('SELECT requested_at,status,category_id,teacher_id FROM appointments WHERE requested_at >= $1 AND requested_at < $2 AND status <> $3', [`${month}-01`,next.toISOString().slice(0,10),'Abgelehnt']);
+      const teacherFilter = clean(url.searchParams.get('teacher_id'), 80);
+      let rows = await db.query('SELECT requested_at,status,category_id,teacher_id,appointment_time FROM appointments WHERE requested_at >= $1 AND requested_at < $2 AND status <> $3', [`${month}-01`,next.toISOString().slice(0,10),'Abgelehnt']);
+      if (teacherFilter) rows = rows.filter(row => row.teacher_id === teacherFilter);
       const days = {};
       for (const row of rows) {
         const date = row.requested_at.slice(0,10);
-        days[date] ??= {date,hasAppointments:false,hasRequests:false};
+        days[date] ??= teacherFilter ? {date,hasAppointments:false,hasRequests:false,busyTimes:[]} : {date,hasAppointments:false,hasRequests:false};
         if (row.status === 'Bestätigt') days[date].hasAppointments = true;
         else days[date].hasRequests = true;
+        if (teacherFilter && row.appointment_time && !days[date].busyTimes.includes(row.appointment_time)) days[date].busyTimes.push(row.appointment_time);
       }
       // Students receive availability only: never names, topics, codes, teachers or category details.
       return json(res, 200, { days:Object.values(days) });
@@ -180,7 +201,7 @@ export default async function api(req, res) {
       const code = clean(url.searchParams.get('code'), 40).toUpperCase();
       if (!code) fail(400, 'Anfragecode fehlt');
       const appointment = (await db.query('SELECT code,first_name,last_name,class_name,subject,topic,requested_at,appointment_time,school_end,status,note,updated_at,requester_type,child_name FROM appointments WHERE code=$1 AND visitor_id=$2', [code, session.visitor_id]))[0];
-      if (!appointment) fail(404, 'Kein Termin zu diesem Code in dieser Sitzung gefunden. Verwende das Gerät, auf dem die Anfrage erstellt wurde.');
+      if (!appointment) fail(404, 'Kein Termin zu diesem Code auf diesem Gerät gefunden.');
       return json(res, 200, { appointment });
     }
     if (path === '/student-settings' && req.method === 'GET') {
@@ -315,16 +336,16 @@ export default async function api(req, res) {
     if (path === '/admin/teachers' && req.method === 'POST') {
       requireAdmin(session, 'appointments');
       const name = clean(body.name, 120);
-      if (name.length < 2) fail(400, 'Lehrkraftname fehlt');
+      if (name.length < 2) fail(400, 'Name der Ansprechperson fehlt');
       const teacherId=id();
       await db.query('INSERT INTO teachers (id,name,active,created_at) VALUES ($1,$2,1,$3)', [teacherId,name,now()]);
       for (const categoryId of Array.isArray(body.category_ids)?body.category_ids:[]) await db.query('INSERT INTO teacher_categories (teacher_id,category_id) VALUES ($1,$2) ON CONFLICT DO NOTHING',[teacherId,clean(categoryId,80)]);
-      return json(res, 201, {ok:true});
+      return json(res, 201, {ok:true,id:teacherId});
     }
     if (path.startsWith('/admin/teachers/') && req.method === 'PATCH') {
       requireAdmin(session, 'appointments');
       const target=path.split('/')[3], name=clean(body.name,120);
-      if (name.length<2) fail(400,'Lehrkraftname fehlt');
+      if (name.length<2) fail(400,'Name der Ansprechperson fehlt');
       await db.query('UPDATE teachers SET name=$1,active=$2 WHERE id=$3',[name,body.active===false?0:1,target]);
       await db.query('DELETE FROM teacher_categories WHERE teacher_id=$1',[target]);
       for (const categoryId of Array.isArray(body.category_ids)?body.category_ids:[]) await db.query('INSERT INTO teacher_categories (teacher_id,category_id) VALUES ($1,$2) ON CONFLICT DO NOTHING',[target,clean(categoryId,80)]);
@@ -344,8 +365,9 @@ export default async function api(req, res) {
       requireAdmin(session, 'appointments');
       const name = clean(body.name, 80), color = clean(body.color, 20);
       if (!/^#[0-9a-fA-F]{6}$/.test(color) || name.length < 2) fail(400, 'Ungültige Kategorie');
-      await db.query('INSERT INTO categories (id,name,color,active,created_at) VALUES ($1,$2,$3,1,$4)', [id(), name, color, now()]);
-      return json(res, 201, {ok:true});
+      const categoryId=id();
+      await db.query('INSERT INTO categories (id,name,color,active,created_at) VALUES ($1,$2,$3,1,$4)', [categoryId, name, color, now()]);
+      return json(res, 201, {ok:true,id:categoryId});
     }
     if (path.startsWith('/admin/categories/') && req.method === 'PATCH') {
       requireAdmin(session, 'appointments');
@@ -357,8 +379,15 @@ export default async function api(req, res) {
     if (path.startsWith('/admin/categories/') && req.method === 'DELETE') {
       requireAdmin(session, 'appointments');
       const target = path.split('/')[3];
-      await db.query('UPDATE categories SET active=0 WHERE id=$1', [target]);
-      return json(res, 200, {ok:true});
+      const existing = (await db.query('SELECT id,name FROM categories WHERE id=$1', [target]))[0];
+      if (!existing) fail(404, 'Kategorie nicht gefunden');
+      // Permanently remove the category from the editable catalog. Historical
+      // appointments keep the category name in `subject`, so their display is
+      // preserved even after the catalog entry itself is deleted.
+      await db.query('DELETE FROM teacher_categories WHERE category_id=$1', [target]);
+      await db.query('UPDATE appointments SET category_id=NULL WHERE category_id=$1', [target]);
+      await db.query('DELETE FROM categories WHERE id=$1', [target]);
+      return json(res, 200, {ok:true,deleted:true,id:target});
     }
     if (path === '/admin/appointments' && req.method === 'GET') {
       requireAdmin(session, 'appointments');
@@ -481,8 +510,9 @@ export default async function api(req, res) {
     }
     if (path === '/admin/content' && req.method === 'PATCH') {
       requireAdmin(session, 'content');
-      if (!['about','help','hero'].includes(body.key)) fail(400, 'Ungültiger Inhalt');
-      await db.query('INSERT INTO content (key,value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value', [body.key, clean(body.value, 3000)]);
+      if (!['about','help','hero','appointment_form_config'].includes(body.key)) fail(400, 'Ungültiger Inhalt');
+      const max = body.key==='appointment_form_config' ? 20000 : 3000;
+      await db.query('INSERT INTO content (key,value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value', [body.key, clean(body.value, max)]);
       return json(res, 200, { ok: true });
     }
     if (path === '/admin/accounts' && req.method === 'GET') {
