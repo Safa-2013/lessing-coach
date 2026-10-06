@@ -215,3 +215,98 @@ body[data-page="maintenancePage"] .main{background:#0b142b;min-height:100vh}#mai
 
 /* Anfrage-Rolle: Schüler oder Elternteil */
 .requester-choice{margin-top:22px}.requester-choice-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.requester-choice-button{border:2px solid #dbe7f5;background:linear-gradient(145deg,#fff,#f4f9ff);border-radius:16px;padding:18px;text-align:left;display:flex;align-items:center;gap:14px;color:#102945;box-shadow:0 8px 18px #17375e0d;transition:.18s ease}.requester-choice-button:hover,.requester-choice-button:focus-visible{border-color:#0868e8;transform:translateY(-2px);box-shadow:0 12px 25px #0868e81f;outline:none}.requester-choice-icon{font-size:34px;line-height:1}.requester-choice-button strong{display:block;font-size:17px;margin-bottom:4px}.requester-choice-button small{display:block;color:#61758e;line-height:1.4}.requester-form-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #e5ecf5}.requester-change{border:0;background:#edf5ff;color:#0868e8;border-radius:9px;padding:9px 12px;font-weight:700}.student-appointment-notice{background:#eaf5ff;border:1px solid #bcdcff;border-radius:13px;padding:15px 16px;margin:14px 0 18px;display:flex;flex-direction:column;gap:5px;color:#14395f}.student-appointment-notice span{font-size:13px;line-height:1.5;color:#526984}@media(max-width:700px){.requester-choice-buttons{grid-template-columns:1fr}.requester-choice-button{padding:15px}.requester-form-head{align-items:flex-start;flex-direction:column-reverse}.requester-change{width:100%;text-align:left}}
+
+
+/* === MOBILE FIX 2026-10-06: navigation, touch, forms and iPhone safe areas === */
+:root{--safe-top:env(safe-area-inset-top,0px);--safe-right:env(safe-area-inset-right,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px)}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:auto}
+body{min-height:100dvh;overscroll-behavior-y:none}
+button,[role="button"],input,select,textarea{touch-action:manipulation}
+button{-webkit-tap-highlight-color:transparent}
+.schedule-shell,.booking-calendar,.panel,.view{min-width:0;max-width:100%}
+.schedule-shell{overflow:hidden}
+.schedule-month-grid,.schedule-week-grid{min-width:0}
+
+@media(max-width:900px){
+  /* The sidebar was hidden at <=900px while the hamburger only appeared at <=700px.
+     This made iPhone landscape / tablets impossible to navigate. */
+  .mobile-top{
+    display:flex!important;position:sticky!important;top:0!important;z-index:70!important;
+    min-height:calc(56px + var(--safe-top));height:auto!important;
+    padding:var(--safe-top) max(12px,var(--safe-right)) 0 max(10px,var(--safe-left))!important;
+    align-items:center;gap:8px;background:#102945;color:white;font-weight:800;
+    box-shadow:0 2px 12px #06172b33
+  }
+  .mobile-top button{
+    width:48px;height:48px;min-width:48px;display:grid;place-items:center;
+    border:0;border-radius:12px;background:#ffffff12!important;color:#fff!important;
+    font-size:26px!important;padding:0!important
+  }
+  .mobile-top span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+  .main,.ai-mode .main{margin-left:0!important;width:100%!important;min-width:0!important}
+  .sidebar{
+    position:fixed!important;left:0;top:0;bottom:0;height:100dvh;width:min(86vw,320px)!important;
+    padding:max(18px,var(--safe-top)) 12px max(18px,var(--safe-bottom)) max(12px,var(--safe-left))!important;
+    z-index:80!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    transform:translate3d(-110%,0,0)!important;visibility:hidden!important;
+    transition:transform .22s ease,visibility .22s!important
+  }
+  .sidebar.open{transform:translate3d(0,0,0)!important;visibility:visible!important}
+  .scrim.open{display:block!important;position:fixed!important;inset:0!important;z-index:75!important;background:#051529a8!important;touch-action:none}
+  body.menu-open{overflow:hidden!important}
+  body.menu-open .sidebar{touch-action:pan-y!important}
+  .sidebar .nav button{min-height:50px!important;font-size:15px!important;padding:11px 12px!important}
+  .topbar{height:52px!important;padding:0 max(12px,var(--safe-right)) 0 max(12px,var(--safe-left))!important}
+  .topbar button{min-height:42px!important}
+  .view{padding:20px max(14px,var(--safe-right)) calc(50px + var(--safe-bottom)) max(14px,var(--safe-left))!important;width:100%!important}
+  #start{padding-bottom:calc(24px + var(--safe-bottom))!important}
+  #start .hero{min-height:210px!important;padding:28px 18px!important}
+  #start .hero h1{font-size:clamp(32px,9vw,46px)!important}
+  #start .hero p{max-width:82%!important;font-size:14px!important}
+  #start .cards{grid-template-columns:1fr!important;margin:0!important;padding:14px!important;gap:14px!important}
+  #start .feature{min-height:0!important;padding-bottom:18px!important}
+  #start .feature .icon{height:190px!important}
+  #start .feature p{min-height:0!important}
+  .cards,.grid2,.admin-grid{grid-template-columns:1fr!important}
+  .panel{padding:18px 14px!important;border-radius:16px!important}
+  .narrow{width:100%!important;max-width:100%!important}
+  .field input,.field select,.field textarea,.composer input,.composer textarea{font-size:16px!important;min-height:46px}
+  .primary,.danger,.requester-change{min-height:46px}
+  .requester-choice-buttons{grid-template-columns:1fr!important}
+  .requester-choice-button{min-height:92px!important;padding:15px!important;transform:none!important}
+  .requester-choice-button strong{font-size:16px!important}.requester-choice-button small{font-size:13px!important}
+  .requester-form-head{align-items:stretch!important;flex-direction:column-reverse!important}
+  .requester-change{width:100%!important;text-align:left!important}
+  .booking-calendar{max-width:100%!important;padding:10px!important;overflow:hidden}
+  .calendar-grid{grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:3px!important}
+  .calendar-day{min-width:0!important;min-height:38px!important;border-radius:8px!important;font-size:13px!important}
+  .calendar-head button{min-width:44px!important;min-height:44px!important}
+  .school-end label{min-height:48px}
+  .schedule-shell{padding:13px!important;border-radius:14px!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  .schedule-heading{display:block!important}.schedule-controls{justify-content:flex-start!important;margin-top:10px!important}
+  .schedule-month-grid{min-width:630px!important}.schedule-week-grid{min-width:720px!important}
+  .my-appointments-panel{margin-bottom:14px!important}
+  .chat-area{height:calc(100dvh - 190px)!important;min-height:320px!important;padding:10px!important}
+  .composer{gap:5px!important}.composer button{min-width:44px!important;min-height:44px!important}
+  .bubble{max-width:86%!important}
+  .ai-mode .mobile-top{display:flex!important}
+  .ai-page{min-height:calc(100dvh - 56px)!important}
+  .ai-side{position:sticky;top:calc(56px + var(--safe-top));z-index:30;-webkit-overflow-scrolling:touch}
+  .ai-main{padding:20px max(13px,var(--safe-right)) calc(35px + var(--safe-bottom)) max(13px,var(--safe-left))!important}
+  .subjects{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .admin-tabs{overflow-x:auto!important;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .admin-tabs button{flex:0 0 auto!important;min-height:44px}
+  #adminPanel .row{align-items:stretch!important}
+  #adminPanel .row>.field{min-width:100%!important}
+  .toast{left:12px!important;right:12px!important;bottom:calc(12px + var(--safe-bottom))!important;max-width:none!important}
+}
+
+@media(max-width:480px){
+  .mobile-top span{font-size:13px}
+  #start .hero{min-height:190px!important;background-position:70% center!important}
+  #start .hero p{max-width:94%!important}
+  #start .feature .icon{height:165px!important}
+  .panel{padding:15px 12px!important}
+  .calendar-weekday{font-size:10px!important}.calendar-day{min-height:34px!important;font-size:12px!important}
+  .subjects{grid-template-columns:1fr 1fr!important;gap:7px!important}
+}

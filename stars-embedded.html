@@ -121,6 +121,88 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .menu-btn{width:36px!important;height:36px!important;font-size:20px!important}
 }
 </style>
+
+<style id="stars-mobile-portrait-fix">
+/* === MOBILE/PORTRAIT FIX 2026-10-06 ===
+   The former full-screen rotate overlay blocked every tap in portrait.
+   Portrait now has a real touch layout; landscape keeps the game layout. */
+#rotate{display:none!important;pointer-events:none!important}
+html,body{overscroll-behavior:none}
+button,.quick-card,.mode,.brawler-card{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+
+@media(orientation:portrait) and (max-width:900px){
+  html,body,#app{width:100%;height:100dvh;min-height:100dvh;overflow:hidden!important}
+  .screen{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+  .screen.active{display:block}
+
+  /* HOME: actual portrait layout instead of a blocking rotate screen */
+  #screen-home.active{display:flex!important;flex-direction:column!important;padding-bottom:76px;background:linear-gradient(180deg,#0a3e77,#06162d)!important}
+  .home-top{order:0;position:sticky!important;left:auto!important;right:auto!important;top:0!important;width:100%!important;height:auto!important;min-height:68px!important;
+    padding:max(8px,var(--safe-t)) max(7px,var(--safe-r)) 8px max(7px,var(--safe-l))!important;background:#06162df8!important;z-index:70!important;border-bottom:2px solid #245b91!important}
+  .home-top .hud{width:100%;display:flex!important;gap:4px!important;justify-content:space-between!important;overflow:visible!important}
+  .home-top .pill{min-width:0!important;flex:1 1 0!important;height:39px!important;padding:3px 4px!important;border-radius:9px!important;font-size:11px!important;gap:3px!important}
+  .home-top .res-icon{width:18px!important;height:18px!important;flex:0 0 18px}
+  .home-top .menu-btn{width:42px!important;height:42px!important;min-width:42px!important;font-size:23px!important;flex:0 0 42px!important}
+
+  .campus{order:1;position:relative!important;inset:auto!important;width:100%!important;height:43vh!important;min-height:300px!important;flex:0 0 auto!important;background:#123d68!important;overflow:hidden!important}
+  .campus-img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 45%!important}
+  .hero-info{order:2;position:relative!important;left:auto!important;top:auto!important;bottom:auto!important;transform:none!important;margin:-58px auto 10px!important;z-index:12!important;min-width:180px!important;padding:8px 14px!important}
+  .hero-info b{font-size:20px!important}
+
+  .home-right{order:3;position:relative!important;right:auto!important;top:auto!important;width:auto!important;margin:7px 10px 10px!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+  .quick-card{min-width:0!important;min-height:82px!important;padding:7px 4px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;border-radius:13px!important}
+  .quick-card img{width:38px!important;height:32px!important;margin-bottom:2px!important}.quick-card b{font-size:10px!important}.quick-card small{display:none!important}
+
+  .home-bottom{order:4;position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;width:auto!important;height:auto!important;min-height:0!important;margin:0 10px 12px!important;padding:0!important;background:transparent!important;border:0!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  .home-bottom .mode{min-height:78px!important;padding:8px!important;border-radius:13px!important;gap:7px!important}
+  .home-bottom .mode-icon{width:38px!important;height:42px!important;flex:0 0 38px!important}.home-bottom .mode b{font-size:11px!important}.home-bottom .mode small{font-size:9px!important}
+  .home-bottom .play-big{grid-column:1/-1!important;min-height:70px!important;font-size:28px!important;border-radius:15px!important}
+
+  /* Bottom game navigation on portrait phones. */
+  .home-side,.side{position:fixed!important;left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;height:76px!important;z-index:90!important;
+    padding:4px max(5px,var(--safe-r)) max(4px,var(--safe-b)) max(5px,var(--safe-l))!important;background:#06162df8!important;border:0!important;border-top:2px solid #245b91!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .home-side::-webkit-scrollbar,.side::-webkit-scrollbar{display:none!important}
+  .home-side .brand,.side .brand{display:none!important}
+  .home-side .nav,.side .nav{display:flex!important;gap:4px!important;width:max-content!important;height:100%!important}
+  .home-side .nav button,.side .nav button{flex:0 0 76px!important;width:76px!important;height:61px!important;min-height:61px!important;border-radius:9px!important;padding:3px!important;font-size:8px!important;line-height:1!important;text-align:center!important;justify-content:center!important;flex-direction:column!important;gap:2px!important;box-shadow:0 3px 0 #031025!important}
+  .home-side .nav-icon,.side .nav-icon{width:28px!important;height:28px!important;flex:0 0 28px!important}
+
+  /* Generic pages */
+  .game-shell{display:block!important;height:100%!important;padding-bottom:76px!important;background:linear-gradient(145deg,#06172f,#0b3970)!important}
+  .content{height:100%!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;padding-bottom:76px!important;-webkit-overflow-scrolling:touch}
+  .topbar{position:sticky!important;top:0!important;z-index:60!important;height:auto!important;min-height:106px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;padding:max(8px,var(--safe-t)) max(8px,var(--safe-r)) 8px max(8px,var(--safe-l))!important;background:#06162df8!important}
+  .page-title{font-size:23px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .hud{display:flex!important;width:100%!important;gap:4px!important;justify-content:space-between!important;overflow:visible!important}
+  .topbar .pill{min-width:0!important;flex:1 1 0!important;height:36px!important;padding:2px 4px!important;font-size:10px!important;gap:2px!important}
+  .topbar .res-icon{width:17px!important;height:17px!important}.topbar .menu-btn{width:38px!important;height:38px!important;min-width:38px!important;font-size:21px!important;flex:0 0 38px!important}
+  .page{padding:12px 10px calc(96px + var(--safe-b))!important;max-width:100%!important;overflow-x:hidden!important}
+  .section-title{font-size:22px!important}.sub{font-size:13px!important}
+  .panel{padding:11px!important;border-radius:14px!important;min-width:0!important}
+  .grid{grid-template-columns:1fr!important;gap:10px!important}
+  .row{align-items:flex-start!important;flex-direction:column!important;gap:7px!important;padding:11px!important}
+  .btnrow{gap:7px!important}.btn{min-height:46px!important}
+  .input,.select,.textarea{font-size:16px!important;min-height:46px!important}
+
+  .brawler-layout{grid-template-columns:1fr!important;gap:10px!important}.brawler-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.brawler-card{min-height:156px!important;padding:6px!important}.brawler-avatar{height:88px!important}.brawler-card b{font-size:13px!important}.detail-hero{height:250px!important;min-height:220px!important}
+  .skin-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.skin-art{height:150px!important}
+  .play-layout{grid-template-columns:1fr!important;gap:10px!important}.match-panel{grid-column:auto!important}.play-art{height:230px!important}.play-cta{min-height:72px!important;font-size:31px!important;margin-bottom:10px!important}.play-mode{grid-template-columns:40px minmax(0,1fr) auto!important;padding:8px!important}
+  .drop-art-img{height:200px!important;width:100%!important;max-width:100%!important}.shop-art-img{height:190px!important}.small-art{height:110px!important}
+
+  .drawer{width:min(90vw,360px)!important;padding:18px 15px calc(18px + var(--safe-b))!important}.overlay,.modal-wrap{padding:max(10px,var(--safe-t)) max(10px,var(--safe-r)) max(10px,var(--safe-b)) max(10px,var(--safe-l))!important}
+  .modal{max-width:94vw!important;max-height:88dvh!important;overflow:auto!important}
+  #toast{bottom:calc(86px + var(--safe-b))!important;max-width:92vw!important}
+
+  /* Match remains fully touchable in either orientation. */
+  #screen-match{padding-bottom:0!important;overflow:hidden!important}.match{height:100dvh!important}.mobile-controls{padding:0 max(10px,var(--safe-r)) max(12px,var(--safe-b)) max(10px,var(--safe-l))!important}.dpad{grid-template-columns:repeat(3,50px)!important;grid-template-rows:repeat(3,50px)!important}.attack{width:66px!important;height:66px!important}.super{width:72px!important;height:72px!important}
+}
+
+@media(orientation:portrait) and (max-width:390px){
+  .home-top .pill:nth-child(4),.topbar .pill:nth-child(4){display:none!important}
+  .home-top .pill{font-size:10px!important}.home-right{gap:5px!important;margin-left:7px!important;margin-right:7px!important}
+  .home-bottom{margin-left:7px!important;margin-right:7px!important;gap:6px!important}.home-bottom .mode{min-height:72px!important}
+  .brawler-card{min-height:146px!important}.brawler-avatar{height:82px!important}
+}
+</style>
 </head>
 <body>
 <div id="app">
@@ -145,7 +227,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const LS='lessingStarsCompleteStateV4', USERS='lessingStarsAccountsV2', AUDIT='lessingStarsAuditV2', PROFILES='lessingStarsProfilesV1', GUEST='lessingStarsGuestV1';
-const VERSION='1.2.0';
+const VERSION='1.2.1-mobile';
 const rarityRank={'STARTER':0,'SELTEN':1,'SUPERSELTEN':2,'EPISCH':3,'MYTHISCH':4,'LEGENDÄR':5};
 const rarityColors={'STARTER':'#35c96a','SELTEN':'#2eb276','SUPERSELTEN':'#33a7e6','EPISCH':'#a94bc9','MYTHISCH':'#e15061','LEGENDÄR':'#e5b939'};
 const BRAWLERS=[

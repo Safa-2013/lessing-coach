@@ -1,30 +1,47 @@
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
+import { extname, resolve, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import api from './lib/api.js';
 
+const root = fileURLToPath(new URL('./', import.meta.url));
+const mime = {
+  '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8',
+  '.json':'application/json; charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg',
+  '.svg':'image/svg+xml', '.mp4':'video/mp4', '.webp':'image/webp', '.ico':'image/x-icon', '.txt':'text/plain; charset=utf-8'
+};
+
+function safeFile(pathname){
+  const clean = decodeURIComponent(pathname).replace(/^\/+/, '');
+  const target = resolve(root, clean || 'index.html');
+  const rel = relative(root, target);
+  if (rel.startsWith('..') || rel.includes('..\\')) return null;
+  return target;
+}
+
 createServer(async (req, res) => {
-  if (req.url.startsWith('/api/')) {
-    if (req.method !== 'GET') {
-      let input = '';
-      for await (const chunk of req) { input += chunk; if (input.length > 20000) { res.writeHead(413).end(); return; } }
-      req.body = input;
+  try {
+    const u = new URL(req.url, 'http://localhost');
+    const pathname = u.pathname;
+    if (pathname.startsWith('/api/')) {
+      if (req.method !== 'GET') {
+        let input = '';
+        for await (const chunk of req) {
+          input += chunk;
+          if (input.length > 20000) { res.writeHead(413).end(); return; }
+        }
+        req.body = input;
+      }
+      return api(req, res);
     }
-    return api(req, res);
+    const target = safeFile(pathname === '/' ? '/index.html' : pathname);
+    if (!target) { res.writeHead(403).end(); return; }
+    const info = await stat(target).catch(()=>null);
+    if (!info?.isFile()) { res.writeHead(404).end(); return; }
+    res.setHeader('Content-Type', mime[extname(target).toLowerCase()] || 'application/octet-stream');
+    res.setHeader('Cache-Control', /\.(html|css|js)$/.test(target) ? 'no-cache' : 'public, max-age=3600');
+    res.end(await readFile(target));
+  } catch (error) {
+    res.writeHead(500, {'Content-Type':'text/plain; charset=utf-8'}).end('Serverfehler');
   }
-  if (['/assets/maintenance-loop.mp4','/assets/maintenance-loop-violet.mp4','/assets/maintenance-loop-teal.mp4','/assets/maintenance-poster.jpg','/assets/dvd-screensaver.mp4','/assets/dvd-poster.jpg'].includes(req.url)) {
-    res.setHeader('Content-Type',req.url.endsWith('.mp4')?'video/mp4':'image/jpeg');
-    res.end(await readFile(new URL('.'+req.url,import.meta.url)));
-  } else if (req.url === '/visual.css') {
-    res.setHeader('Content-Type', 'text/css; charset=utf-8');
-    res.end(await readFile(new URL('./visual.css', import.meta.url)));
-  } else if (['/assets/feature-strip.png','/assets/hero-books.png','/assets/ai-cap.png'].includes(req.url)) {
-    res.setHeader('Content-Type', 'image/png');
-    res.end(await readFile(new URL('.' + req.url, import.meta.url)));
-  } else if (['/app.js','/holidays.js','/calendar-ui.js'].includes(req.url)) {
-    res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
-    res.end(await readFile(new URL('.' + req.url, import.meta.url)));
-  } else if (req.url === '/' || req.url === '/index.html') {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.end(await readFile(new URL('./index.html', import.meta.url)));
-  } else res.writeHead(404).end();
 }).listen(process.env.PORT || 3000, () => console.log('Lessing: http://localhost:' + (process.env.PORT || 3000)));

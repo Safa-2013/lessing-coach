@@ -1,12 +1,15 @@
-LESSING COACH + LESSING STARS — FINALPRÜFUNG 2026-10-05
+LESSING COACH + LESSING STARS — MOBILE-FIX 2026-10-06
 
 GEPRÜFT / BEHOBEN
 - Lessing Coach / Terminplaner bleibt vollständig im Projekt.
+- Termin-Anfrage hat die Auswahl Schüler/in oder Elternteil: Schüler bekommen den Termin von der Schule; Eltern können Tag/Uhrzeit wählen.
 - Lessing Stars öffnet innerhalb von Lessing Coach und kann über das Schnellmenü wieder geschlossen werden.
 - Kein doppeltes Ressourcen-HUD auf der Lobby.
 - Lobby verwendet eine echte DOM-Oberfläche mit separatem Campus-Hintergrund; Buttons sind echte Bedienelemente.
-- Smartphone-Querformat 844×390 und 667×375 geprüft; kein horizontaler Scrollzwang auf der Spielen-Seite.
-- Portrait-Hinweis fordert zum Drehen des Geräts auf.
+- Mobile Navigation funktioniert jetzt bis 900 px Breite, also auch auf iPhone im Querformat und auf kleinen Tablets.
+- Lessing Stars blockiert Hochformat nicht mehr: Portrait hat jetzt eine echte bedienbare Touch-Ansicht mit Bottom-Navigation.
+- Smartphone-Querformat bleibt kompakt; Spielen-Seite und HUD sind weiterhin für kleine Höhen angepasst.
+- iPhone Safe-Areas (Notch/Home-Bar), 44–48 px Touch-Flächen und 16 px Formulareingaben sind berücksichtigt.
 - Lobby, Shop, Brawler, Skins, Pass, L-Drops/Mega-Boxen, Daily, Quests, Rewards, Freunde, Club, Profil, Einstellungen, Spielen, Login, Post, Ressourcen, Hilfe, Admin und Map-Editor rendern ohne JavaScript-Ausnahme.
 - 50 Brawler vorhanden; Hamza.S. ist der einzige Starter-Brawler.
 - Safa Yildiz ist männlich angelegt und besitzt die höchsten HP- und Angriffswerte.
@@ -29,3 +32,11 @@ GEPRÜFT / BEHOBEN
 
 TECHNISCHE GRENZE
 Echtes geräteübergreifendes Live-Multiplayer und ein echter E-Mail-Passwort-Reset benötigen einen laufenden Server/Auth-Dienst. Die enthaltene lokale Spiel-/Raum-/Account-Demo funktioniert ohne diesen externen Dienst.
+
+
+MOBILE-FIX TECHNISCH
+- Behoben: Sidebar wurde bis 900 px ausgeblendet, Hamburger erschien aber erst bis 700 px.
+- Behoben: Lern-KI hatte im Bereich 701–900 px keinen sichtbaren mobilen Rückweg.
+- Behoben: Vollbild-Drehhinweis in Lessing Stars blockierte im Hochformat sämtliche Touchs.
+- Behoben: Server liefert CSS mit Versions-Query sowie stars-embedded.html und UI-Assets korrekt aus.
+- Cache-Busting für mobile CSS- und Lessing-Stars-Datei aktualisiert.

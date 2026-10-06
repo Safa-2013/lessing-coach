@@ -23,3 +23,6 @@ assets/
 
 Wichtig: In assets/ auch die Unterordner ui/, brawlers/ und visual/ vollständig übernehmen.
 Wenn GitHub/Vercel bereits verbunden ist, nach dem Commit das neue Deployment abwarten und die Seite einmal vollständig neu laden.
+
+MOBILE-HINWEIS 2026-10-06:
+Nach dem neuen Deployment Safari einmal neu laden. Die CSS-/Stars-Dateien haben neue Versionsparameter, damit nicht die alte Handy-Ansicht aus dem Cache benutzt wird.
