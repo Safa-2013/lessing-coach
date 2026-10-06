@@ -23,7 +23,7 @@ async function request(path, options = {}) {
   return result;
 }
 const send = (path, data, method='POST') => request(path, { method, body:JSON.stringify(data) });
-const studentSchedule = makeSchedule($('#studentSchedule'),request);async function loadMyAppointments(){const box=$('#myAppointments');if(!box)return;try{const {appointments}=await request('appointments/mine');box.innerHTML=appointments.length?appointments.map(a=>`<div class="list-item"><div class="row"><strong>${safe(a.subject)}</strong><span class="pill">${safe(a.status)}</span></div><p>${safe(dayLabel(a.requested_at))}${a.appointment_time?' · '+safe(a.appointment_time)+' Uhr':''}</p><p class="small">${safe(a.topic)}</p><small>Dein Code: ${safe(a.code)}</small></div>`).join(''):'<p class="muted">Du hast auf diesem Gerät noch keine eigenen Terminanfragen.</p>';}catch(e){box.innerHTML='<p class="muted">Eigene Termine konnten nicht geladen werden.</p>';}}
+const studentSchedule = makeSchedule($('#studentSchedule'),request);async function loadMyAppointments(){const box=$('#myAppointments');if(!box)return;try{const {appointments}=await request('appointments/mine');box.innerHTML=appointments.length?appointments.map(a=>`<div class="list-item"><div class="row"><strong>${safe(a.subject)}</strong><span class="pill">${safe(a.status)}</span></div><p>${a.requested_at?safe(dayLabel(a.requested_at))+(a.appointment_time?' · '+safe(a.appointment_time)+' Uhr':''):'Termin wird von der Schule zugeteilt.'}</p>${a.requester_type==='parent'&&a.child_name?`<p class="small"><strong>Für:</strong> ${safe(a.child_name)}</p>`:''}<p class="small">${safe(a.topic)}</p><small>Dein Code: ${safe(a.code)}</small></div>`).join(''):'<p class="muted">Du hast auf diesem Gerät noch keine eigenen Terminanfragen.</p>';}catch(e){box.innerHTML='<p class="muted">Eigene Termine konnten nicht geladen werden.</p>';}}
 
 const adminSchedule = makeSchedule($('#adminSchedule'),request,true);
 let activeAdminTab = 'overview';
@@ -121,8 +121,37 @@ const berlinToday = () => {
   const get = type => parts.find(p => p.type === type).value;
   return `${get('year')}-${get('month')}-${get('day')}`;
 };
-const dayLabel = value => new Date(`${value.slice(0,10)}T12:00:00Z`).toLocaleDateString('de-DE',{timeZone:'UTC',day:'numeric',month:'long',year:'numeric'});
+const dayLabel = value => value ? new Date(`${String(value).slice(0,10)}T12:00:00Z`).toLocaleDateString('de-DE',{timeZone:'UTC',day:'numeric',month:'long',year:'numeric'}) : 'Termin noch nicht zugeteilt';
 const schoolEndLabel = value => ({'13:20':'13:20 Uhr','15:50':'15:50 Uhr',later:'später als 15:50 Uhr'})[value] || 'nicht angegeben';
+let requesterRole = null;
+function setRequesterRole(role){
+  requesterRole = role === 'parent' ? 'parent' : role === 'student' ? 'student' : null;
+  const form=$('#appointmentForm'), choice=$('#requesterChoice');
+  if(!form||!choice)return;
+  const type=form.elements.requester_type, child=form.elements.child_name, date=form.elements.requested_at, time=form.elements.requested_time;
+  if(!requesterRole){
+    type.value=''; form.reset(); type.value='';
+    form.classList.add('hidden'); choice.classList.remove('hidden');
+    $('#parentChildField').classList.add('hidden'); $('#parentSchedulePicker').classList.add('hidden'); $('#studentAppointmentNotice').classList.add('hidden');
+    child.required=false; child.disabled=true; date.disabled=true; time.required=false; time.disabled=true;
+    $('#appointmentResult').innerHTML='';
+    return;
+  }
+  type.value=requesterRole; choice.classList.add('hidden'); form.classList.remove('hidden');
+  const parent=requesterRole==='parent';
+  $('#requesterRoleLabel').textContent=parent?'Eltern-Anfrage':'Schüler-Anfrage';
+  $('#appointmentFirstNameLabel').childNodes[0].nodeValue=parent?'Vorname (Elternteil)':'Vorname';
+  $('#appointmentLastNameLabel').childNodes[0].nodeValue=parent?'Nachname (Elternteil)':'Nachname';
+  $('#parentChildField').classList.toggle('hidden',!parent); child.required=parent; child.disabled=!parent;
+  $('#parentSchedulePicker').classList.toggle('hidden',!parent); date.disabled=!parent; time.disabled=!parent; time.required=parent;
+  $('#studentAppointmentNotice').classList.toggle('hidden',parent);
+  $('#schoolEndLegend').textContent=parent?'Wann hat dein Kind Schule aus?':'Wann hast du Schule aus?';
+  $('#appointmentSubmit').textContent=parent?'Termin anfragen':'Anfrage senden';
+  if(parent) loadCalendar(); else { date.value=''; time.value=''; }
+  requestAnimationFrame(()=>form.scrollIntoView({block:'start',behavior:'smooth'}));
+}
+document.querySelectorAll('[data-requester-role]').forEach(button=>button.addEventListener('click',()=>setRequesterRole(button.dataset.requesterRole)));
+$('#changeRequesterRole').onclick=()=>setRequesterRole(null);
 let calendarOffset = 0, calendarRequest = 0, calendarDays = {};
 const monthAt = offset => { const today=berlinToday(); return new Date(Date.UTC(Number(today.slice(0,4)),Number(today.slice(5,7))-1+offset,1)); };
 function renderCalendar() {
@@ -144,7 +173,7 @@ function renderCalendar() {
   }).join('');
   if (selected) {
     const info=calendarDays[selected];
-    $('#calendarStatus').textContent=`Gewählt: ${dayLabel(selected)} · ${holidayOn(selected)?holidayOn(selected)+' · ':''}Der Tag ist vorgemerkt. Die Uhrzeit wird später abgestimmt.`;
+    $('#calendarStatus').textContent=`Gewählt: ${dayLabel(selected)} · ${holidayOn(selected)?holidayOn(selected)+' · ':''}Wähle darunter noch eine Uhrzeit.`;
   }
 }
 async function loadCalendar() {
@@ -167,14 +196,24 @@ $('#calendarDays').onclick=e=>{
 };
 $('#appointmentForm').onsubmit = async e => {
   e.preventDefault(); const form = e.currentTarget, button = form.querySelector('button[type="submit"]');
-  if (!form.elements.requested_at.value) { $('#calendarStatus').textContent='Bitte wähle zuerst einen Tag im Kalender.'; $('#bookingCalendar').scrollIntoView({block:'center'}); return; }
+  const role=form.elements.requester_type.value;
+  if (!role) { setRequesterRole(null); return; }
+  if (role==='parent' && !form.elements.requested_at.value) { $('#calendarStatus').textContent='Bitte wähle zuerst einen Tag im Kalender.'; $('#bookingCalendar').scrollIntoView({block:'center'}); return; }
   button.disabled = true;
-  try { const data = await send('appointments', Object.fromEntries(new FormData(form))); $('#appointmentResult').innerHTML = `<div class="result">Anfrage gesendet! Dein persönlicher Anfragecode:<br><span class="code">${safe(data.code)}</span><br>Bewahre ihn auf, damit du den Status unter „Termine“ prüfen kannst.</div>`; form.reset(); await loadCalendar(); }
+  try {
+    const data = await send('appointments', Object.fromEntries(new FormData(form)));
+    const message=role==='student'?'Die Schule teilt dir einen Termin zu. Prüfe den Status später unter „Termine“.':'Deine Terminanfrage wurde gesendet.';
+    $('#appointmentResult').innerHTML = `<div class="result">Anfrage gesendet! Dein persönlicher Anfragecode:<br><span class="code">${safe(data.code)}</span><br>${message}</div>`;
+    const resultHtml=$('#appointmentResult').innerHTML;
+    form.reset(); form.elements.requester_type.value=role;
+    if(role==='parent') await loadCalendar();
+    $('#appointmentResult').innerHTML=resultHtml;
+  }
   catch(err) { toast(err.message); } finally { button.disabled = false; }
 };
 $('#lookupForm').onsubmit = async e => {
   e.preventDefault(); const code = new FormData(e.currentTarget).get('code');
-  try { const {appointment:a} = await request('appointments?code=' + encodeURIComponent(code)); $('#lookupResult').innerHTML = `<div class="result"><strong>${safe(a.status)}</strong><p>${safe(a.subject==='Coaching'?'Coaching · ':a.subject+' · ')}${safe(a.topic)}</p><p>Gewählter Tag: ${safe(dayLabel(a.requested_at))}</p><p>Schule aus: ${safe(schoolEndLabel(a.school_end))}</p>${a.note ? `<p>Rückmeldung: ${safe(a.note)}</p>` : ''}<small>Zuletzt aktualisiert: ${new Date(Number(a.updated_at)).toLocaleString('de-DE')}</small></div>`; }
+  try { const {appointment:a} = await request('appointments?code=' + encodeURIComponent(code)); const when=a.requested_at?`<p>Termin: ${safe(dayLabel(a.requested_at))}${a.appointment_time?' · '+safe(a.appointment_time)+' Uhr':''}</p>`:'<p><strong>Der Termin wird von der Schule noch zugeteilt.</strong></p>'; $('#lookupResult').innerHTML = `<div class="result"><strong>${safe(a.status)}</strong><p>${safe(a.subject==='Coaching'?'Coaching · ':a.subject+' · ')}${safe(a.topic)}</p>${when}<p>${a.requester_type==='parent'?'Schule aus (Kind)':'Schule aus'}: ${safe(schoolEndLabel(a.school_end))}</p>${a.requester_type==='parent'&&a.child_name?`<p>Kind: ${safe(a.child_name)}</p>`:''}${a.note ? `<p>Rückmeldung: ${safe(a.note)}</p>` : ''}<small>Zuletzt aktualisiert: ${new Date(Number(a.updated_at)).toLocaleString('de-DE')}</small></div>`; }
   catch(err) { $('#lookupResult').innerHTML = `<div class="result notice">${safe(err.message)}</div>`; }
 };
 function bubbles(messages, target) {
@@ -253,7 +292,7 @@ async function loadAdmin() {
       const total=Object.values(totals).reduce((sum,count)=>sum+count,0);
       $('#adminStats').innerHTML=[['Alle Anfragen',total],['Kommende Termine',upcoming],['Offene Anfragen',(totals['Anfrage eingegangen']||0)+(totals['In Bearbeitung']||0)],['Bestätigt',totals['Bestätigt']||0]].map(([label,value])=>`<div class="admin-stat"><span>${label}</span><strong>${value}</strong></div>`).join('');
       $('#adminOverviewList').innerHTML=`<div class="panel"><h3>Neueste Anfragen</h3>${appointments.length?appointments.slice(0,5).map(a=>`<div class="admin-overview-item"><span>${safe(dayLabel(a.requested_at))}</span><strong>${safe(a.category_name||a.topic)}</strong><span class="pill">${safe(a.status)}</span></div>`).join(''):'<p class="muted">Noch keine Anfragen vorhanden.</p>'}</div>`;
-            $('#appointmentList').innerHTML=appointments.length?appointments.map(a=>`<div class="list-item appointment-admin-card" style="--category-color:${safe(a.category_color||'#3B82F6')}"><div class="row"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong><span class="pill">${safe(a.status)}</span><span class="category-chip" style="--category-color:${safe(a.category_color||'#3B82F6')}"><i></i>${safe(a.category_name||a.subject)}</span></div><p class="small">${safe(a.class_name)} · ${safe(a.teacher_name||'Lehrkraft nicht gesetzt')} · ${safe(dayLabel(a.requested_at))} · ${safe(a.appointment_time||'Uhrzeit offen')} · Schule aus: ${safe(schoolEndLabel(a.school_end))}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="grid2"><label class="field">Datum<input type="date" name="requested_at" value="${safe(a.requested_at)}"></label><label class="field">Uhrzeit<input type="time" name="appointment_time" value="${safe(a.appointment_time||'')}"></label><label class="field">Bereich<select name="category_id" class="category-edit" data-current="${safe(a.category_id||'')}"></select></label><label class="field">Lehrkraft<select name="teacher_id" class="teacher-edit" data-current="${safe(a.teacher_id||'')}"></select></label></div><label class="field">Status<select name="status"><option ${a.status==='Anfrage eingegangen'?'selected':''}>Anfrage eingegangen</option><option ${a.status==='In Bearbeitung'?'selected':''}>In Bearbeitung</option><option ${a.status==='Bestätigt'?'selected':''}>Bestätigt</option><option ${a.status==='Abgelehnt'?'selected':''}>Abgelehnt</option><option ${a.status==='Erledigt'?'selected':''}>Erledigt</option><option ${a.status==='Nicht erschienen'?'selected':''}>Nicht erschienen</option></select></label><label class="field">Rückmeldung / Notiz<input name="note" maxlength="500" placeholder="z. B. Termin bestätigt / verschoben" value="${safe(a.note)}"></label><div class="row"><button type="button" class="primary" data-accept="${safe(a.id)}">Anfrage annehmen</button><button type="button" class="primary" data-reschedule="${safe(a.id)}">Termin verschieben</button><button type="button" class="primary danger" data-reject="${safe(a.id)}">Ablehnen</button><button class="primary">Speichern</button></div></form></div>`).join(''):'<p class="muted">Noch keine Anfragen.</p>';
+            $('#appointmentList').innerHTML=appointments.length?appointments.map(a=>`<div class="list-item appointment-admin-card" style="--category-color:${safe(a.category_color||'#3B82F6')}"><div class="row"><strong>${safe(a.first_name)} ${safe(a.last_name)}</strong><span class="pill">${safe(a.requester_type==='parent'?'Elternteil':'Schüler/in')}</span><span class="pill">${safe(a.status)}</span><span class="category-chip" style="--category-color:${safe(a.category_color||'#3B82F6')}"><i></i>${safe(a.category_name||a.subject)}</span></div><p class="small">${a.requester_type==='parent'?`Kind: ${safe(a.child_name||'nicht angegeben')} · `:''}Klasse ${safe(a.class_name)} · ${safe(a.teacher_name||'Lehrkraft nicht gesetzt')} · ${safe(dayLabel(a.requested_at))} · ${safe(a.appointment_time||'Uhrzeit offen')} · Schule aus: ${safe(schoolEndLabel(a.school_end))}</p><p>${safe(a.topic)}</p><p class="small">Code: ${safe(a.code)}</p><form class="statusForm" data-id="${safe(a.id)}"><div class="grid2"><label class="field">Datum<input type="date" name="requested_at" value="${safe(a.requested_at)}"></label><label class="field">Uhrzeit<input type="time" name="appointment_time" value="${safe(a.appointment_time||'')}"></label><label class="field">Bereich<select name="category_id" class="category-edit" data-current="${safe(a.category_id||'')}"></select></label><label class="field">Lehrkraft<select name="teacher_id" class="teacher-edit" data-current="${safe(a.teacher_id||'')}"></select></label></div><label class="field">Status<select name="status"><option ${a.status==='Anfrage eingegangen'?'selected':''}>Anfrage eingegangen</option><option ${a.status==='In Bearbeitung'?'selected':''}>In Bearbeitung</option><option ${a.status==='Bestätigt'?'selected':''}>Bestätigt</option><option ${a.status==='Abgelehnt'?'selected':''}>Abgelehnt</option><option ${a.status==='Erledigt'?'selected':''}>Erledigt</option><option ${a.status==='Nicht erschienen'?'selected':''}>Nicht erschienen</option></select></label><label class="field">Rückmeldung / Notiz<input name="note" maxlength="500" placeholder="z. B. Termin bestätigt / verschoben" value="${safe(a.note)}"></label><div class="row"><button type="button" class="primary" data-accept="${safe(a.id)}">Anfrage annehmen</button><button type="button" class="primary" data-reschedule="${safe(a.id)}">Termin verschieben</button><button type="button" class="primary danger" data-reject="${safe(a.id)}">Ablehnen</button><button class="primary">Speichern</button></div></form></div>`).join(''):'<p class="muted">Noch keine Anfragen.</p>';
       const catalog=window.lessingCatalog||{categories:[],teachers:[]}; document.querySelectorAll('.appointment-admin-card').forEach(card=>{const cf=card.querySelector('.category-edit'),tf=card.querySelector('.teacher-edit');if(!cf||!tf)return;const currentC=cf.dataset.current,currentT=tf.dataset.current;cf.innerHTML=catalog.categories.map(c=>`<option value="${safe(c.id)}" ${c.id===currentC?'selected':''}>${safe(c.name)}</option>`).join('');const fill=()=>{const cid=cf.value,ts=catalog.teachers.filter(t=>(t.category_ids||[]).includes(cid));tf.innerHTML=ts.map(t=>`<option value="${safe(t.id)}" ${t.id===currentT?'selected':''}>${safe(t.name)}</option>`).join('')||'<option value="">Keine Lehrkraft</option>';};cf.onchange=fill;fill();});
       }
     if (can('chats')) {
