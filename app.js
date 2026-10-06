@@ -396,7 +396,7 @@ async function loadStaffManagement() {
   const form=$('#appointmentConfigForm');
   if(form){for(const el of form.elements){if(el.name&&Object.hasOwn(cfg,el.name)&&typeof cfg[el.name]==='string')el.value=cfg[el.name];}}
   $('#teacherList').innerHTML=teachers.length?teachers.map(t=>{const aud=audienceFor(cfg.teacherAudience,t.id);return `<div class="list-item teacher-card"><div class="row"><input class="field teacher-name" data-id="${safe(t.id)}" value="${safe(t.name)}"><button class="primary" data-save-teacher="${safe(t.id)}">Speichern</button><button class="primary danger" data-delete-teacher="${safe(t.id)}">Entfernen</button></div><div class="audience-editor"><strong>Sichtbar für:</strong> <label><input type="checkbox" class="teacher-audience" data-teacher="${safe(t.id)}" data-role="student" ${aud.includes('student')?'checked':''}> Schüler/in</label> <label><input type="checkbox" class="teacher-audience" data-teacher="${safe(t.id)}" data-role="parent" ${aud.includes('parent')?'checked':''}> Elternteil</label></div><div class="teacher-categories"><strong>Kategorien:</strong><div class="row">${categories.filter(c=>c.active!==0).map(c=>`<label><input type="checkbox" class="teacher-category" data-teacher="${safe(t.id)}" data-category="${safe(c.id)}" ${(t.category_ids||[]).includes(c.id)?'checked':''}> ${safe(c.name)}</label>`).join('')}</div></div></div>`}).join(''):'<p class="muted">Noch keine Ansprechpersonen.</p>';
-  $('#categoryList').innerHTML=categories.map(c=>{const aud=audienceFor(cfg.categoryAudience,c.id);return `<div class="list-item category-card"><div class="row"><input class="field category-name" data-id="${safe(c.id)}" value="${safe(c.name)}"><input type="color" class="category-color" data-id="${safe(c.id)}" value="${safe(c.color)}" title="Farbe"><button class="primary" data-save-category="${safe(c.id)}">Speichern</button><button class="primary danger" type="button" data-delete-category="${safe(c.id)}">Deaktivieren</button></div><div class="audience-editor"><strong>Sichtbar für:</strong> <label><input type="checkbox" class="category-audience" data-category="${safe(c.id)}" data-role="student" ${aud.includes('student')?'checked':''}> Schüler/in</label> <label><input type="checkbox" class="category-audience" data-category="${safe(c.id)}" data-role="parent" ${aud.includes('parent')?'checked':''}> Elternteil</label></div></div>`}).join('');
+  $('#categoryList').innerHTML=categories.map(c=>{const aud=audienceFor(cfg.categoryAudience,c.id);return `<div class="list-item category-card"><div class="row"><input class="field category-name" data-id="${safe(c.id)}" value="${safe(c.name)}"><input type="color" class="category-color" data-id="${safe(c.id)}" value="${safe(c.color)}" title="Farbe"><button class="primary" data-save-category="${safe(c.id)}">Speichern</button><button class="primary danger" type="button" data-delete-category="${safe(c.id)}">Löschen</button></div><div class="audience-editor"><strong>Sichtbar für:</strong> <label><input type="checkbox" class="category-audience" data-category="${safe(c.id)}" data-role="student" ${aud.includes('student')?'checked':''}> Schüler/in</label> <label><input type="checkbox" class="category-audience" data-category="${safe(c.id)}" data-role="parent" ${aud.includes('parent')?'checked':''}> Elternteil</label></div></div>`}).join('');
 }
 async function loadAppointmentNotes() {
   const box=$('#appointmentNotesList'); if(!box) return;
@@ -499,7 +499,20 @@ document.querySelector('[data-admin-section="staff"]').onclick = async e => {
   const saveTeacher=e.target.dataset.saveTeacher;
   if (saveTeacher) { const input=document.querySelector(`.teacher-name[data-id="${CSS.escape(saveTeacher)}"]`); const category_ids=[...document.querySelectorAll(`.teacher-category[data-teacher="${CSS.escape(saveTeacher)}"]:checked`)].map(x=>x.dataset.category); try { await send('admin/teachers/'+saveTeacher,{name:input.value,category_ids},'PATCH'); await loadStaffManagement(); await loadCatalog(); toast('Ansprechperson gespeichert'); } catch(err){toast(err.message);} return; }
   const deleteCategory=e.target.dataset.deleteCategory;
-  if (deleteCategory) { try { await request('admin/categories/'+deleteCategory,{method:'DELETE'}); await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Bereich deaktiviert'); } catch(err){toast(err.message);} return; }
+  if (deleteCategory) {
+    const card=document.querySelector(`.category-name[data-id="${CSS.escape(deleteCategory)}"]`);
+    const label=card?.value?.trim()||'diese Kategorie';
+    if(!confirm(`"${label}" wirklich endgültig löschen?\n\nDie Kategorie verschwindet für Schüler, Eltern und Lehrkräfte. Bereits vorhandene Termine bleiben erhalten.`)) return;
+    try {
+      await request('admin/categories/'+encodeURIComponent(deleteCategory),{method:'DELETE'});
+      const cfg=appointmentConfig();
+      if(cfg.categoryAudience && Object.prototype.hasOwnProperty.call(cfg.categoryAudience,deleteCategory)){
+        const next={...cfg.categoryAudience}; delete next[deleteCategory]; cfg.categoryAudience=next;
+        await saveAppointmentConfig(cfg,{reload:false});
+      }
+      await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Kategorie endgültig gelöscht');
+    } catch(err){toast(err.message);} return;
+  }
   const saveCategory=e.target.dataset.saveCategory;
   if (saveCategory) { const name=document.querySelector(`.category-name[data-id="${CSS.escape(saveCategory)}"]`).value; const color=document.querySelector(`.category-color[data-id="${CSS.escape(saveCategory)}"]`).value; try { await send('admin/categories/'+saveCategory,{name,color},'PATCH'); await loadStaffManagement(); await loadCatalog(); adminSchedule.refresh(); toast('Bereich gespeichert'); } catch(err){toast(err.message);} }
 };

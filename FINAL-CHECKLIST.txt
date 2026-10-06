@@ -53,3 +53,5 @@ MOBILE-FIRST TERMIN-FIX 2026-10-06
 - Lehrer-/Adminansicht auf iPad hat größere Touchflächen und zweispaltige Terminbearbeitung, wo Platz vorhanden ist.
 - Lessing Stars besitzt zusätzlich einen immer erreichbaren „← Coach“-Button, damit man auf dem Handy nicht im Vollbild hängen bleibt.
 - Neue Tests prüfen ausdrücklich Schüler-Anfrage ohne Termin, Eltern-Terminwahl und Admin-Zuteilung.
+
+- Admin: Kategorien können endgültig gelöscht werden; bestehende Termine bleiben erhalten.
