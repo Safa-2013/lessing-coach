@@ -28,7 +28,7 @@ createServer(async (req, res) => {
         let input = '';
         for await (const chunk of req) {
           input += chunk;
-          if (input.length > 20000) { res.writeHead(413).end(); return; }
+          if (input.length > 4000000) { res.writeHead(413,{'Content-Type':'application/json'}).end(JSON.stringify({error:'Upload zu groß (maximal 4 MB).'})); return; }
         }
         req.body = input;
       }
@@ -36,6 +36,8 @@ createServer(async (req, res) => {
     }
     const target = safeFile(pathname === '/' ? '/index.html' : pathname);
     if (!target) { res.writeHead(403).end(); return; }
+    const rel=relative(root,target).replaceAll('\\','/');
+    if(rel.startsWith('.')||/^(test|lib|api|node_modules|backups)\//.test(rel)&&rel!=='lib/stars-game.js'||['server.js','backup.mjs','package-lock.json','package.json'].includes(rel)){res.writeHead(404).end();return}
     const info = await stat(target).catch(()=>null);
     if (!info?.isFile()) { res.writeHead(404).end(); return; }
     res.setHeader('Content-Type', mime[extname(target).toLowerCase()] || 'application/octet-stream');

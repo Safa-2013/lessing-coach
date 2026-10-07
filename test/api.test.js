@@ -122,7 +122,7 @@ test('student requests, private contact chats, admin roles and AI setup', async 
     const history=await call('ai/threads/'+threads.data.thread.id,'GET',null,learner.cookie);
     assert.equal(history.data.messages.length,2);
     assert.equal((await call('ai/progress','GET',null,learner.cookie)).data.questions,1);
-    process.env.GEMINI_API_KEY='test-gemini-key';
+    process.env.GEMINI_API_KEY='test-gemini-key';process.env.GEMINI_MODEL='gemini-test-model';
     globalThis.fetch=async (url,options) => {
       assert.match(url,/generativelanguage\.googleapis\.com/);
       assert.equal(options.headers['x-goog-api-key'],'test-gemini-key');
@@ -140,7 +140,7 @@ test('student requests, private contact chats, admin roles and AI setup', async 
       assert.match(failed.data.error,expected);
       assert.equal((await call('ai/threads/'+threads.data.thread.id,'GET',null,learner.cookie)).data.messages.length,4);
     }
-  } finally { globalThis.fetch=oldFetch; delete process.env.OPENAI_API_KEY; delete process.env.GEMINI_API_KEY; }
+  } finally { globalThis.fetch=oldFetch; delete process.env.OPENAI_API_KEY; delete process.env.GEMINI_API_KEY; delete process.env.GEMINI_MODEL; }
   // Admins can permanently delete categories. Existing appointments keep their stored subject name.
   const deletedCategory = await call('admin/categories/'+categoryId,'DELETE',null,normal.cookie);
   assert.equal(deletedCategory.status,200);

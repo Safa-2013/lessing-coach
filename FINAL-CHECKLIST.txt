@@ -1,57 +1,7 @@
-LESSING COACH + LESSING STARS — MOBILE-FIX 2026-10-06
+UPDATE 10 — 07.10.2026
 
-GEPRÜFT / BEHOBEN
-- Lessing Coach / Terminplaner bleibt vollständig im Projekt.
-- Termin-Anfrage hat die Auswahl Schüler/in oder Elternteil: Schüler bekommen den Termin von der Schule; Eltern können Tag/Uhrzeit wählen.
-- Lessing Stars öffnet innerhalb von Lessing Coach und kann über das Schnellmenü wieder geschlossen werden.
-- Kein doppeltes Ressourcen-HUD auf der Lobby.
-- Lobby verwendet eine echte DOM-Oberfläche mit separatem Campus-Hintergrund; Buttons sind echte Bedienelemente.
-- Mobile Navigation funktioniert jetzt bis 900 px Breite, also auch auf iPhone im Querformat und auf kleinen Tablets.
-- Lessing Stars blockiert Hochformat nicht mehr: Portrait hat jetzt eine echte bedienbare Touch-Ansicht mit Bottom-Navigation.
-- Smartphone-Querformat bleibt kompakt; Spielen-Seite und HUD sind weiterhin für kleine Höhen angepasst.
-- iPhone Safe-Areas (Notch/Home-Bar), 44–48 px Touch-Flächen und 16 px Formulareingaben sind berücksichtigt.
-- Lobby, Shop, Brawler, Skins, Pass, L-Drops/Mega-Boxen, Daily, Quests, Rewards, Freunde, Club, Profil, Einstellungen, Spielen, Login, Post, Ressourcen, Hilfe, Admin und Map-Editor rendern ohne JavaScript-Ausnahme.
-- 50 Brawler vorhanden; Hamza.S. ist der einzige Starter-Brawler.
-- Safa Yildiz ist männlich angelegt und besitzt die höchsten HP- und Angriffswerte.
-- Startwerte: 1500 Münzen, 100 Juwelen, 1000 Powerpunkte, 45 Tickets.
-- Für alle 50 Brawler ist ein lokales Bild-Asset vorhanden.
-- Legendärer L-Drop liefert 1–3 Belohnungen, niemals mehr als 3.
-- Mega-Box liefert 4–8 Belohnungen pro Box, niemals weniger/mehr.
-- Mega-Box Multi-Open: 1× / 3× / 5× / 10×.
-- Käufe/Öffnungen besitzen Schutz gegen schnelles Mehrfachauslösen.
-- Shop- und Skin-Kaufbuttons werden bei zu wenig Währung deaktiviert.
-- Doppelte Brawler/Skins werden in Ersatzbelohnungen umgewandelt.
-- Tagesbelohnung, Pass, Quests und Trophy Road können nicht mehrfach abgeholt werden.
-- Fortschritt, Ressourcen, Skins, Brawler und Einstellungen werden lokal gespeichert.
-- Lokale Spieler-Accounts besitzen getrennte Profile; Gastprofil ist getrennt.
-- Admin kann Accounts erstellen, Spieler sperren/entsperren, Ziel-Spielern Ressourcen/Brawler geben, Inhalte/Maps erstellen und Belohnungen an Spieler senden.
-- Browser-Routen/Aliase für Lobby/Brawler/L-Drops geprüft.
-- Alle statisch/dynamisch referenzierten Lessing-Stars-Bildassets sind vorhanden.
-- HTML/JavaScript-Syntaxprüfung bestanden.
-- Projekt-Test-Suite: 5/5 Tests bestanden.
+Aktuelle Änderungen, Prüfungen und Grenzen stehen in README-UPDATE-10.md.
+Frühere Aussagen in alten Update-Dateien beschreiben ältere lokale Versionen.
 
-TECHNISCHE GRENZE
-Echtes geräteübergreifendes Live-Multiplayer und ein echter E-Mail-Passwort-Reset benötigen einen laufenden Server/Auth-Dienst. Die enthaltene lokale Spiel-/Raum-/Account-Demo funktioniert ohne diesen externen Dienst.
-
-
-MOBILE-FIX TECHNISCH
-- Behoben: Sidebar wurde bis 900 px ausgeblendet, Hamburger erschien aber erst bis 700 px.
-- Behoben: Lern-KI hatte im Bereich 701–900 px keinen sichtbaren mobilen Rückweg.
-- Behoben: Vollbild-Drehhinweis in Lessing Stars blockierte im Hochformat sämtliche Touchs.
-- Behoben: Server liefert CSS mit Versions-Query sowie stars-embedded.html und UI-Assets korrekt aus.
-- Cache-Busting für mobile CSS- und Lessing-Stars-Datei aktualisiert.
-
-
-MOBILE-FIRST TERMIN-FIX 2026-10-06
-- Kritischer Fehler behoben: index.html hatte eine veraltete eingebettete App-Version ohne Schüler/Eltern-Rollenlogik. index.html und app.js sind jetzt synchron.
-- Schüler können auf dem Handy die komplette Anfrage ausfüllen und absenden; Datum/Uhrzeit bleiben bei Schülern deaktiviert.
-- Eltern können auf dem Handy einen Termin Montag–Freitag bis 16:00 Uhr wählen; Ferien/Wochenenden sind gesperrt.
-- Ein vorhandener Termin sperrt nicht mehr fälschlich den ganzen Tag; Konflikte werden pro Lehrkraft/Uhrzeit geprüft.
-- Mobile Schnellnavigation unten: Start / Termin / Status / Lern-KI.
-- Die Seite wird beim Laden nicht mehr unsichtbar und unklickbar.
-- Anfragecode-Feld ist für Handys optimiert.
-- Lehrer-/Adminansicht auf iPad hat größere Touchflächen und zweispaltige Terminbearbeitung, wo Platz vorhanden ist.
-- Lessing Stars besitzt zusätzlich einen immer erreichbaren „← Coach“-Button, damit man auf dem Handy nicht im Vollbild hängen bleibt.
-- Neue Tests prüfen ausdrücklich Schüler-Anfrage ohne Termin, Eltern-Terminwahl und Admin-Zuteilung.
-
-- Admin: Kategorien können endgültig gelöscht werden; bestehende Termine bleiben erhalten.
+16 automatisierte Tests bestanden.
+Kein Live-KI-Test, kein echter Safari-Gerätetest und kein Deployment erfolgt.

@@ -1,0 +1,10 @@
+.runtime-arena{position:absolute;inset:0;background:#173822;overflow:hidden;touch-action:none}
+#battleCanvas{width:100%;height:100%;display:block}
+.runtime-hud{position:absolute;top:max(8px,env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:white;text-shadow:0 2px #000;font-size:clamp(10px,1.5vw,17px)}
+.runtime-hud .btn{padding:6px 10px;min-height:40px}
+.runtime-move{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:max(12px,env(safe-area-inset-left));display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,48px);gap:4px}
+.runtime-move button,.runtime-fire button{touch-action:none;border:3px solid #8cbcff;border-radius:50%;background:#174dabda;color:white;font-weight:900;font-size:24px;user-select:none;-webkit-user-select:none}
+.runtime-move [data-dir=up]{grid-column:2}.runtime-move [data-dir=left]{grid-column:1;grid-row:2}.runtime-move [data-dir=down]{grid-column:2;grid-row:2}.runtime-move [data-dir=right]{grid-column:3;grid-row:2}
+.runtime-fire{position:absolute;bottom:max(14px,env(safe-area-inset-bottom));right:max(14px,env(safe-area-inset-right));display:flex;gap:12px;align-items:end}
+.runtime-fire button{width:72px;height:72px;font-size:11px;background:#9d3041db;border-color:#f59cad}.runtime-fire #battleSuper{width:60px;height:60px;background:#ad8720d9;border-color:#ffe16d}
+#workshop .grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}#workshop input,#workshop select,#workshop textarea{margin-bottom:10px}#workshop img:empty{display:none}

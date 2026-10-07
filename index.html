@@ -102,7 +102,7 @@ let toastTimer;
 function toast(message) { const el = $('#toast'); el.textContent = message; el.classList.remove('hidden'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.add('hidden'), 6000); }
 async function request(path, options = {}) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
+  const timer = setTimeout(() => controller.abort(), path==='ai/ask'?40000:15000);
   try {
     const response = await fetch('/api/' + path, { credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, ...options, signal:options.signal || controller.signal });
     let result;
@@ -422,14 +422,16 @@ $('#settingsButton').onclick = () => { utility('<h2>Einstellungen</h2><label><in
 document.body.classList.toggle('reduced-motion',localStorage.getItem('lessing_less_motion')==='true');
 $('#aiTheme').onclick = () => { document.body.classList.toggle('ai-light'); $('#aiTheme').textContent=document.body.classList.contains('ai-light')?'☾':'☼'; };
 $('#aiAttach').onclick = () => $('#aiFile').click();
-$('#aiFile').onchange = async e => { const file=e.target.files?.[0]; if (!file) return; if (!/\.(txt|md)$/i.test(file.name) || file.size>3000) { toast('Bitte eine Textdatei (.txt oder .md) bis 3 KB auswählen.'); e.target.value=''; return; } const input=$('#aiForm').elements.message; input.value=(input.value+`\n[${file.name}]\n`+await file.text()).trim().slice(0,4000); input.focus(); e.target.value=''; };
+let aiAttachment=null;
+$('#aiFile').accept='.txt,.md,.pdf,image/png,image/jpeg,image/webp';
+$('#aiFile').onchange = async e => { const file=e.target.files?.[0]; if(!file)return; try{if(file.size>2000000)throw Error('Datei maximal 2 MB');const input=$('#aiForm').elements.message;if(/\.(txt|md)$/i.test(file.name)){input.value=(input.value+`\n[${file.name}]\n`+await file.text()).trim().slice(0,4000);aiAttachment=null}else{const mimeType=/\.pdf$/i.test(file.name)?'application/pdf':file.type;if(!['application/pdf','image/png','image/jpeg','image/webp'].includes(mimeType))throw Error('Bitte PDF, Text oder ein PNG/JPEG/WebP-Bild auswählen.');const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('Datei konnte nicht gelesen werden'));r.readAsDataURL(file)});aiAttachment={name:file.name,mimeType,data:data.replace(/^data:[^;]*;base64,/,'data:'+mimeType+';base64,')};if(!input.value.trim())input.value='Hilf mir, diese Datei zu verstehen.';toast('Datei bereit: '+file.name)}input.focus()}catch(error){toast(error.message)}finally{e.target.value=''} };
 $('#aiVoice').onclick = () => { const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition; if (!SpeechRecognition) { toast('Spracheingabe wird von diesem Browser nicht unterstützt.'); return; } const recognizer=new SpeechRecognition(); recognizer.lang='de-DE'; recognizer.onresult=e=>{const input=$('#aiForm').elements.message; input.value=(input.value+' '+e.results[0][0].transcript).trim().slice(0,4000);input.focus();}; recognizer.onerror=()=>toast('Spracheingabe konnte nicht gestartet werden.');recognizer.start(); };
 $('#aiForm').onsubmit = async e => {
   e.preventDefault(); const form = e.currentTarget, input = form.elements.message, question = input.value.trim(), button = form.querySelector('button');
   if (!question) return; button.disabled = true;
   try {
     if (!state.threadId) { const {thread} = await send('ai/threads', {title:question.slice(0,55)}); state.threadId = thread.id; await loadThreads(); }
-    const {answer} = await send('ai/ask', {thread_id:state.threadId,message:question}); input.value = ''; await openThread(state.threadId);
+    const {answer} = await send('ai/ask', {thread_id:state.threadId,message:question,attachments:aiAttachment?[aiAttachment]:[]}); aiAttachment=null; input.value = ''; await openThread(state.threadId);
     if (!answer) throw new Error('Keine Antwort');
   } catch(err) { toast(err.message); } finally { button.disabled = false; }
 };
@@ -784,7 +786,7 @@ window.addEventListener('lessing-coach-home',()=>navigate('start'));</script>
 <script id="coachStarsController">
 (function(){
  const overlay=document.getElementById('coachStarsOverlay'),frame=document.getElementById('coachStarsFrame');let focusBefore;
- window.openLessingStars=function(){focusBefore=document.activeElement;const shell=document.querySelector('.shell');if(shell)shell.inert=true;overlay.hidden=false;document.body.classList.add('coach-stars-open');frame.src='stars-embedded.html?v=20261006-safari9';frame.focus();};
+ window.openLessingStars=function(){focusBefore=document.activeElement;const shell=document.querySelector('.shell');if(shell)shell.inert=true;overlay.hidden=false;document.body.classList.add('coach-stars-open');frame.src='stars-embedded.html?v=20261006-complete10';frame.focus();};
  window.closeLessingStars=function(){overlay.hidden=true;document.body.classList.remove('coach-stars-open');const shell=document.querySelector('.shell');if(shell)shell.inert=false;frame.removeAttribute('src');window.dispatchEvent(new Event('lessing-coach-home'));focusBefore?.focus();};
  document.getElementById('coachStarsClose')?.addEventListener('click',()=>window.closeLessingStars());
  window.addEventListener('message',function(event){if(event.source===frame.contentWindow&&event.origin===location.origin&&event.data?.type==='lessing-coach-home')window.closeLessingStars();});
