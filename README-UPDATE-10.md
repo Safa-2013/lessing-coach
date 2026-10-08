@@ -121,3 +121,10 @@ Nur die Verlaufsspeicherung wurde geändert. Aktuelle Nachrichten bleiben im Arb
 - Computer: WASD/Pfeile, Maus zum Zielen, Linksklick für Angriff, Rechtsklick/E für Super, Leertaste für Angriff.
 - Kamera folgt weich auf beiden Achsen; Ziellinie, Laufbewegung, Munitionsanzeige.
 - Kein identischer Nachbau des Brawl-Stars-Spielgefühls zugesichert; Browser-/Gerätetest weiterhin erforderlich.
+
+## iMac und Figuren – 08.10.2026
+- Engine, Steuerung und neue Brawler-Grafiken sind direkt in stars-embedded.html enthalten. Externe JS-Dateien und der Engine-Import sind für diese ausgelieferte Spielseite nicht erforderlich.
+- Physische KeyW/KeyA/KeyS/KeyD/KeyE-Tasten, Maussteuerung und expliziter Spielfeldfokus.
+- Neun transparente Ganzkörper-Sprites anhand der vorhandenen Brawler-Shopvorlage mit Bildgenerierung erstellt. Kampf und Brawler-/Match-Vorschau greifen auf dieselben neuen Figuren zu; eigene hochgeladene Bilder haben Vorrang. Die Grafiken sind abgeleitet, keine exakten 3D-Modelle.
+- Neue Cache-Version bundled13. Vollständiges Paket hochladen, nicht nur die Coach-index.html.
+- Browserprüfung auf einem echten iMac ist weiterhin nicht durchgeführt.

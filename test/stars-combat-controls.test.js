@@ -18,8 +18,8 @@ test('combat: keyboard movement, short touch attacks, cancellation, training and
  await new Promise(r=>setTimeout(r,10));await vm.runInContext('Stars.startLocal()',c);await Promise.resolve();
  assert.equal(c.current,'match');assert.equal(lastRoom.actors.length,10);assert.ok(node('battleCanvas').focused);
  const me=lastRoom.actors[0],x=me.x;
- c.document.onkeydown({key:'d',preventDefault(){}});now+=100;frames.pop()();await Promise.resolve();assert.ok(me.x>x);
- c.document.onkeyup({key:'d'});
+ c.document.onkeydown({key:'Unidentified',code:'KeyD',preventDefault(){}});now+=100;frames.pop()();await Promise.resolve();assert.ok(me.x>x);
+ c.document.onkeyup({key:'Unidentified',code:'KeyD'});
  const pointer={pointerId:2,preventDefault(){}};node('battleFire').onpointerdown(pointer);node('battleFire').onpointerup(pointer);now+=100;frames.pop()();await Promise.resolve();
  assert.equal(inputs.at(-1).fire,true,'A short tap must survive until the next update');assert.ok(me.ammo<3);
  now+=100;frames.pop()();await Promise.resolve();assert.equal(inputs.at(-1).fire,false,'A released attack must not stick');
@@ -28,4 +28,15 @@ test('combat: keyboard movement, short touch attacks, cancellation, training and
  node('battleSuper').onpointerdown({...aimPointer,pointerId:5});node('battleSuper').onpointercancel({pointerId:5});now+=100;frames.pop()();await Promise.resolve();assert.equal(inputs.at(-1).super,false,'Cancelled super does not fire');
  dirs[0].onpointerdown(pointer);dirs[0].onpointercancel(pointer);now+=100;frames.pop()();await Promise.resolve();assert.equal(inputs.at(-1).dy,0);
  await node('battleLeave').onclick();assert.equal(c.current,'home');assert.equal(c.document.onkeydown,null);const count=inputs.length;frames.pop()();await Promise.resolve();assert.equal(inputs.length,count,'Exited matches must stop ticking');
+});
+
+test('shipped game bundles its exact controls, engine and matching sprite atlas',()=>{
+ const html=readFileSync(new URL('../stars-embedded.html',import.meta.url),'utf8');
+ const runtime=html.match(/<script id="stars-runtime-bundle">([\s\S]*?)<\/script>/)[1];
+ assert.equal(runtime,readFileSync(new URL('../stars-runtime.js',import.meta.url),'utf8'));
+ const bundled=html.match(/<script id="stars-combat-engine">([\s\S]*?)<\/script>/)[1];const c={};vm.createContext(c);vm.runInContext(bundled,c);
+ vm.runInContext("globalThis.room={mode:'showdown',players:[{username:'test',id:'lex',team:0}]};StarsCombatEngine.beginRoom(room,StarsCombatEngine.BASE,10000);StarsCombatEngine.applyInput(room,'test',{seq:1,dx:1,dy:0,fire:true,angle:0},10000);StarsCombatEngine.tick(room,10100)",c);
+ assert.equal(c.room.actors.length,10);assert.ok(c.room.actors[0].x>120);assert.ok(c.room.bullets.length);
+ assert.match(bundled,/const StarsCombatAtlas="assets\/combat-brawlers-v1\.png"/);
+ assert.ok(readFileSync(new URL("../assets/combat-brawlers-v1.png",import.meta.url)).length>100000);
 });
