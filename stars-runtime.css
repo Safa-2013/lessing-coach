@@ -8,3 +8,21 @@
 .runtime-fire{position:absolute;bottom:max(14px,env(safe-area-inset-bottom));right:max(14px,env(safe-area-inset-right));display:flex;gap:12px;align-items:end}
 .runtime-fire button{width:72px;height:72px;font-size:11px;background:#9d3041db;border-color:#f59cad}.runtime-fire #battleSuper{width:60px;height:60px;background:#ad8720d9;border-color:#ffe16d}
 #workshop .grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}#workshop input,#workshop select,#workshop textarea{margin-bottom:10px}#workshop img:empty{display:none}
+
+/* Combat controls are independent of the lobby's decorative layouts. */
+#screen-match.active{position:fixed!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;overflow:hidden!important;animation:none!important;transform:none!important;pointer-events:auto!important}
+#screen-match .runtime-arena{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;pointer-events:auto!important}
+#screen-match #battleCanvas{position:absolute;inset:0;width:100%!important;height:100%!important;outline:none}
+#screen-match .runtime-hud{z-index:5;pointer-events:none;flex-wrap:nowrap}
+#screen-match .runtime-hud button{pointer-events:auto;flex:0 0 auto;min-height:40px!important;max-height:48px;min-width:60px;position:static;transform:none}
+#screen-match #battleInfo{text-align:center;min-width:0;font-size:clamp(10px,1.2vw,16px)}
+#screen-match .runtime-move{z-index:5;display:grid!important;width:156px!important;height:104px!important;grid-template-columns:repeat(3,48px)!important;grid-template-rows:repeat(2,48px)!important;transform:none!important}
+#screen-match .runtime-move button{position:static!important;display:block!important;width:48px!important;height:48px!important;min-height:48px!important;padding:0!important;margin:0!important;transform:none!important;pointer-events:auto!important}
+#screen-match .runtime-move [data-dir=up]{grid-column:2!important;grid-row:1!important}
+#screen-match .runtime-move [data-dir=left]{grid-column:1!important;grid-row:2!important}
+#screen-match .runtime-move [data-dir=down]{grid-column:2!important;grid-row:2!important}
+#screen-match .runtime-move [data-dir=right]{grid-column:3!important;grid-row:2!important}
+#screen-match .runtime-fire{z-index:5;transform:none!important}
+#screen-match .runtime-fire button{position:static!important;padding:0!important;margin:0!important;transform:none!important;pointer-events:auto!important}
+#screen-match button{cursor:pointer;-webkit-touch-callout:none}
+@media(orientation:landscape) and (max-height:430px){#screen-match .runtime-hud{top:max(4px,env(safe-area-inset-top))}#screen-match .runtime-move,#screen-match .runtime-fire{bottom:max(6px,env(safe-area-inset-bottom))}}

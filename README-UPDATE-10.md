@@ -105,3 +105,12 @@ prüfen. Automatische Sicherungen sind noch nicht auf deinem Konto eingerichtet.
 ## Änderung vom 08.10.2026: Lern-KI ohne gespeicherten Verlauf
 
 Nur die Verlaufsspeicherung wurde geändert. Aktuelle Nachrichten bleiben im Arbeitsspeicher der offenen KI-Ansicht, damit Folgefragen weiterhin funktionieren. Beim neuen Chat, Verlassen oder Neuladen werden sie verworfen. Keine neuen KI-Nachrichten oder Chattitel werden in der Website-Datenbank gespeichert. Beim Öffnen der Lern-KI entfernt die Website alte gespeicherte KI-Chats des aktuellen Browsers. Kontakt-Chats, Notizen, Termine, Spiel, Modellwahl und übrige Ansicht bleiben unverändert. Dies betrifft die Website-Speicherung; die Datenverarbeitung des KI-Anbieters wird dadurch nicht geändert.
+
+## Spielkorrektur vom 08.10.2026
+- Ausschließlich Lessing Stars geändert; Coach-Ansicht, Terminlogik und Lern-KI unverändert.
+- Kampflayout zusätzlich direkt eingebettet: Steuerung und Lobby-Schaltfläche im sichtbaren Bildschirm. Spieldateien haben eine neue Cache-Version.
+- Kurze Touch-Angriffe werden bis zum nächsten Spielupdate behalten. Loslassen und Pointer-Abbruch beenden die Bewegung.
+- Neue Matches ignorieren verspätete Antworten und Animationen alter Matches. Lobby-Wechsel funktioniert auch, wenn das Verlassen des Serverraums scheitert.
+- Vollständige transparente Designerfiguren statt Brawler-Karten im Kampf; hochgeladene Figuren/Skins haben Vorrang.
+- Training nutzt ausgewählte Powerstufe und Skin. Tastaturfokus liegt beim Start auf dem Spielfeld.
+- 17 automatisierte Tests, einschließlich echter Spielengine mit simulierten Tastatur- und Touch-Eingaben. Ein echter iPhone-Safari-Test ist hier nicht durchgeführt: Der Browserdownload war nicht verfügbar.
