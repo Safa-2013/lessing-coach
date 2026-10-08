@@ -1,4 +1,5 @@
 import { test } from 'node:test';
+import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -120,17 +121,19 @@ test('student requests, private contact chats, admin roles and AI setup', async 
     const answered=await call('ai/ask','POST',{thread_id:threads.data.thread.id,message:'Brüche erklären'},learner.cookie);
     assert.equal(answered.status,200);
     const history=await call('ai/threads/'+threads.data.thread.id,'GET',null,learner.cookie);
-    assert.equal(history.data.messages.length,2);
-    assert.equal((await call('ai/progress','GET',null,learner.cookie)).data.questions,1);
+    assert.equal(history.status,404);
+    assert.deepEqual((await call('ai/threads','GET',null,learner.cookie)).data.threads,[]);
+    assert.equal((await call('ai/progress','GET',null,learner.cookie)).data.questions,0);
     process.env.GEMINI_API_KEY='test-gemini-key';process.env.GEMINI_MODEL='gemini-test-model';
     globalThis.fetch=async (url,options) => {
       assert.match(url,/generativelanguage\.googleapis\.com/);
       assert.equal(options.headers['x-goog-api-key'],'test-gemini-key');
       const data=JSON.parse(options.body);
       assert.equal(data.contents.at(-1).parts[0].text,'Nächster Lernschritt');
+      assert.equal(data.contents[0].parts[0].text,'Brüche erklären');
       return {ok:true,json:async()=>({candidates:[{content:{parts:[{text:'Übe zuerst die Grundlagen.'}]}}]})};
     };
-    const gemini=await call('ai/ask','POST',{thread_id:threads.data.thread.id,message:'Nächster Lernschritt'},learner.cookie);
+    const gemini=await call('ai/ask','POST',{thread_id:threads.data.thread.id,message:'Nächster Lernschritt',history:[{role:'user',content:'Brüche erklären'},{role:'assistant',content:'Ein Bruch ist ein Teil eines Ganzen.'}]},learner.cookie);
     assert.equal(gemini.status,200);
     assert.equal(gemini.data.answer,'Übe zuerst die Grundlagen.');
     for (const [status, expected] of [[403,/Berechtigung/],[404,/Modell/],[429,/Kontingent/]]) {
@@ -138,9 +141,22 @@ test('student requests, private contact chats, admin roles and AI setup', async 
       const failed=await call('ai/ask','POST',{thread_id:threads.data.thread.id,message:'Weitere Frage'},learner.cookie);
       assert.equal(failed.status,status===429?429:502);
       assert.match(failed.data.error,expected);
-      assert.equal((await call('ai/threads/'+threads.data.thread.id,'GET',null,learner.cookie)).data.messages.length,4);
+      assert.equal((await call('ai/threads/'+threads.data.thread.id,'GET',null,learner.cookie)).status,404);
     }
   } finally { globalThis.fetch=oldFetch; delete process.env.OPENAI_API_KEY; delete process.env.GEMINI_API_KEY; delete process.env.GEMINI_MODEL; }
+  const {database}=await import('../lib/db.js');
+  const privacyDb=await database();
+  const token=learner.cookie.split('=')[1];
+  const visitor=(await privacyDb.query('SELECT visitor_id FROM sessions WHERE token_hash=$1',[createHash('sha256').update(token).digest('hex')]))[0].visitor_id;
+  assert.equal((await privacyDb.query('SELECT id FROM ai_messages')).length,0);
+  assert.equal((await privacyDb.query('SELECT id FROM ai_threads')).length,0);
+  await privacyDb.query('INSERT INTO ai_threads (id,visitor_id,title,created_at) VALUES ($1,$2,$3,$4)',['old-thread',visitor,'Old saved question',Date.now()]);
+  await privacyDb.query('INSERT INTO ai_messages (id,thread_id,visitor_id,role,body,created_at) VALUES ($1,$2,$3,$4,$5,$6)',['old-message','old-thread',visitor,'user','1+1',Date.now()]);
+  await privacyDb.query('INSERT INTO ai_threads (id,visitor_id,title,created_at) VALUES ($1,$2,$3,$4)',['other-thread','other-visitor','Other visitor',Date.now()]);
+  assert.equal((await call('ai/history/clear','POST',{},learner.cookie)).status,200);
+  assert.equal((await privacyDb.query('SELECT id FROM ai_messages WHERE visitor_id=$1',[visitor])).length,0);
+  assert.equal((await privacyDb.query('SELECT id FROM ai_threads WHERE visitor_id=$1',[visitor])).length,0);
+  assert.equal((await privacyDb.query('SELECT id FROM ai_threads WHERE id=$1',['other-thread'])).length,1);
   // Admins can permanently delete categories. Existing appointments keep their stored subject name.
   const deletedCategory = await call('admin/categories/'+categoryId,'DELETE',null,normal.cookie);
   assert.equal(deletedCategory.status,200);

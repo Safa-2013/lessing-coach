@@ -142,6 +142,7 @@ function navigate(page,options={}) {
   gameCleanup();
   const previous=document.querySelector('.view.active')?.id;
   if(previous===page){closeMobileMenu();return;}
+  if(previous==='ki' && page!=='ki') resetAIChat();
   if(previous)pageScroll[previous]=window.scrollY;
   if (page === 'login' && !document.getElementById('login').classList.contains('active')) $('#loginForm').reset();
   document.body.dataset.page = page;
@@ -405,19 +406,22 @@ $('#loginForm').onsubmit = async e => {
   catch(err) { toast(err.message); }
 };
 $('#logout').onclick = async () => { try { const data = await send('logout', {}); state.session = data.session; state.threadId = null; state.currentChat=null; $('#adminChatDetail').replaceChildren(); $('#loginForm').reset(); renderAuth(); navigate('start'); } catch(e) { toast(e.message); } };
+let aiConversation = [], aiChatVersion = 0, aiSending = false;
+function resetAIChat() {
+  aiChatVersion++; aiConversation=[]; aiAttachment=null;
+  state.threadId=null; $('#threadList').replaceChildren(); $('#threadList').hidden=true;
+  $('#aiMessages').replaceChildren(); $('#aiUtility').classList.add('hidden');
+  $('#aiForm').elements.message.value='';
+}
 async function loadThreads() {
-  try { const {threads} = await request('ai/threads'); $('#threadList').innerHTML = threads.map(t => `<button data-thread="${safe(t.id)}">💬 ${safe(t.title)}</button>`).join(''); }
-  catch(e) { toast(e.message); }
+  $('#threadList').replaceChildren(); $('#threadList').hidden=true;
+  try { await send('ai/history/clear', {}); } catch(e) { toast(e.message); }
 }
-$('#threadList').onclick = async e => { const id = e.target.closest('[data-thread]')?.dataset.thread; if (id) openThread(id); };
-async function openThread(id) {
-  try { const {messages} = await request('ai/threads/' + encodeURIComponent(id)); state.threadId = id; bubbles(messages, $('#aiMessages')); }
-  catch(e) { toast(e.message); }
-}
-$('#newThread').onclick = () => { state.threadId = null; $('#aiMessages').innerHTML = ''; $('#aiUtility').classList.add('hidden'); $('#aiForm input[name="message"]').focus(); };
+$('#threadList').onclick = null;
+$('#newThread').onclick = () => { resetAIChat(); $('#aiForm input[name="message"]').focus(); };
 function utility(html) { const panel=$('#aiUtility'); panel.innerHTML=html; panel.classList.remove('hidden'); panel.scrollIntoView({block:'nearest'}); }
 $('#notesButton').onclick = () => { utility('<h2>Notizen</h2><p>Deine Notizen werden nur in diesem Browser gespeichert.</p><textarea id="aiNotes" aria-label="Notizen" placeholder="Schreibe deine Notizen …"></textarea>'); const notes=$('#aiNotes'); notes.value=localStorage.getItem('lessing_notes') || ''; notes.oninput=()=>localStorage.setItem('lessing_notes',notes.value.slice(0,10000)); notes.focus(); };
-$('#toolsButton').onclick = async () => { utility('<h2>Tools</h2><p id="aiToolStatus">Lernfortschritt wird geladen …</p>'); try { const p=await request('ai/progress'); $('#aiToolStatus').textContent=`${p.chats} Chats und ${p.questions} Fragen in diesem Browser.`; } catch(e) { $('#aiToolStatus').textContent=e.message; } };
+$('#toolsButton').onclick = async () => { utility('<h2>Tools</h2><p id="aiToolStatus"></p>'); $('#aiToolStatus').textContent=`${aiConversation.filter(m=>m.role==='user').length} Fragen im aktuellen Chat. Kein gespeicherter Verlauf.`; };
 $('#settingsButton').onclick = () => { utility('<h2>Einstellungen</h2><label><input type="checkbox" id="aiMotion"> Animationen reduzieren</label>'); $('#aiMotion').checked=document.body.classList.contains('reduced-motion'); $('#aiMotion').onchange=e=>{document.body.classList.toggle('reduced-motion',e.target.checked); localStorage.setItem('lessing_less_motion',String(e.target.checked));}; };
 document.body.classList.toggle('reduced-motion',localStorage.getItem('lessing_less_motion')==='true');
 $('#aiTheme').onclick = () => { document.body.classList.toggle('ai-light'); $('#aiTheme').textContent=document.body.classList.contains('ai-light')?'☾':'☼'; };
@@ -427,13 +431,17 @@ $('#aiFile').accept='.txt,.md,.pdf,image/png,image/jpeg,image/webp';
 $('#aiFile').onchange = async e => { const file=e.target.files?.[0]; if(!file)return; try{if(file.size>2000000)throw Error('Datei maximal 2 MB');const input=$('#aiForm').elements.message;if(/\.(txt|md)$/i.test(file.name)){input.value=(input.value+`\n[${file.name}]\n`+await file.text()).trim().slice(0,4000);aiAttachment=null}else{const mimeType=/\.pdf$/i.test(file.name)?'application/pdf':file.type;if(!['application/pdf','image/png','image/jpeg','image/webp'].includes(mimeType))throw Error('Bitte PDF, Text oder ein PNG/JPEG/WebP-Bild auswählen.');const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('Datei konnte nicht gelesen werden'));r.readAsDataURL(file)});aiAttachment={name:file.name,mimeType,data:data.replace(/^data:[^;]*;base64,/,'data:'+mimeType+';base64,')};if(!input.value.trim())input.value='Hilf mir, diese Datei zu verstehen.';toast('Datei bereit: '+file.name)}input.focus()}catch(error){toast(error.message)}finally{e.target.value=''} };
 $('#aiVoice').onclick = () => { const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition; if (!SpeechRecognition) { toast('Spracheingabe wird von diesem Browser nicht unterstützt.'); return; } const recognizer=new SpeechRecognition(); recognizer.lang='de-DE'; recognizer.onresult=e=>{const input=$('#aiForm').elements.message; input.value=(input.value+' '+e.results[0][0].transcript).trim().slice(0,4000);input.focus();}; recognizer.onerror=()=>toast('Spracheingabe konnte nicht gestartet werden.');recognizer.start(); };
 $('#aiForm').onsubmit = async e => {
-  e.preventDefault(); const form = e.currentTarget, input = form.elements.message, question = input.value.trim(), button = form.querySelector('button');
-  if (!question) return; button.disabled = true;
+  e.preventDefault(); const form=e.currentTarget,input=form.elements.message,question=input.value.trim(),button=form.querySelector('button');
+  if(!question || aiSending) return;
+  const version=aiChatVersion; aiSending=true; button.disabled=true;
   try {
-    if (!state.threadId) { const {thread} = await send('ai/threads', {title:question.slice(0,55)}); state.threadId = thread.id; await loadThreads(); }
-    const {answer} = await send('ai/ask', {thread_id:state.threadId,message:question,attachments:aiAttachment?[aiAttachment]:[]}); aiAttachment=null; input.value = ''; await openThread(state.threadId);
-    if (!answer) throw new Error('Keine Antwort');
-  } catch(err) { toast(err.message); } finally { button.disabled = false; }
+    const {answer}=await send('ai/ask',{message:question,history:aiConversation.slice(-12).map(m=>({role:m.role,content:m.body})),attachments:aiAttachment?[aiAttachment]:[]});
+    if(version!==aiChatVersion) return;
+    if(!answer) throw new Error('Keine Antwort');
+    aiConversation.push({role:'user',body:question,created_at:Date.now()},{role:'assistant',body:answer,created_at:Date.now()});
+    aiAttachment=null; input.value=''; bubbles(aiConversation,$('#aiMessages'));
+  } catch(err) { if(version===aiChatVersion) toast(err.message); }
+  finally { aiSending=false; button.disabled=false; }
 };
 const can = permission => state.session.role === 'big' || state.session.permissions.includes(permission);
 async function loadAdmin() {
@@ -777,7 +785,8 @@ function startMemory(root){
 }
 
 const starsNavigation=document.querySelector('#starsNavigation');if(starsNavigation)starsNavigation.onclick=()=>{if(maintenanceBlocked('stars'))showMaintenance('stars');else{closeMobileMenu();window.openLessingStars?.();}};
-window.addEventListener('lessing-coach-home',()=>navigate('start'));</script>
+window.addEventListener('lessing-coach-home',()=>navigate('start'));
+</script>
 <style id="coach-stars-integration">#coachStarsOverlay{position:fixed;inset:0;width:100%;height:100dvh;z-index:10000;background:#102945}#coachStarsOverlay[hidden]{display:none}#coachStarsFrame{display:block;border:0;width:100%;height:100%}#coachStarsClose{position:fixed;z-index:10002;bottom:21vh;left:max(10px,env(safe-area-inset-left));min-height:44px;border:1px solid #ffffff45;border-radius:12px;background:#0b2449e8;color:#fff;padding:8px 13px;font-weight:800}body.coach-stars-open{overflow:hidden}</style>
 <section id="coachStarsOverlay" hidden aria-label="Lessing Stars"><button type="button" id="coachStarsClose" aria-label="Zurück zu Lessing Coach">← Coach</button><iframe id="coachStarsFrame" title="Lessing Stars" allow="fullscreen; autoplay" referrerpolicy="same-origin"></iframe></section>
 <style id="coach-stars-touch-fix">

@@ -101,3 +101,7 @@ als `.data/lessing.sqlite` einsetzen; alte `-wal`/`-shm`-Dateien entfernen.
 PostgreSQL: Sicherungen über den Datenbankanbieter oder `pg_dump` einrichten.
 Eine Sicherung zunächst in einer getrennten Datenbank wiederherstellen und
 prüfen. Automatische Sicherungen sind noch nicht auf deinem Konto eingerichtet.
+
+## Änderung vom 08.10.2026: Lern-KI ohne gespeicherten Verlauf
+
+Nur die Verlaufsspeicherung wurde geändert. Aktuelle Nachrichten bleiben im Arbeitsspeicher der offenen KI-Ansicht, damit Folgefragen weiterhin funktionieren. Beim neuen Chat, Verlassen oder Neuladen werden sie verworfen. Keine neuen KI-Nachrichten oder Chattitel werden in der Website-Datenbank gespeichert. Beim Öffnen der Lern-KI entfernt die Website alte gespeicherte KI-Chats des aktuellen Browsers. Kontakt-Chats, Notizen, Termine, Spiel, Modellwahl und übrige Ansicht bleiben unverändert. Dies betrifft die Website-Speicherung; die Datenverarbeitung des KI-Anbieters wird dadurch nicht geändert.
