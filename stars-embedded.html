@@ -532,5 +532,12 @@ if(location.hash.startsWith('#/stars/')){const m=location.hash.match(/^#\/stars\
 #screen-match .runtime-fire button{position:static!important;padding:0!important;margin:0!important;transform:none!important;pointer-events:auto!important}
 #screen-match button{cursor:pointer;-webkit-touch-callout:none}
 @media(orientation:landscape) and (max-height:430px){#screen-match .runtime-hud{top:max(4px,env(safe-area-inset-top))}#screen-match .runtime-move,#screen-match .runtime-fire{bottom:max(6px,env(safe-area-inset-bottom))}}
-</style><link rel="stylesheet" href="stars-runtime.css?v=11"><script src="stars-runtime.js?v=11"></script></body>
+
+#screen-match .runtime-move[hidden]{display:none!important}
+#screen-match .runtime-stick{position:absolute;z-index:6;left:max(22px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));width:112px;height:112px;border:3px solid #82bbff88;border-radius:50%;background:#173d8580;box-shadow:inset 0 0 18px #12326f;touch-action:none}
+#screen-match #battleStickKnob{position:absolute;inset:27px;display:block;border:3px solid #b3ddff;border-radius:50%;background:linear-gradient(#539ef5,#285ac6);box-shadow:0 4px 12px #00163b99;pointer-events:none}
+#screen-match .runtime-fire #battleFire{width:88px;height:88px;font-size:12px;box-shadow:0 4px 0 #632337,0 0 0 8px #f26d8622}
+#screen-match .runtime-fire #battleSuper{box-shadow:0 4px 0 #735710}
+@media(max-height:400px){#screen-match .runtime-stick{width:96px;height:96px}#screen-match #battleStickKnob{inset:23px}#screen-match .runtime-fire #battleFire{width:76px;height:76px}}
+</style><link rel="stylesheet" href="stars-runtime.css?v=12"><script src="stars-runtime.js?v=12"></script></body>
 </html>

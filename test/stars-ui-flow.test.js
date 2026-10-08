@@ -16,5 +16,5 @@ test('UI bridge restores a guest, opens four-tap server drops and retains combat
  await new Promise(resolve=>setTimeout(resolve,30));assert.equal(context.state.session.admin,false);assert.equal(context.state.coins,1500);assert.equal(toasts.length,0);
  const fighter=vm.runInContext('allBrawlers()[0]',context);assert.equal(fighter.combatRange,420);assert.equal(fighter.range,5);
  vm.runInContext("openRewards('drop',1)",context);await new Promise(resolve=>setTimeout(resolve,30));assert.equal(reveal.batches[0].serverAwarded,true);assert.equal(reveal.batches[0].items[0].value,100);assert.equal(context.actionLock,true);assert.ok(calls.find(c=>c.path==='action').body.requestId);
- const html=readFileSync(new URL('../stars-embedded.html',import.meta.url),'utf8');assert.match(html,/if\(!batch.serverAwarded\)/);assert.match(html,/if\(taps===4\)/);assert.match(html,/src="stars-runtime.js\?v=11"/);
+ const html=readFileSync(new URL('../stars-embedded.html',import.meta.url),'utf8');assert.match(html,/if\(!batch.serverAwarded\)/);assert.match(html,/if\(taps===4\)/);assert.match(html,/src="stars-runtime.js\?v=12"/);
 });

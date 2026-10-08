@@ -114,3 +114,10 @@ Nur die Verlaufsspeicherung wurde geändert. Aktuelle Nachrichten bleiben im Arb
 - Vollständige transparente Designerfiguren statt Brawler-Karten im Kampf; hochgeladene Figuren/Skins haben Vorrang.
 - Training nutzt ausgewählte Powerstufe und Skin. Tastaturfokus liegt beim Start auf dem Spielfeld.
 - 17 automatisierte Tests, einschließlich echter Spielengine mit simulierten Tastatur- und Touch-Eingaben. Ein echter iPhone-Safari-Test ist hier nicht durchgeführt: Der Browserdownload war nicht verfügbar.
+
+## Joystick- und Zielsteuerung
+- Linker analoger Joystick: Richtung und Geschwindigkeit, auch diagonal.
+- Angriffs- und Super-Schaltfläche: Ziehen zum Zielen, Loslassen zum Schießen; kurzer Tipp nutzt das nächste Ziel. Pointer-Abbruch löst keinen Angriff aus.
+- Computer: WASD/Pfeile, Maus zum Zielen, Linksklick für Angriff, Rechtsklick/E für Super, Leertaste für Angriff.
+- Kamera folgt weich auf beiden Achsen; Ziellinie, Laufbewegung, Munitionsanzeige.
+- Kein identischer Nachbau des Brawl-Stars-Spielgefühls zugesichert; Browser-/Gerätetest weiterhin erforderlich.
