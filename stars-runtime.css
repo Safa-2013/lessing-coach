@@ -33,3 +33,6 @@
 #screen-match .runtime-fire #battleFire{width:88px;height:88px;font-size:12px;box-shadow:0 4px 0 #632337,0 0 0 8px #f26d8622}
 #screen-match .runtime-fire #battleSuper{box-shadow:0 4px 0 #735710}
 @media(max-height:400px){#screen-match .runtime-stick{width:96px;height:96px}#screen-match #battleStickKnob{inset:23px}#screen-match .runtime-fire #battleFire{width:76px;height:76px}}
+
+#screen-match #battle3D{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#screen-match #battleCanvas{z-index:1;touch-action:none}

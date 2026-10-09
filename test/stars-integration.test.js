@@ -44,7 +44,9 @@ test('guest, admin, grants, catalog, drops, multiplayer and maintenance',async()
  const joined=await call('room/join',{code},guest.cookie);assert.equal(joined.data.room.players.length,2);
  assert.equal((await call('room/start',{code},guest.cookie)).status,403);
  const started=await call('room/start',{code},player.cookie);assert.equal(started.status,200);assert.equal(started.data.room.actors.length,10);
- assert.equal((await call('room/input',{code,seq:1,dx:1,dy:0,fire:true},player.cookie)).status,200);
+ const beforeX=started.data.room.actors.find(a=>a.username==='spieler').x;
+ await new Promise(r=>setTimeout(r,35));
+ const moved=await call('room/input',{code,seq:1,dx:1,dy:0,fire:true,angle:0},player.cookie);assert.equal(moved.status,200);const shooter=moved.data.room.actors.find(a=>a.username==='spieler');assert.ok(shooter.x>beforeX,'The first input response must already include movement');assert.ok(shooter.ammo<3,'The first input response must already include the shot');
  const db=await database();const saved=JSON.parse((await db.query('SELECT data FROM stars_rooms WHERE code=$1',[code]))[0].data);saved.time=.001;saved.lastTick=Date.now()-100;await db.query('UPDATE stars_rooms SET data=$1 WHERE code=$2',[JSON.stringify(saved),code]);
  const ended=await call('room/state',{code},player.cookie);assert.equal(ended.data.room.phase,'finished');assert.equal(ended.data.progress.stats.matches,1);
  assert.equal((await call('room/state',{code},player.cookie)).data.progress.stats.matches,1,'A result cannot award twice');

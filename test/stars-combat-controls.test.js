@@ -20,6 +20,7 @@ test('combat: keyboard movement, short touch attacks, cancellation, training and
  const me=lastRoom.actors[0],x=me.x;
  c.document.onkeydown({key:'Unidentified',code:'KeyD',preventDefault(){}});now+=100;frames.pop()();await Promise.resolve();assert.ok(me.x>x);
  c.document.onkeyup({key:'Unidentified',code:'KeyD'});
+ c.document.onkeydown({key:' ',code:'Space',repeat:false,preventDefault(){}});c.document.onkeyup({key:' ',code:'Space'});now+=100;frames.pop()();await Promise.resolve();assert.equal(inputs.at(-1).fire,true,'Fast keyboard taps must survive until the simulation consumes them');
  const pointer={pointerId:2,preventDefault(){}};node('battleFire').onpointerdown(pointer);node('battleFire').onpointerup(pointer);now+=100;frames.pop()();await Promise.resolve();
  assert.equal(inputs.at(-1).fire,true,'A short tap must survive until the next update');assert.ok(me.ammo<3);
  now+=100;frames.pop()();await Promise.resolve();assert.equal(inputs.at(-1).fire,false,'A released attack must not stick');
@@ -39,4 +40,10 @@ test('shipped game bundles its exact controls, engine and matching sprite atlas'
  assert.equal(c.room.actors.length,10);assert.ok(c.room.actors[0].x>120);assert.ok(c.room.bullets.length);
  assert.match(bundled,/const StarsCombatAtlas="assets\/combat-brawlers-v1\.png"/);
  assert.ok(readFileSync(new URL("../assets/combat-brawlers-v1.png",import.meta.url)).length>100000);
+});
+
+
+test('3D renderer emits spatial, lit meshes for ten fighters and falls back without WebGL',()=>{
+ const source=readFileSync(new URL('../stars-renderer3d.js',import.meta.url),'utf8');const html=readFileSync(new URL('../stars-embedded.html',import.meta.url),'utf8');assert.equal(html.match(/<script id="stars-renderer3d">([\s\S]*?)<\/script>/)[1],source);
+ const buffers=[];let drawCount=0;const gl=new Proxy({getShaderParameter:()=>true,getProgramParameter:()=>true,getAttribLocation:()=>0,bufferData:(target,data)=>buffers.push(data),drawArrays:(mode,start,count)=>drawCount=count},{get:(obj,key)=>obj[key]||(()=>({}))});const c={};vm.createContext(c);vm.runInContext(source,c);assert.equal(c.createStars3D({getContext:()=>null}),null);const renderer=c.createStars3D({getContext:()=>gl});const room={mode:'showdown',players:[{username:'tester',id:'lex',team:0}]};engine.beginRoom(room,engine.BASE,10000);const view=renderer.draw(room,room.actors[0],{},engine.BASE,1,10000,844,390,1);assert.equal(view.tilt,.72);assert.ok(drawCount>1000);assert.ok(buffers[0].every(Number.isFinite));const depths=[];for(let i=2;i<buffers[0].length;i+=9)depths.push(buffers[0][i]);assert.ok(Math.max(...depths)>=80);assert.ok(Math.min(...depths)<0);renderer.dispose();
 });
