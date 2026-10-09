@@ -131,3 +131,6 @@ Nur die Verlaufsspeicherung wurde geändert. Aktuelle Nachrichten bleiben im Arb
 
 
 Spiel-Update 16: Laufbewegungen von Armen und Beinen, Atmen, Blinzeln, Waffenrückstoß, Mündungsfeuer und Trefferblinken. Bewegung in Online-Runden wird lokal vorausberechnet und mit dem Server abgeglichen. Im Match steht "3D v16". Keine Geräteprüfung auf echtem iMac/iPhone; 19 automatisierte Tests bestanden.
+
+
+Steuerungsupdate 3D v17: Rechtsklick halten zum Zielen, Linksklick zum Schießen (auch gleichzeitig). Super bleibt E oder die Super-Taste. WASD nach physischer Tastenposition; Positionsabgleich wird geglättet. 19 automatisierte Tests bestanden; kein echter Safari-/iMac-Hardwaretest.
