@@ -795,7 +795,7 @@ window.addEventListener('lessing-coach-home',()=>navigate('start'));
 <script id="coachStarsController">
 (function(){
  const overlay=document.getElementById('coachStarsOverlay'),frame=document.getElementById('coachStarsFrame');let focusBefore;
- window.openLessingStars=function(){focusBefore=document.activeElement;const shell=document.querySelector('.shell');if(shell)shell.inert=true;overlay.hidden=false;document.body.classList.add('coach-stars-open');frame.src='stars-embedded.html?v=20261009-combat3d15';frame.focus();};
+ window.openLessingStars=function(){focusBefore=document.activeElement;const shell=document.querySelector('.shell');if(shell)shell.inert=true;overlay.hidden=false;document.body.classList.add('coach-stars-open');frame.src='stars-embedded.html?v=20261009-animation16';frame.focus();};
  window.closeLessingStars=function(){overlay.hidden=true;document.body.classList.remove('coach-stars-open');const shell=document.querySelector('.shell');if(shell)shell.inert=false;frame.removeAttribute('src');window.dispatchEvent(new Event('lessing-coach-home'));focusBefore?.focus();};
  document.getElementById('coachStarsClose')?.addEventListener('click',()=>window.closeLessingStars());
  window.addEventListener('message',function(event){if(event.source===frame.contentWindow&&event.origin===location.origin&&event.data?.type==='lessing-coach-home')window.closeLessingStars();});
