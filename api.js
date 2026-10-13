@@ -4,6 +4,7 @@ import starsApi from './stars-api.js';
 import {askAI} from './ai-provider.js';
 import { holidayOn } from '../holidays.js';
 
+const aiRequestTimes = new Map();
 const now = () => Date.now();
 const id = () => randomUUID();
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -82,7 +83,11 @@ export default async function api(req, res) {
       if (origin && new URL(origin).host !== req.headers.host) fail(403, 'Ungültige Herkunft');
     }
     const db = await database();
-    if(path.startsWith('/stars/'))return starsApi(req,res,db,path);
+    if(path.startsWith('/stars/')){
+      await seed(db);
+      const coachSession=/(?:^|;\s*)lessing_session=/.test(req.headers.cookie||'')?await sessionFor(req,res,db,req.method!=='GET'):null;
+      return starsApi(req,res,db,path,coachSession);
+    }
     await seed(db);
     let session = await sessionFor(req, res, db, path !== '/maintenance');
     const body = req.method === 'GET' ? {} : bodyOf(req);
@@ -194,13 +199,13 @@ export default async function api(req, res) {
       return json(res, 200, { days:Object.values(days) });
     }
     if (path === '/appointments/mine' && req.method === 'GET') {
-      const appointments=await db.query(`SELECT code,subject,topic,requested_at,appointment_time,status,note,updated_at,requester_type,child_name FROM appointments WHERE visitor_id=$1 ORDER BY created_at DESC LIMIT 100`,[session.visitor_id]);
+      const appointments=await db.query(`SELECT code,subject,topic,requested_at,appointment_time,lesson_period,status,note,updated_at,requester_type,child_name FROM appointments WHERE visitor_id=$1 ORDER BY created_at DESC LIMIT 100`,[session.visitor_id]);
       return json(res,200,{appointments});
     }
     if (path === '/appointments' && req.method === 'GET') {
       const code = clean(url.searchParams.get('code'), 40).toUpperCase();
       if (!code) fail(400, 'Anfragecode fehlt');
-      const appointment = (await db.query('SELECT code,first_name,last_name,class_name,subject,topic,requested_at,appointment_time,school_end,status,note,updated_at,requester_type,child_name FROM appointments WHERE code=$1 AND visitor_id=$2', [code, session.visitor_id]))[0];
+      const appointment = (await db.query('SELECT code,first_name,last_name,class_name,subject,topic,requested_at,appointment_time,lesson_period,school_end,status,note,updated_at,requester_type,child_name FROM appointments WHERE code=$1 AND visitor_id=$2', [code, session.visitor_id]))[0];
       if (!appointment) fail(404, 'Kein Termin zu diesem Code auf diesem Gerät gefunden.');
       return json(res, 200, { appointment });
     }
@@ -286,39 +291,33 @@ export default async function api(req, res) {
       await db.query('INSERT INTO messages (id,visitor_id,author,body,created_at) VALUES ($1,$2,$3,$4,$5)', [id(), session.visitor_id, 'visitor', message, now()]);
       return json(res, 201, { ok: true });
     }
-    if (path === '/ai/threads' && req.method === 'GET') {
-      const threads = await db.query('SELECT id,title,created_at FROM ai_threads WHERE visitor_id=$1 ORDER BY created_at DESC LIMIT 50', [session.visitor_id]);
-      return json(res, 200, { threads });
+    // Lern-KI conversations live only in the open page, never in the database.
+    if (path === '/ai/history/clear' && req.method === 'POST') {
+      await db.transaction(async tx => {
+        await tx.query('DELETE FROM ai_messages WHERE visitor_id=$1', [session.visitor_id]);
+        await tx.query('DELETE FROM ai_threads WHERE visitor_id=$1', [session.visitor_id]);
+      });
+      return json(res, 200, { ok: true });
     }
-    if (path === '/ai/threads' && req.method === 'POST') {
-      const thread = { id: id(), title: clean(body.title, 80) || 'Neuer Chat' };
-      await db.query('INSERT INTO ai_threads (id,visitor_id,title,created_at) VALUES ($1,$2,$3,$4)', [thread.id, session.visitor_id, thread.title, now()]);
-      return json(res, 201, { thread });
-    }
-    if (path.startsWith('/ai/threads/') && req.method === 'GET') {
-      const thread = (await db.query('SELECT id,title FROM ai_threads WHERE id=$1 AND visitor_id=$2', [path.split('/')[3], session.visitor_id]))[0];
-      if (!thread) fail(404, 'Chat nicht gefunden');
-      const messages = await db.query('SELECT role,body,created_at FROM ai_messages WHERE thread_id=$1 AND visitor_id=$2 ORDER BY created_at ASC LIMIT 100', [thread.id, session.visitor_id]);
-      return json(res, 200, { thread, messages });
-    }
-    if (path === '/ai/progress' && req.method === 'GET') {
-      const threads = await db.query('SELECT id FROM ai_threads WHERE visitor_id=$1', [session.visitor_id]);
-      const questions = await db.query('SELECT id FROM ai_messages WHERE visitor_id=$1 AND role=$2', [session.visitor_id, 'user']);
-      return json(res, 200, { chats: threads.length, questions: questions.length });
-    }
+    if (path === '/ai/threads' && req.method === 'GET') return json(res, 200, { threads: [] });
+    if (path === '/ai/threads' && req.method === 'POST') return json(res, 201, { thread: { id: id(), title: 'Neuer Chat' } });
+    if (path.startsWith('/ai/threads/') && req.method === 'GET') fail(404, 'KI-Verläufe werden nicht gespeichert.');
+    if (path === '/ai/progress' && req.method === 'GET') return json(res, 200, { chats: 0, questions: 0 });
     if (path === '/ai/ask' && req.method === 'POST') {
-      const prompt = clean(body.message, 4000), threadId = clean(body.thread_id, 50);
+      const prompt = clean(body.message, 4000);
       if (!prompt) fail(400, 'Frage fehlt');
-      const thread = (await db.query('SELECT id FROM ai_threads WHERE id=$1 AND visitor_id=$2', [threadId, session.visitor_id]))[0];
-      if (!thread) fail(404, 'Chat nicht gefunden');
+      const attachments=Array.isArray(body.attachments)?body.attachments:[];
+      if(attachments.length>1)fail(400,'Bitte jeweils eine Datei senden.');
+      for(const a of attachments){if(!a||!['application/pdf','image/png','image/jpeg','image/webp'].includes(a.mimeType)||typeof a.data!=='string'||a.data.length>2800000||!a.data.startsWith('data:'+a.mimeType+';base64,')||!/^[A-Za-z0-9+/=]+$/.test(a.data.split(',')[1]||''))fail(400,'Ungültige Datei. PDF oder Bild bis 2 MB auswählen.');a.name=clean(a.name,100);}
       if (!process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY) fail(503, 'Lern-KI ist noch nicht eingerichtet: GEMINI_API_KEY oder OPENAI_API_KEY fehlt.');
-      const recent = await db.query('SELECT role,body FROM ai_messages WHERE thread_id=$1 AND visitor_id=$2 ORDER BY created_at DESC LIMIT 12', [threadId, session.visitor_id]);
-      const count = await db.query('SELECT id FROM ai_messages WHERE visitor_id=$1 AND role=$2 AND created_at>$3 LIMIT 11', [session.visitor_id, 'user', now() - 60000]);
-      if (count.length >= 10) fail(429, 'Bitte eine Minute warten, bevor du weitere Fragen sendest.');
+      const recent = (Array.isArray(body.history) ? body.history : []).slice(-12).filter(r => r && ['user','assistant'].includes(r.role) && typeof r.content === 'string').map(r => ({role:r.role,content:clean(r.content,4000)}));
+      const time = now();
+      for (const [visitor, times] of aiRequestTimes) if (!times.some(t => t > time - 60000)) aiRequestTimes.delete(visitor);
+      const times = (aiRequestTimes.get(session.visitor_id) || []).filter(t => t > time - 60000);
+      if (times.length >= 10) fail(429, 'Bitte eine Minute warten, bevor du weitere Fragen sendest.');
+      aiRequestTimes.set(session.visitor_id, [...times,time]);
       const instructions = 'Du bist ein freundlicher deutschsprachiger Lerncoach für Schüler. Erkläre verständlich und altersgerecht. Unterstütze beim selbstständigen Lernen; bei Hausaufgaben erst den Lösungsweg erklären. Keine erfundenen Fakten. Gib bei Unsicherheit diese an. Verwende keine persönlichen Namen.';
-      const answer = await askAI({instructions,input:[...recent.reverse().map(r=>({role:r.role,content:r.body})),{role:'user',content:prompt}]});
-      await db.query('INSERT INTO ai_messages (id,thread_id,visitor_id,role,body,created_at) VALUES ($1,$2,$3,$4,$5,$6)', [id(), threadId, session.visitor_id, 'user', prompt, now()]);
-      await db.query('INSERT INTO ai_messages (id,thread_id,visitor_id,role,body,created_at) VALUES ($1,$2,$3,$4,$5,$6)', [id(), threadId, session.visitor_id, 'assistant', answer, now()]);
+      const answer = await askAI({instructions,input:[...recent,{role:'user',content:prompt,attachments}]});
       return json(res, 200, { answer });
     }
     if (path === '/catalog' && req.method === 'GET') {
@@ -389,6 +388,28 @@ export default async function api(req, res) {
       await db.query('DELETE FROM categories WHERE id=$1', [target]);
       return json(res, 200, {ok:true,deleted:true,id:target});
     }
+    if (path === '/admin/appointments' && req.method === 'POST') {
+      requireAdmin(session, 'appointments');
+      const first=clean(body.first_name,80),last=clean(body.last_name,80),className=clean(body.class_name,30),date=clean(body.requested_at,10),time=clean(body.appointment_time,5),period=Number(body.lesson_period||0),teacherId=clean(body.teacher_id,80),categoryId=clean(body.category_id,80);
+      if(!first||!last||!className) fail(400,'Bitte Vorname, Nachname und Klasse eingeben.');
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||Number.isNaN(Date.parse(date))||new Date(date).toISOString().slice(0,10)!==date) fail(400,'Bitte ein gültiges Datum wählen.');
+      if(!Number.isInteger(period)||period<0||period>12) fail(400,'Unterrichtsstunde muss zwischen 1 und 12 liegen.');
+      if(time&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) fail(400,'Ungültige Uhrzeit.');
+      if(!period&&!time) fail(400,'Bitte Unterrichtsstunde oder Uhrzeit angeben.');
+      const appointment=await db.transaction(async tx=>{
+        // Serialize reservations for the same teacher, including concurrent saves.
+        const teacher=(await tx.query('SELECT * FROM teachers WHERE id=$1'+(db.dialect==='postgres'?' FOR UPDATE':''),[teacherId]))[0];
+        const category=(await tx.query('SELECT * FROM categories WHERE id=$1',[categoryId]))[0];
+        if(!teacher||!teacher.active||!category||!category.active) fail(400,'Bitte aktive Lehrkraft und Bereich auswählen.');
+        if(!(await tx.query('SELECT teacher_id FROM teacher_categories WHERE teacher_id=$1 AND category_id=$2',[teacherId,categoryId])).length) fail(400,'Diese Lehrkraft ist diesem Bereich nicht zugeordnet.');
+        const conflict=await tx.query("SELECT id FROM appointments WHERE teacher_id=$1 AND requested_at=$2 AND status NOT IN ('Abgelehnt','Erledigt','Nicht erschienen') AND (($3>0 AND lesson_period=$3) OR ($4<>'' AND appointment_time=$4)) LIMIT 1",[teacherId,date,period,time]);
+        if(conflict.length) fail(409,'Diese Lehrkraft hat in dieser Stunde oder zu dieser Uhrzeit bereits einen Termin.');
+        const record={id:id(),code:randomBytes(6).toString('hex').toUpperCase()};
+        await tx.query('INSERT INTO appointments (id,code,visitor_id,first_name,last_name,class_name,subject,topic,requested_at,appointment_time,lesson_period,status,note,created_at,updated_at,school_end,category_id,teacher_id,requester_type,child_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)',[record.id,record.code,'staff:'+record.id,first,last,className,category.name,clean(body.topic,500)||'Persönlich vereinbarter Termin',date,time,period,'Bestätigt',clean(body.note,500),now(),now(),'',categoryId,teacherId,'staff','']);
+        return record;
+      });
+      return json(res,201,{appointment});
+    }
     if (path === '/admin/appointments' && req.method === 'GET') {
       requireAdmin(session, 'appointments');
       return json(res, 200, { appointments: await db.query(`SELECT a.*, c.name AS category_name, c.color AS category_color, t.name AS teacher_name
@@ -408,7 +429,7 @@ export default async function api(req, res) {
       const from = clean(url.searchParams.get('from'), 10), to = clean(url.searchParams.get('to'), 10);
       const valid = day => /^\d{4}-\d{2}-\d{2}$/.test(day) && !Number.isNaN(Date.parse(day)) && new Date(day).toISOString().slice(0,10) === day;
       if (!valid(from) || !valid(to) || from > to || Date.parse(to) - Date.parse(from) > 370 * 86400000) fail(400, 'Ungültiger Kalenderzeitraum');
-      return json(res, 200, { appointments: await db.query(`SELECT a.id,a.code,a.first_name,a.last_name,a.class_name,a.topic,a.school_end,a.requested_at,a.appointment_time,a.status,a.note,a.category_id,a.teacher_id,a.requester_type,a.child_name,
+      return json(res, 200, { appointments: await db.query(`SELECT a.id,a.code,a.first_name,a.last_name,a.class_name,a.topic,a.school_end,a.requested_at,a.appointment_time,a.lesson_period,a.status,a.note,a.category_id,a.teacher_id,a.requester_type,a.child_name,
         c.name AS category_name,c.color AS category_color,t.name AS teacher_name
         FROM appointments a
         LEFT JOIN categories c ON c.id=a.category_id
@@ -454,13 +475,16 @@ export default async function api(req, res) {
       if(!current) fail(404,'Termin nicht gefunden');
       const requestedAt=clean(body.requested_at,10)||current.requested_at;
       const appointmentTime=clean(body.appointment_time,5)||current.appointment_time||'';
+      const lessonPeriod=body.lesson_period===undefined?Number(current.lesson_period||0):Number(body.lesson_period);
+      if(!Number.isInteger(lessonPeriod)||lessonPeriod<0||lessonPeriod>12) fail(400,'Ungültige Unterrichtsstunde');
       const categoryId=clean(body.category_id,80)||current.category_id||'';
       const teacherId=clean(body.teacher_id,80)||current.teacher_id||'';
       if(appointmentTime && !/^([01]\d|2[0-3]):[0-5]\d$/.test(appointmentTime)) fail(400,'Ungültige Uhrzeit');
-      if(requestedAt && !/^\d{4}-\d{2}-\d{2}$/.test(requestedAt)) fail(400,'Ungültiges Datum');
-      if(body.status==='Bestätigt' && (!requestedAt || !appointmentTime)) fail(400,'Bitte zuerst Datum und Uhrzeit für den Termin festlegen.');
+      if(requestedAt && (!/^\d{4}-\d{2}-\d{2}$/.test(requestedAt)||Number.isNaN(Date.parse(requestedAt))||new Date(requestedAt).toISOString().slice(0,10)!==requestedAt)) fail(400,'Ungültiges Datum');
+      if(body.status==='Bestätigt' && (!requestedAt || (!appointmentTime&&!lessonPeriod))) fail(400,'Bitte zuerst Datum und Unterrichtsstunde oder Uhrzeit festlegen.');
+      if(teacherId&&lessonPeriod&& !['Abgelehnt','Erledigt','Nicht erschienen'].includes(body.status)){const conflict=await db.query("SELECT id FROM appointments WHERE teacher_id=$1 AND requested_at=$2 AND lesson_period=$3 AND id<>$4 AND status NOT IN ('Abgelehnt','Erledigt','Nicht erschienen') LIMIT 1",[teacherId,requestedAt,lessonPeriod,target]);if(conflict.length) fail(409,'Diese Lehrkraft ist in dieser Unterrichtsstunde bereits belegt.');}
       if(teacherId && appointmentTime){ const conflict=await db.query("SELECT id FROM appointments WHERE teacher_id=$1 AND requested_at=$2 AND appointment_time=$3 AND id<>$4 AND status NOT IN ('Abgelehnt','Erledigt','Nicht erschienen') LIMIT 1",[teacherId,requestedAt,appointmentTime,target]); if(conflict.length) fail(409,'Diese Lehrkraft ist zu dieser Zeit bereits belegt.'); }
-      await db.query('UPDATE appointments SET status=$1,note=$2,requested_at=$3,appointment_time=$4,category_id=$5,teacher_id=$6,subject=COALESCE((SELECT name FROM categories WHERE id=$5),subject),updated_at=$7 WHERE id=$8',[body.status,clean(body.note,500),requestedAt,appointmentTime,categoryId,teacherId,now(),target]);
+      await db.query('UPDATE appointments SET status=$1,note=$2,requested_at=$3,appointment_time=$4,category_id=$5,teacher_id=$6,subject=COALESCE((SELECT name FROM categories WHERE id=$5),subject),updated_at=$7,lesson_period=$9 WHERE id=$8',[body.status,clean(body.note,500),requestedAt,appointmentTime,categoryId,teacherId,now(),target,lessonPeriod]);
       return json(res,200,{ok:true});
     }
     if (path === '/admin/chats' && req.method === 'GET') {
