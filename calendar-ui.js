@@ -19,7 +19,8 @@ export function makeSchedule(root, request, admin=false) {
   let anchor=localToday(), mode='month', days={}, detailDay='', sequence=0, loaded=false;
   const body=root.querySelector('.schedule-body');
   const controls=root.querySelector('.schedule-controls');
-  const appointmentList=day=>days[day]||[];
+  const appointmentList=day=>(days[day]||[]).slice().sort((a,b)=>(a.lesson_period||99)-(b.lesson_period||99)||String(a.appointment_time||'').localeCompare(String(b.appointment_time||'')));
+  const when=item=>[item.lesson_period?`${item.lesson_period}. Stunde`:'',item.appointment_time?`${item.appointment_time} Uhr`:''].filter(Boolean).join(' · ')||'Uhrzeit offen';
   const status=day=>{
     const list=appointmentList(day);
     return {confirmed:list.some(a=>a.status==='Bestätigt'||a.hasAppointments),pending:list.some(a=>a.status&&!['Bestätigt','Abgelehnt'].includes(a.status)||a.hasRequests)};
@@ -37,7 +38,7 @@ export function makeSchedule(root, request, admin=false) {
   }
   function button(day,small=false) {
     const a=info(day), count=appointmentList(day).length;
-    const events=admin&&count&&!small?`<span class="schedule-events">${appointmentList(day).slice(0,2).map(item=>`<span class="schedule-event" style="--category-color:${esc(item.category_color||'#3B82F6')}"><i></i>${esc(item.category_name||item.topic)} · ${esc(item.teacher_name||'Lehrkraft')}</span>`).join('')}${count>2?`<span>+ ${count-2} weitere</span>`:''}</span>`:'';
+    const events=admin&&count&&!small?`<span class="schedule-events">${appointmentList(day).slice(0,mode==='week'?count:2).map(item=>`<span class="schedule-event" style="--category-color:${esc(item.category_color||'#3B82F6')}"><i></i>${esc(when(item))} · ${esc(item.first_name+' '+item.last_name)} · ${esc(item.teacher_name||'Lehrkraft')}</span>`).join('')}${mode!=='week'&&count>2?`<span>+ ${count-2} weitere</span>`:''}</span>`:'';
     const color=admin&&appointmentList(day)[0]?.category_color;
     return `<button type="button" class="schedule-day ${a.color}${detailDay===day?' is-selected':''}" ${color?`style="--category-color:${esc(color)}"`:''} data-schedule-date="${day}" aria-label="${esc(longDate(day)+': '+a.text)}"><strong>${Number(day.slice(-2))}</strong>${small?'':`<span class="schedule-day-state">${esc(a.text)}</span>`}${events}</button>`;
   }
@@ -58,7 +59,7 @@ export function makeSchedule(root, request, admin=false) {
     else content=month(from);
     if(detailDay) {
       const a=info(detailDay), list=appointmentList(detailDay);
-      const details=admin&&list.length?list.map(item=>`<div class="schedule-detail-row" style="border-left:4px solid ${esc(item.category_color||'#3B82F6')}"><span class="pill">${esc(item.status)}</span><strong>${esc(item.requester_type==='parent'?(item.child_name||'Kind nicht angegeben'):item.first_name+' '+item.last_name)}</strong><span>${item.requester_type==='parent'?'Eltern-Anfrage · ':''}${esc(item.category_name||item.topic)} · ${esc(item.teacher_name||'Lehrkraft')} · ${esc(item.appointment_time||'Uhrzeit offen')}</span><small>${esc(item.code)}</small></div>`).join(''):'';
+      const details=admin&&list.length?list.map(item=>`<div class="schedule-detail-row" style="border-left:4px solid ${esc(item.category_color||'#3B82F6')}"><span class="pill">${esc(item.status)}</span><strong>${esc(item.requester_type==='parent'?(item.child_name||'Kind nicht angegeben'):item.first_name+' '+item.last_name)}</strong><span>${esc(item.class_name||'')} · ${esc(item.category_name||item.topic)} · ${esc(item.teacher_name||'Lehrkraft')} · ${esc(when(item))}</span><small>${esc(item.code)}</small></div>`).join(''):'';
       content+=`<div class="schedule-details"><h3>${longDate(detailDay)}</h3><p>${esc(a.text)}${admin&&list.length?` · ${list.length} ${list.length===1?'Eintrag':'Einträge'}`:''}</p>${details}</div>`;
     }
     body.innerHTML=content;

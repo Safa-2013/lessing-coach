@@ -185,6 +185,12 @@ body[data-page="contact"] .topbar{display:none}
 .schedule-day[style*="--category-color"]{box-shadow:inset 0 4px 0 var(--category-color)}
 .schedule-event{display:block;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
 .schedule-event i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--category-color);margin-right:5px}
+#directAppointment summary{cursor:pointer;padding:8px 0;color:#185fc2}
+#directAppointment form{margin-top:14px}
+#directAppointmentResult:not(:empty){padding:10px;background:#eef5ff;border-radius:8px}
+#adminSchedule .schedule-week .schedule-events{display:flex}
+#adminSchedule .schedule-week .schedule-event{white-space:normal;overflow-wrap:anywhere;line-height:1.4}
+@media(max-width:700px){#adminSchedule .schedule-week{grid-template-columns:1fr 1fr}#directAppointment .grid2{grid-template-columns:1fr}}
 .nested{background:#f8fbff;border:1px solid #e3eaf3;border-radius:14px;padding:15px;margin:15px 0}
 .admin-section[data-admin-section="staff"] .panel{min-height:220px}
 @media(max-width:700px){.category-legend{gap:5px}.category-chip{font-size:11px;padding:5px 8px}}

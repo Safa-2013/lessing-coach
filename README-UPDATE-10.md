@@ -1,3 +1,9 @@
+# Terminplaner-Update – 13.10.2026
+
+Lehrkräfte können im Verwaltungsbereich unter Kalender oder Terminanfragen „＋ Termin direkt eintragen“ wählen. Vorname, Nachname, Klasse, Datum, Bereich und Lehrkraft eintragen; Unterrichtsstunde (1–12) oder Uhrzeit wählen. Der Termin ist sofort bestätigt. Weitere Einträge behalten Datum, Lehrkraft, Kategorie und Klasse bei. Unterrichtsstunden erscheinen im Wochenplan und sind in bestehenden Terminen editierbar. Gleichzeitige Doppelbelegungen beim Anlegen werden verhindert. Es werden keine Uhrzeiten für Unterrichtsstunden erfunden; die tatsächlichen Schulzeiten sind nicht hinterlegt. Nur die Verwaltung sieht Namen und interne Notizen dieser direkt eingetragenen Termine.
+
+Vollständiges Website-Update: ZIP entpacken, Inhalte mit Ordnerstruktur hochladen und das Deployment abwarten. Nicht nur index.html austauschen: lib/api.js, lib/db.js, calendar-ui.js, app.js und visual.css wurden ebenfalls geändert. Die Datenbank ergänzt lesson_period automatisch und bewahrt bestehende Termine. Das Spiel ist unverändert. 21 automatisierte Tests bestanden; keine Prüfung auf echtem Safari/iPhone und keine automatische Veröffentlichung.
+
 # Lessing Coach + Lessing Stars · Update 10
 
 Die ZIP enthält die vollständige Website. `index.html` ist weiterhin die
@@ -134,3 +140,13 @@ Spiel-Update 16: Laufbewegungen von Armen und Beinen, Atmen, Blinzeln, Waffenrü
 
 
 Steuerungsupdate 3D v17: Rechtsklick halten zum Zielen, Linksklick zum Schießen (auch gleichzeitig). Super bleibt E oder die Super-Taste. WASD nach physischer Tastenposition; Positionsabgleich wird geglättet. 19 automatisierte Tests bestanden; kein echter Safari-/iMac-Hardwaretest.
+
+
+Spielupdate 3D v18
+- Linksklick schießt automatisch zum nächsten Gegner. Rechtsklick halten zeigt die Zielrichtung; Loslassen schießt in diese Richtung. E bleibt Super.
+- Bots benutzen Wege um Wände, seitliche Bewegung, Zielvorhalt und Geschossausweichen. Brawler-Namen stehen über den Bots. Kämpfer können nicht einfach ineinander laufen.
+- Treffer prüfen den gesamten Geschossweg; Nachberechnung ist auf 0,2 Sekunden begrenzt, damit Verbindungsverzögerungen keine mehrsekündigen Trefferbursts verursachen. Während langer Unterbrechungen läuft die Simulation dadurch langsamer.
+- Öffentliche Schnellspiele suchen passende Räume: In den ersten 20 Sekunden können echte Spieler lebende Bot-Plätze übernehmen. Fehlende Plätze werden weiterhin mit Bots gefüllt. Private Räume bleiben getrennt.
+- Showdown: 1140 x 2175 statt 760 x 1450; 2,25-fache Fläche mit passender Kamera und skalierten Hindernissen. Andere Modi behalten ihre bisherigen Abmessungen.
+- WebGL-Figuren mit zusätzlichen Frisuren/Accessoires und editierbaren Proportionen; unterschiedliche Geschossfarben, Formen und Spuren. Das sind prozedurale 3D-Modelle, keine identischen 3D-Nachbildungen der Shop-Bilder. Ohne WebGL bleibt die 2D-Ersatzansicht.
+- 20 automatisierte Tests bestanden, darunter Bot-Navigation, Treffer, Ausweichen, Zeitbegrenzung, Maussteuerung und Spieleraufnahme. Kein Test auf echtem iMac oder iPhone; keine Garantie für Fehlerfreiheit oder 1:1-Brawl-Stars-Verhalten.
