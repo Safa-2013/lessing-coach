@@ -187,6 +187,9 @@ body[data-page="contact"] .topbar{display:none}
 .schedule-event i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--category-color);margin-right:5px}
 #directAppointment summary{cursor:pointer;padding:8px 0;color:#185fc2}
 #teacherCodeSchedule[hidden]{display:none!important}
+#studentSchedule.code-calendar .schedule-events{display:flex}
+#studentSchedule.code-calendar .schedule-event{white-space:normal;overflow-wrap:anywhere;line-height:1.4}
+@media(max-width:700px){#studentSchedule.code-calendar .schedule-week{grid-template-columns:1fr 1fr}}
 .teacher-code-form{margin-top:16px;padding-top:12px;border-top:1px solid #dfe7f1}
 #teacherCodeSchedule .schedule-week .schedule-events{display:flex}
 #teacherCodeSchedule .schedule-week .schedule-event{white-space:normal;overflow-wrap:anywhere;line-height:1.4}

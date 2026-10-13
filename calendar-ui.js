@@ -92,5 +92,12 @@ export function makeSchedule(root, request, admin=false) {
     if(mode==='year') { anchor=day; mode='month'; detailDay=day; refresh(); }
     else { detailDay=day; render(); }
   };
-  return {refresh,ensure:()=>{if(!loaded)refresh();}};
+  return {refresh,ensure:()=>{if(!loaded)refresh();},
+    setSource(next,privateView=false,day=localToday(),displayMode='month'){
+      sequence++;request=next;admin=privateView;days={};loaded=false;detailDay='';
+      if(/^\d{4}-\d{2}-\d{2}$/.test(day)){anchor=day;if(privateView)detailDay=day;}
+      mode=displayMode;body.innerHTML='';return refresh();
+    },
+    showDate(day,displayMode='week'){if(/^\d{4}-\d{2}-\d{2}$/.test(day)){anchor=day;detailDay=day;mode=displayMode;}return refresh();}
+  };
 }

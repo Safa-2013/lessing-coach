@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import api from '../lib/api.js';
 import { holidayOn } from '../holidays.js';
+import { makeSchedule } from '../calendar-ui.js';
 
 process.chdir(mkdtempSync(join(tmpdir(), 'lessing-mobile-test-')));
 delete process.env.DATABASE_URL;
@@ -128,4 +129,16 @@ test('teacher calendar codes open only the assigned calendar without login and c
   assert.equal((await call('admin/appointments','PATCH',{code:'NEW',id:'fake',status:'Bestätigt'},visitor)).status,403);
   let limited=false;for(let i=0;i<23;i++)limited ||= (await open('WRONG')).status===429;assert.ok(limited,'Repeated code guesses must be throttled');
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.doesNotMatch(html,/teacherCalendarAccessForm/);assert.match(html,/id="lookupForm"/);assert.match(html,/Termine mit Code öffnen/);assert.match(html,/placeholder="Code eingeben" maxlength="64"/);assert.match(html,/minlength="3"/);assert.match(html,/Code deaktivieren/);assert.match(html,/adminSchedule.*insertAdjacentHTML\('afterend'/);
+});
+
+test('the existing calendar switches to code appointments, follows their date and clears stale private results',async()=>{
+  const body={innerHTML:''},period={textContent:''},controls={querySelector:()=>period,querySelectorAll:()=>[]},root={querySelector:selector=>selector==='.schedule-body'?body:controls};
+  const calls=[],row={requested_at:'2026-10-13',lesson_period:3,first_name:'Lina',last_name:'Test',teacher_name:'Lenart',status:'Bestätigt',class_name:'7G2'};
+  const schedule=makeSchedule(root,async()=>({days:[]}));
+  await schedule.setSource(async path=>{calls.push(path);return {appointments:[row]}},true,row.requested_at,'week');
+  assert.match(calls[0],/from=2026-10-12/);assert.match(body.innerHTML,/Lina Test/);assert.match(body.innerHTML,/3. Stunde/);
+  let release;const stale=schedule.setSource(()=>new Promise(resolve=>release=resolve),true,row.requested_at,'week');
+  await schedule.setSource(async()=>({days:[]}),false);release({appointments:[row]});await stale;assert.doesNotMatch(body.innerHTML,/Lina Test/);
+  const admin=makeSchedule(root,async path=>{calls.push(path);return {appointments:[row]}},true);await admin.showDate('2026-11-04');assert.match(calls.at(-1),/from=2026-11-02/);
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.doesNotMatch(html,/cloneNode\(true\)/);assert.match(html,/studentSchedule\.setSource/);assert.match(html,/adminSchedule\.showDate/);
 });
