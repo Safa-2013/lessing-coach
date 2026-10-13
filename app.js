@@ -149,11 +149,11 @@ function renderAuth() {
   $('#topLogin').dataset.page = isStaff ? 'adminPanel' : 'login';
   $('#adminAccounts').classList.toggle('hidden', !isStaff);
   for (const [permission, element] of [['appointments','#adminAppointments'],['chats','#adminChats'],['content','#adminContent']]) {
-    $(element).classList.toggle('hidden', !['admin','big'].includes(state.session.role));
+    $(element).classList.toggle('hidden', !['admin','big','teacher'].includes(state.session.role));
   }
   document.querySelectorAll('[data-admin-tab]').forEach(button => {
     const required = button.dataset.requires;
-    button.classList.toggle('hidden', !!required && !['admin','big'].includes(state.session.role));
+    button.classList.toggle('hidden', !!required && !['admin','big','teacher'].includes(state.session.role));
   });
 }
 async function boot() {
@@ -409,7 +409,7 @@ $('#aiForm').onsubmit = async e => {
   } catch(err) { if(version===aiChatVersion) toast(err.message); }
   finally { aiSending=false; button.disabled=false; }
 };
-const can = permission => ['admin','big'].includes(state.session.role);
+const can = permission => ['admin','big','teacher'].includes(state.session.role);
 function prepareDirectAppointment(){
   const calendar=$('#adminSchedule');if(!calendar)return;
   if(!$('#directAppointment')){
@@ -451,11 +451,11 @@ async function loadAdmin() {
     if (can('appointments')) { await loadStaffManagement(); await loadAppointmentNotes(); }
   } catch(e) { toast(e.message); }
 }
-function isStaffForAccounts(){ return state.session.role === 'admin' || state.session.role === 'big'; }
+function isStaffForAccounts(){ return ['admin','big','teacher'].includes(state.session.role); }
 async function loadAccounts() {
   const box=$('#accountList'); if(!box) return;
   const {accounts} = await request('admin/accounts');
-  box.innerHTML = accounts.length ? accounts.map(a => `<div class="list-item"><strong>${safe(a.username)}</strong><span class="pill">Admin · Vollzugriff</span><form class="accountForm" data-id="${safe(a.id)}"><label class="field">Neues Passwort (optional)<input type="password" name="password" minlength="10"></label><button class="primary">Speichern</button> <button class="primary danger" type="button" data-delete="${safe(a.id)}">Löschen</button></form></div>`).join('') : '<p class="muted">Noch keine normalen Admin-Konten vorhanden.</p>';
+  box.innerHTML = accounts.length ? accounts.map(a => `<div class="list-item"><strong>${safe(a.username)}</strong><span class="pill">Lehrerkonto</span><form class="accountForm" data-id="${safe(a.id)}"><label class="field">Neues Passwort (optional)<input type="password" name="password" minlength="10"></label><button class="primary">Speichern</button> <button class="primary danger" type="button" data-delete="${safe(a.id)}">Löschen</button></form></div>`).join('') : '<p class="muted">Noch keine Lehrerkonten vorhanden.</p>';
 }
 function renderCalendarCodeManager(teachers){
   if(!$('#calendarCodeManager'))$('#adminSchedule').insertAdjacentHTML('afterend','<div class="panel" id="calendarCodeManager"><h2>Kalender-Code erstellen</h2><p class="muted">Wähle eine Lehrkraft und setze ihren Code. Damit lässt sich ihr Kalender unten unter „Termine“ ohne Anmeldung öffnen.</p><form id="calendarCodeForm"><div class="grid2"><label class="field">Lehrkraft<select name="teacher_id" required></select></label><label class="field">Code (mindestens 3 Zeichen)<input name="code" type="password" minlength="3" maxlength="64" autocomplete="new-password" required></label></div><p class="small" id="calendarCodeState"></p><div class="row"><button type="submit" class="primary">Code speichern / ändern</button><button type="button" class="primary danger" id="disableCalendarCode">Code deaktivieren</button></div><p role="status" id="calendarCodeResult"></p></form></div>');
@@ -558,17 +558,17 @@ $('#adminAccounts').onsubmit = async e => {
   const form=e.target;
   if (form.id==='createAdmin') {
     e.preventDefault();
-    try { await send('admin/accounts',{username:form.elements.username.value,password:form.elements.password.value,permissions:permissions()}); form.reset(); await loadAccounts(); toast('Admin erstellt'); }
+    try { await send('admin/accounts',{username:form.elements.username.value,password:form.elements.password.value,permissions:permissions()}); form.reset(); await loadAccounts(); toast('Lehrerkonto erstellt'); }
     catch(err){toast(err.message);}
   } else if (form.matches('.accountForm')) {
     e.preventDefault();
-    try { await send('admin/accounts/'+form.dataset.id,{permissions:permissions(),password:form.elements.password.value},'PATCH'); await loadAccounts(); toast('Admin aktualisiert'); }
+    try { await send('admin/accounts/'+form.dataset.id,{permissions:permissions(),password:form.elements.password.value},'PATCH'); await loadAccounts(); toast('Lehrerkonto aktualisiert'); }
     catch(err){toast(err.message);}
   }
 };
 $('#adminAccounts').onclick = async e => {
   const del=e.target.dataset.delete;
-  if (del) { if (!confirm('Dieses normale Admin-Konto wirklich löschen?')) return; try { await request('admin/accounts/'+del,{method:'DELETE'}); await loadAccounts(); } catch(err){toast(err.message);} return; }
+  if (del) { if (!confirm('Dieses Lehrerkonto wirklich löschen?')) return; try { await request('admin/accounts/'+del,{method:'DELETE'}); await loadAccounts(); } catch(err){toast(err.message);} return; }
 };
 document.querySelector('[data-admin-section="staff"]').onclick = async e => {
   const teacherId=e.target.dataset.deleteTeacher;

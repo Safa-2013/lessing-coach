@@ -107,7 +107,7 @@ test('staff directly records lesson appointments, edits them, prevents duplicate
   assert.equal((await call('@rewrite:admin/appointments','POST',{...input,lesson_period:7},staff.cookie)).status,201,'Vercel rewrite URL must reach the save handler without req.query');
   assert.equal((await call('admin/accounts','POST',{username:'terminadmin',password:'TerminAdmin1234',permissions:[]},staff.cookie)).status,201);
   const normal=await call('login','POST',{username:'terminadmin',password:'TerminAdmin1234'},(await call('bootstrap')).cookie);
-  assert.equal(normal.data.session.role,'admin');
+  assert.equal(normal.data.session.role,'teacher');
   assert.equal((await call('admin/appointments','POST',{...input,lesson_period:9},normal.cookie)).status,201,'A separately created normal admin can create appointments');
   assert.equal((await call('admin/teacher-calendar-code','POST',{teacher_id:teacher.id,code:'NORMAL9'},normal.cookie)).status,200,'Normal admins can also set calendar codes');
   const big=await call('login','POST',{username:'admin',password:'1234'},(await call('bootstrap')).cookie);

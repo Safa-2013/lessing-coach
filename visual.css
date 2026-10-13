@@ -187,6 +187,27 @@ body[data-page="contact"] .topbar{display:none}
 .schedule-event i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--category-color);margin-right:5px}
 #directAppointment summary{cursor:pointer;padding:8px 0;color:#185fc2}
 #teacherCodeSchedule[hidden]{display:none!important}
+#start .cards{grid-template-columns:repeat(3,minmax(0,1fr));max-width:none;width:100%;margin:-5px 0 0;padding:0 clamp(24px,3.5vw,60px);gap:18px;align-items:stretch}
+#start .feature{display:grid;grid-template-rows:auto auto 1fr auto;min-width:0;min-height:0!important;padding:0 22px 22px;border-radius:22px;box-shadow:0 10px 24px #193f6714}
+#start .feature::before{display:none;content:none}
+#start .feature .icon{position:relative;display:block;flex:none;width:calc(100% + 44px);height:auto!important;aspect-ratio:1.6;margin:0 -22px 12px;background-size:300% auto;background-position-y:60%;filter:none}
+#start .feature h2{font-size:clamp(22px,1.65vw,28px);line-height:1.15;margin:0;letter-spacing:-.035em}
+#start .feature p{min-height:0!important;font-size:clamp(14px,1vw,16px);line-height:1.5;margin:9px 0 20px}
+#start .feature .primary{align-self:end;margin:0;width:100%;min-height:54px;border-radius:13px;font-size:16px;font-weight:600;padding:13px 18px}
+#start .feature-badge{position:absolute;top:22px;left:22px;display:grid;place-items:center;width:62px;height:62px;border-radius:15px;box-shadow:0 10px 20px #193f6720;color:#fff}
+#start .feature-badge svg{width:34px;height:34px;display:block}
+#start .orange .feature-badge{background:linear-gradient(135deg,#ff9d2f,#ff6911)}
+#start .blue .feature-badge{background:linear-gradient(135deg,#2488ff,#0055d8)}
+#start .green .feature-badge{background:linear-gradient(135deg,#1bb876,#007f56)}
+#start .orange .primary{background:linear-gradient(120deg,#ff861b,#ff6308)}
+#start .blue .primary{background:linear-gradient(120deg,#0877f6,#0055dc)}
+#start .green .primary{background:linear-gradient(120deg,#14a16a,#008351)}
+.sidebar{background:linear-gradient(150deg,#132b46,#0d2138 75%)}
+.nav button.active,.nav button:hover{background:linear-gradient(110deg,#234d80,#163e70)}
+.nav button{font-size:16px;color:#edf3fc}
+.nav button span:first-child svg{display:block;width:25px;height:25px}
+.brand{font-size:22px}.brand-mark{font-size:80px}
+@media(max-width:700px){#start .cards{grid-template-columns:1fr!important}#start .feature-badge{width:52px;height:52px;top:18px;left:18px}#start .feature-badge svg{width:29px;height:29px}#start .feature h2{font-size:24px}#start .feature p{font-size:15px}}
 #studentSchedule.code-calendar .schedule-events{display:flex}
 #studentSchedule.code-calendar .schedule-event{white-space:normal;overflow-wrap:anywhere;line-height:1.4}
 @media(max-width:700px){#studentSchedule.code-calendar .schedule-week{grid-template-columns:1fr 1fr}}
