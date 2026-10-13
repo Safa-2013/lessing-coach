@@ -120,5 +120,5 @@ test('teacher calendar codes open only the assigned calendar without login and c
   await call('admin/teachers/'+teachers[1].id,'DELETE',{},staff);assert.equal((await open('DEF')).status,404);
   assert.equal((await call('admin/appointments','PATCH',{code:'NEW',id:'fake',status:'Bestätigt'},visitor)).status,403);
   let limited=false;for(let i=0;i<23;i++)limited ||= (await open('WRONG')).status===429;assert.ok(limited,'Repeated code guesses must be throttled');
-  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.match(html,/teacherCalendarAccessForm/);assert.match(html,/minlength="3"/);assert.match(html,/Code deaktivieren/);
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.doesNotMatch(html,/teacherCalendarAccessForm/);assert.match(html,/id="lookupForm"/);assert.match(html,/Termine mit Code öffnen/);assert.match(html,/placeholder="Code eingeben" maxlength="64"/);assert.match(html,/minlength="3"/);assert.match(html,/Code deaktivieren/);
 });
