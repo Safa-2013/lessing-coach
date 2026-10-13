@@ -76,7 +76,8 @@ function scope(session) { return { role: session.role || 'visitor', permissions:
 export default async function api(req, res) {
   try {
     const url = new URL(req.url, 'http://localhost');
-    const path = '/' + String(req.query?.path || url.pathname.replace(/^\/api\/?/, '')).replace(/^\//, '');
+    const routedPath=req.query?.path ?? url.searchParams.get('path');
+    const path = '/' + String(Array.isArray(routedPath)?routedPath.join('/'):routedPath||url.pathname.replace(/^\/api\/?/, '')).replace(/^\//, '').replace(/\/$/, '');
     if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(req.method)) fail(405, 'Methode nicht erlaubt');
     if (req.method !== 'GET') {
       const origin = req.headers.origin;
