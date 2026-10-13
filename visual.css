@@ -186,6 +186,11 @@ body[data-page="contact"] .topbar{display:none}
 .schedule-event{display:block;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
 .schedule-event i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--category-color);margin-right:5px}
 #directAppointment summary{cursor:pointer;padding:8px 0;color:#185fc2}
+#teacherCodeSchedule[hidden]{display:none!important}
+.teacher-code-form{margin-top:16px;padding-top:12px;border-top:1px solid #dfe7f1}
+#teacherCodeSchedule .schedule-week .schedule-events{display:flex}
+#teacherCodeSchedule .schedule-week .schedule-event{white-space:normal;overflow-wrap:anywhere;line-height:1.4}
+@media(max-width:700px){#teacherCodeSchedule .schedule-week{grid-template-columns:1fr 1fr}}
 #directAppointment form{margin-top:14px}
 #directAppointmentResult:not(:empty){padding:10px;background:#eef5ff;border-radius:8px}
 #adminSchedule .schedule-week .schedule-events{display:flex}
