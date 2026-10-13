@@ -6,7 +6,7 @@ import {join} from 'node:path';
 import api from '../lib/api.js';
 process.chdir(mkdtempSync(join(tmpdir(),'lessing-maintenance-')));
 process.env.INITIAL_ADMIN_PASSWORD='teacher-test';process.env.INITIAL_BIG_ADMIN_PASSWORD='owner-test';
-async function call(path,method='GET',body={},cookie=''){const r={setHeader(k,v){if(k==='Set-Cookie')this.cookie=v.split(';')[0];},end(s){this.data=JSON.parse(s);}};await api({url:'/api/'+path,method,body:JSON.stringify(body),headers:{host:'localhost',cookie}},r);return r;}
+async function call(path,method='GET',body={},cookie=''){const r={writeHead(status,headers){this.statusCode=status;},setHeader(k,v){if(k==='Set-Cookie')this.cookie=v.split(';')[0];},end(s){this.data=JSON.parse(s);}};await api({url:'/api/'+path,method,body:JSON.stringify(body),headers:{host:'localhost',cookie}},r);return r;}
 test('maintenance is shared, Big Admin only, enforced on API and reversible',async()=>{
  const owner=await call('login','POST',{username:'admin',password:'owner-test'});const teacher=await call('login','POST',{username:'Lessing',password:'teacher-test'});
  assert.equal((await call('admin/maintenance','PATCH',{all:true},teacher.cookie)).statusCode,403);
@@ -17,6 +17,15 @@ test('maintenance is shared, Big Admin only, enforced on API and reversible',asy
  assert.equal((await call('admin/overview','GET',{},teacher.cookie)).statusCode,503);
  assert.equal((await call('admin/overview','GET',{},owner.cookie)).statusCode,200);
  assert.equal((await call('login','POST',{username:'admin',password:'owner-test'})).statusCode,200);
+ const bigStatus=await call('stars/status','GET',{},owner.cookie);
+ assert.equal(bigStatus.data.maintenance,false);assert.equal(bigStatus.data.maintenanceActive,true);assert.equal(bigStatus.data.maintenanceBypass,true);
+ assert.equal((await call('stars/guest','POST',{},teacher.cookie)).statusCode,503);
+ assert.equal((await call('stars/guest','POST',{},'lessing_session=forged')).statusCode,503);
+ const gameGuest=await call('stars/guest','POST',{},owner.cookie);assert.equal(gameGuest.statusCode,200);assert.equal(gameGuest.data.user.role,'guest');
+ const bothCookies=owner.cookie+'; '+gameGuest.cookie;
+ assert.equal((await call('stars/action','POST',{action:'profile',name:'Big test'},bothCookies)).statusCode,200);
+ assert.equal((await call('stars/action','POST',{action:'profile',name:'Blocked'},gameGuest.cookie)).statusCode,503);
+ assert.equal((await call('stars/admin/config','GET',{},bothCookies)).statusCode,403);
  await call('admin/maintenance','PATCH',{all:false,sections:{ki:true},games:false},owner.cookie);
  assert.equal((await call('ai/threads')).statusCode,503);
  assert.equal((await call('catalog')).statusCode,200);

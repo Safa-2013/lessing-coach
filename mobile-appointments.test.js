@@ -80,3 +80,27 @@ test('critical mobile UI is immediately usable and role controller is actually s
   assert.match(css,/MOBILE-FIRST APPOINTMENTS/);
   assert.match(css,/#appointmentSubmit\{width:100%/);
 });
+
+test('staff directly records lesson appointments, edits them, prevents duplicates and keeps names private',async()=>{
+  const visitor=await call('bootstrap');
+  const staff=await call('login','POST',{username:'Lessing',password:'Schulen'},(await call('bootstrap')).cookie);
+  const category=(await call('catalog','GET',null,visitor.cookie)).data.categories[0];
+  const teacher=(await call('admin/teachers','POST',{name:'Frau Lenart Test'},staff.cookie)).data;
+  await call('admin/teachers/'+teacher.id,'PATCH',{name:'Frau Lenart Test',active:true,category_ids:[category.id]},staff.cookie);
+  const input={first_name:'Schüler',last_name:'X',class_name:'7G2',requested_at:'2026-10-13',lesson_period:3,category_id:category.id,teacher_id:teacher.id};
+  assert.equal((await call('admin/appointments','POST',input,visitor.cookie)).status,403);
+  const created=await call('admin/appointments','POST',input,staff.cookie);assert.equal(created.status,201);
+  const calendar=await call('admin/calendar?from=2026-10-12&to=2026-10-19','GET',null,staff.cookie);
+  const row=calendar.data.appointments.find(a=>a.id===created.data.appointment.id);
+  assert.equal(row.status,'Bestätigt');assert.equal(row.lesson_period,3);assert.equal(row.first_name,'Schüler');assert.equal(row.appointment_time,'');
+  assert.equal((await call('appointments?code='+row.code,'GET',null,visitor.cookie)).status,404);
+  const publicCalendar=await call('appointments/calendar?month=2026-10','GET',null,visitor.cookie);assert.equal(JSON.stringify(publicCalendar.data).includes('Schüler'),false);assert.equal(JSON.stringify(publicCalendar.data).includes('Frau Lenart'),false);
+  assert.equal((await call('admin/appointments','POST',input,staff.cookie)).status,409);
+  const next=await call('admin/appointments','POST',{...input,last_name:'Y',lesson_period:4},staff.cookie);assert.equal(next.status,201);
+  assert.equal((await call('admin/appointments','PATCH',{id:next.data.appointment.id,status:'Bestätigt',lesson_period:3},staff.cookie)).status,409);
+  assert.equal((await call('admin/appointments','PATCH',{id:next.data.appointment.id,status:'Bestätigt',lesson_period:6},staff.cookie)).status,200);
+  const concurrent=await Promise.all([call('admin/appointments','POST',{...input,lesson_period:5},staff.cookie),call('admin/appointments','POST',{...input,lesson_period:5},staff.cookie)]);assert.deepEqual(concurrent.map(r=>r.status).sort(),[201,409]);
+  for(const invalid of [{lesson_period:13},{lesson_period:0},{requested_at:'2026-02-31'},{teacher_id:'missing'}])assert.equal((await call('admin/appointments','POST',{...input,...invalid},staff.cookie)).status,400);
+  assert.equal((await call('admin/appointments','POST',{...input,lesson_period:0,appointment_time:'08:35'},staff.cookie)).status,201);
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.match(html,/id="directAppointmentForm"/);assert.match(html,/Termin direkt eintragen/);assert.match(html,/name="lesson_period"/);
+});

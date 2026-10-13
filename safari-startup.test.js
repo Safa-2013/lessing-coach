@@ -4,6 +4,17 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {spawnSync} from 'node:child_process';
 const stars=fs.readFileSync(new URL('../stars-embedded.html',import.meta.url),'utf8');
+test('Coach close control cannot stretch between inherited top and bottom',()=>{
+ const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+ const fix=html.match(/<style id="coach-stars-touch-fix">([\s\S]*?)<\/style>/)[1];
+ assert.match(fix,/top:auto!important/);assert.match(fix,/height:44px!important/);
+ assert.match(fix,/right:auto!important/);assert.match(fix,/width:auto!important/);
+});
+test('Modal action row remains outside the scrollable content',()=>{
+ assert.match(stars,/<div class="modal-content">\$\{body\}<\/div><div class="modal-foot">/);
+ assert.match(stars,/grid-template-rows:auto minmax\(0,1fr\) auto/);
+ assert.match(stars,/#modal \.onboard-art\{min-height:80px;height:100px/);
+});
 test('Safari storage denial and quota do not abort game actions',()=>{
  const code=stars.slice(stars.indexOf('function resilientStorage('),stars.indexOf("const localStorage=resilientStorage"));
  for(const deniedGetter of [false,true]){
