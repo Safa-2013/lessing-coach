@@ -13,7 +13,8 @@ process.env.INITIAL_BIG_ADMIN_PASSWORD = '1234';
 
 async function call(path, method='GET', data, cookie='') {
   const response = { headers:{}, setHeader(k,v){this.headers[k.toLowerCase()]=v;}, end(text){this.data=JSON.parse(text);}, get headersSent(){return false;} };
-  await api({url:'/api/'+path,method,body:data?JSON.stringify(data):undefined,headers:{cookie,host:'localhost'}},response);
+  const routed=path.startsWith('@rewrite:');
+  await api({url:routed?'/api/index.js?path='+encodeURIComponent(path.slice(9)):'/api/'+path,method,body:data?JSON.stringify(data):undefined,headers:{cookie,host:'localhost'}},response);
   return {status:response.statusCode,data:response.data,cookie:response.headers['set-cookie']?.split(';')[0]||cookie};
 }
 function nextSchoolDay(){
@@ -102,5 +103,6 @@ test('staff directly records lesson appointments, edits them, prevents duplicate
   const concurrent=await Promise.all([call('admin/appointments','POST',{...input,lesson_period:5},staff.cookie),call('admin/appointments','POST',{...input,lesson_period:5},staff.cookie)]);assert.deepEqual(concurrent.map(r=>r.status).sort(),[201,409]);
   for(const invalid of [{lesson_period:13},{lesson_period:0},{requested_at:'2026-02-31'},{teacher_id:'missing'}])assert.equal((await call('admin/appointments','POST',{...input,...invalid},staff.cookie)).status,400);
   assert.equal((await call('admin/appointments','POST',{...input,lesson_period:0,appointment_time:'08:35'},staff.cookie)).status,201);
+  assert.equal((await call('@rewrite:admin/appointments','POST',{...input,lesson_period:7},staff.cookie)).status,201,'Vercel rewrite URL must reach the save handler without req.query');
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.match(html,/id="directAppointmentForm"/);assert.match(html,/Termin direkt eintragen/);assert.match(html,/name="lesson_period"/);
 });
