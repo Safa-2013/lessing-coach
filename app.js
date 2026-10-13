@@ -152,11 +152,11 @@ function renderAuth() {
   $('#topLogin').dataset.page = isStaff ? 'adminPanel' : 'login';
   $('#adminAccounts').classList.toggle('hidden', !isStaff);
   for (const [permission, element] of [['appointments','#adminAppointments'],['chats','#adminChats'],['content','#adminContent']]) {
-    $(element).classList.toggle('hidden', !(state.session.role === 'big' || state.session.permissions.includes(permission)));
+    $(element).classList.toggle('hidden', !['admin','big'].includes(state.session.role));
   }
   document.querySelectorAll('[data-admin-tab]').forEach(button => {
     const required = button.dataset.requires;
-    button.classList.toggle('hidden', !!required && !(state.session.role==='big' || state.session.permissions.includes(required)));
+    button.classList.toggle('hidden', !!required && !['admin','big'].includes(state.session.role));
   });
 }
 async function boot() {
@@ -412,7 +412,7 @@ $('#aiForm').onsubmit = async e => {
   } catch(err) { if(version===aiChatVersion) toast(err.message); }
   finally { aiSending=false; button.disabled=false; }
 };
-const can = permission => state.session.role === 'big' || state.session.permissions.includes(permission);
+const can = permission => ['admin','big'].includes(state.session.role);
 function prepareDirectAppointment(){
   const calendar=$('#adminSchedule');if(!calendar)return;
   if(!$('#directAppointment')){
@@ -460,13 +460,22 @@ async function loadAccounts() {
   const {accounts} = await request('admin/accounts');
   box.innerHTML = accounts.length ? accounts.map(a => `<div class="list-item"><strong>${safe(a.username)}</strong><span class="pill">Admin · Vollzugriff</span><form class="accountForm" data-id="${safe(a.id)}"><label class="field">Neues Passwort (optional)<input type="password" name="password" minlength="10"></label><button class="primary">Speichern</button> <button class="primary danger" type="button" data-delete="${safe(a.id)}">Löschen</button></form></div>`).join('') : '<p class="muted">Noch keine normalen Admin-Konten vorhanden.</p>';
 }
+function renderCalendarCodeManager(teachers){
+  if(!$('#calendarCodeManager'))$('#adminSchedule').insertAdjacentHTML('afterend','<div class="panel" id="calendarCodeManager"><h2>Kalender-Code erstellen</h2><p class="muted">Wähle eine Lehrkraft und setze ihren Code. Damit lässt sich ihr Kalender unten unter „Termine“ ohne Anmeldung öffnen.</p><form id="calendarCodeForm"><div class="grid2"><label class="field">Lehrkraft<select name="teacher_id" required></select></label><label class="field">Code (mindestens 3 Zeichen)<input name="code" type="password" minlength="3" maxlength="64" autocomplete="new-password" required></label></div><p class="small" id="calendarCodeState"></p><div class="row"><button type="submit" class="primary">Code speichern / ändern</button><button type="button" class="primary danger" id="disableCalendarCode">Code deaktivieren</button></div><p role="status" id="calendarCodeResult"></p></form></div>');
+  const form=$('#calendarCodeForm'),select=form.elements.teacher_id,previous=select.value;
+  select.innerHTML=teachers.filter(t=>t.active).map(t=>`<option value="${safe(t.id)}">${safe(t.name)}</option>`).join('');if([...select.options].some(o=>o.value===previous))select.value=previous;
+  const current=()=>teachers.find(t=>t.id===select.value),update=()=>{$('#calendarCodeState').textContent=current()?.calendar_code_enabled?'Für diese Lehrkraft ist ein Code aktiv.':'Für diese Lehrkraft ist noch kein Code aktiv.';$('#disableCalendarCode').disabled=!current()?.calendar_code_enabled;form.querySelector('[type="submit"]').disabled=!current()};
+  select.onchange=()=>{form.elements.code.value='';$('#calendarCodeResult').textContent='';update()};update();
+  let saving=false;const save=async disable=>{if(saving||!current())return;saving=true;const teacher=current(),code=form.elements.code.value;select.disabled=true;form.querySelectorAll('button').forEach(b=>b.disabled=true);try{await send('admin/teacher-calendar-code',{teacher_id:teacher.id,code,disable});teacher.calendar_code_enabled=disable?0:1;form.elements.code.value='';$('#calendarCodeResult').textContent=disable?'Code deaktiviert.':'Code gespeichert. Er kann im gemeinsamen Code-Feld unter „Termine“ benutzt werden.'}catch(error){$('#calendarCodeResult').textContent=error.message}finally{saving=false;select.disabled=false;update()}};
+  form.onsubmit=e=>{e.preventDefault();save(false)};$('#disableCalendarCode').onclick=()=>save(true);
+}
 async function loadStaffManagement() {
   const [{teachers},{categories}] = await Promise.all([request('admin/teachers'),request('admin/categories')]);
   const cfg=appointmentConfig();
   const form=$('#appointmentConfigForm');
   if(form){for(const el of form.elements){if(el.name&&Object.hasOwn(cfg,el.name)&&typeof cfg[el.name]==='string')el.value=cfg[el.name];}}
   $('#teacherList').innerHTML=teachers.length?teachers.map(t=>{const aud=audienceFor(cfg.teacherAudience,t.id);return `<div class="list-item teacher-card"><div class="row"><input class="field teacher-name" data-id="${safe(t.id)}" value="${safe(t.name)}"><button class="primary" data-save-teacher="${safe(t.id)}">Speichern</button><button class="primary danger" data-delete-teacher="${safe(t.id)}">Entfernen</button></div><div class="audience-editor"><strong>Sichtbar für:</strong> <label><input type="checkbox" class="teacher-audience" data-teacher="${safe(t.id)}" data-role="student" ${aud.includes('student')?'checked':''}> Schüler/in</label> <label><input type="checkbox" class="teacher-audience" data-teacher="${safe(t.id)}" data-role="parent" ${aud.includes('parent')?'checked':''}> Elternteil</label></div><div class="teacher-categories"><strong>Kategorien:</strong><div class="row">${categories.filter(c=>c.active!==0).map(c=>`<label><input type="checkbox" class="teacher-category" data-teacher="${safe(t.id)}" data-category="${safe(c.id)}" ${(t.category_ids||[]).includes(c.id)?'checked':''}> ${safe(c.name)}</label>`).join('')}</div></div></div>`}).join(''):'<p class="muted">Noch keine Ansprechpersonen.</p>';
-  document.querySelectorAll('#teacherList .teacher-card').forEach((card,index)=>{const teacher=teachers[index];card.insertAdjacentHTML('beforeend',`<form class="teacher-code-form"><h4>Kalender-Code · ${teacher.calendar_code_enabled?'aktiv':'noch nicht eingerichtet'}</h4><label class="field">Neuen Code wählen (mindestens 3 Zeichen)<input name="code" type="password" minlength="3" maxlength="64" autocomplete="new-password" required></label><p class="small muted">Mit diesem Code sind im gemeinsamen Code-Feld unter „Termine“ nur die Termine dieser Lehrkraft ohne Anmeldung sichtbar. Gib ihn nur an die Lehrkraft weiter.</p><div class="row"><button type="submit" class="primary" ${teacher.active?'':'disabled'}>Code speichern / ändern</button><button type="button" class="primary danger" data-disable-calendar ${teacher.calendar_code_enabled&&teacher.active?'':'disabled'}>Code deaktivieren</button></div><p class="small" role="status"></p></form>`);const form=card.querySelector('.teacher-code-form'),result=form.querySelector('[role="status"]');const save=async disable=>{const buttons=[...form.querySelectorAll('button')];if(buttons[0].disabled)return;buttons.forEach(b=>b.disabled=true);try{await send('admin/teacher-calendar-code',{teacher_id:teacher.id,code:form.elements.code.value,disable});form.elements.code.value='';result.textContent=disable?'Code deaktiviert.':'Code gespeichert. Der bisherige Code ist ersetzt.';teacher.calendar_code_enabled=disable?0:1;form.querySelector('h4').textContent='Kalender-Code · '+(disable?'deaktiviert':'aktiv');}catch(error){result.textContent=error.message}finally{buttons[0].disabled=!teacher.active;buttons[1].disabled=!teacher.calendar_code_enabled||!teacher.active}};form.onsubmit=e=>{e.preventDefault();save(false)};form.querySelector('[data-disable-calendar]').onclick=()=>save(true)});
+  renderCalendarCodeManager(teachers);
   $('#categoryList').innerHTML=categories.map(c=>{const aud=audienceFor(cfg.categoryAudience,c.id);return `<div class="list-item category-card"><div class="row"><input class="field category-name" data-id="${safe(c.id)}" value="${safe(c.name)}"><input type="color" class="category-color" data-id="${safe(c.id)}" value="${safe(c.color)}" title="Farbe"><button class="primary" data-save-category="${safe(c.id)}">Speichern</button><button class="primary danger" type="button" data-delete-category="${safe(c.id)}">Löschen</button></div><div class="audience-editor"><strong>Sichtbar für:</strong> <label><input type="checkbox" class="category-audience" data-category="${safe(c.id)}" data-role="student" ${aud.includes('student')?'checked':''}> Schüler/in</label> <label><input type="checkbox" class="category-audience" data-category="${safe(c.id)}" data-role="parent" ${aud.includes('parent')?'checked':''}> Elternteil</label></div></div>`}).join('');
 }
 async function loadAppointmentNotes() {

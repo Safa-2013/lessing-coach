@@ -104,6 +104,13 @@ test('staff directly records lesson appointments, edits them, prevents duplicate
   for(const invalid of [{lesson_period:13},{lesson_period:0},{requested_at:'2026-02-31'},{teacher_id:'missing'}])assert.equal((await call('admin/appointments','POST',{...input,...invalid},staff.cookie)).status,400);
   assert.equal((await call('admin/appointments','POST',{...input,lesson_period:0,appointment_time:'08:35'},staff.cookie)).status,201);
   assert.equal((await call('@rewrite:admin/appointments','POST',{...input,lesson_period:7},staff.cookie)).status,201,'Vercel rewrite URL must reach the save handler without req.query');
+  assert.equal((await call('admin/accounts','POST',{username:'terminadmin',password:'TerminAdmin1234',permissions:[]},staff.cookie)).status,201);
+  const normal=await call('login','POST',{username:'terminadmin',password:'TerminAdmin1234'},(await call('bootstrap')).cookie);
+  assert.equal(normal.data.session.role,'admin');
+  assert.equal((await call('admin/appointments','POST',{...input,lesson_period:9},normal.cookie)).status,201,'A separately created normal admin can create appointments');
+  assert.equal((await call('admin/teacher-calendar-code','POST',{teacher_id:teacher.id,code:'NORMAL9'},normal.cookie)).status,200,'Normal admins can also set calendar codes');
+  const big=await call('login','POST',{username:'admin',password:'1234'},(await call('bootstrap')).cookie);
+  assert.equal((await call('admin/appointments','POST',{...input,lesson_period:10},big.cookie)).status,201,'Big Admin can create appointments too');
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.match(html,/id="directAppointmentForm"/);assert.match(html,/Termin direkt eintragen/);assert.match(html,/name="lesson_period"/);
 });
 
@@ -120,5 +127,5 @@ test('teacher calendar codes open only the assigned calendar without login and c
   await call('admin/teachers/'+teachers[1].id,'DELETE',{},staff);assert.equal((await open('DEF')).status,404);
   assert.equal((await call('admin/appointments','PATCH',{code:'NEW',id:'fake',status:'Bestätigt'},visitor)).status,403);
   let limited=false;for(let i=0;i<23;i++)limited ||= (await open('WRONG')).status===429;assert.ok(limited,'Repeated code guesses must be throttled');
-  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.doesNotMatch(html,/teacherCalendarAccessForm/);assert.match(html,/id="lookupForm"/);assert.match(html,/Termine mit Code öffnen/);assert.match(html,/placeholder="Code eingeben" maxlength="64"/);assert.match(html,/minlength="3"/);assert.match(html,/Code deaktivieren/);
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.doesNotMatch(html,/teacherCalendarAccessForm/);assert.match(html,/id="lookupForm"/);assert.match(html,/Termine mit Code öffnen/);assert.match(html,/placeholder="Code eingeben" maxlength="64"/);assert.match(html,/minlength="3"/);assert.match(html,/Code deaktivieren/);assert.match(html,/adminSchedule.*insertAdjacentHTML\('afterend'/);
 });
