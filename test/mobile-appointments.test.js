@@ -94,13 +94,15 @@ test('staff directly records lesson appointments, edits them, prevents duplicate
   const created=await call('admin/appointments','POST',input,staff.cookie);assert.equal(created.status,201);
   const calendar=await call('admin/calendar?from=2026-10-12&to=2026-10-19','GET',null,staff.cookie);
   const row=calendar.data.appointments.find(a=>a.id===created.data.appointment.id);
-  assert.equal(row.status,'Bestätigt');assert.equal(row.lesson_period,3);assert.equal(row.first_name,'Schüler');assert.equal(row.appointment_time,'');
+  assert.equal(row.status,'Bestätigt');assert.equal(row.lesson_period,3);assert.equal(row.first_name,'Schüler');assert.equal(row.appointment_time,'09:55');
+  assert.equal((await call('admin/appointments','POST',{...input,lesson_period:0,appointment_time:'09:55'},staff.cookie)).status,409,'Clock-time reservations conflict with the corresponding lesson');
   assert.equal((await call('appointments?code='+row.code,'GET',null,visitor.cookie)).status,404);
   const publicCalendar=await call('appointments/calendar?month=2026-10','GET',null,visitor.cookie);assert.equal(JSON.stringify(publicCalendar.data).includes('Schüler'),false);assert.equal(JSON.stringify(publicCalendar.data).includes('Frau Lenart'),false);
   assert.equal((await call('admin/appointments','POST',input,staff.cookie)).status,409);
   const next=await call('admin/appointments','POST',{...input,last_name:'Y',lesson_period:4},staff.cookie);assert.equal(next.status,201);
   assert.equal((await call('admin/appointments','PATCH',{id:next.data.appointment.id,status:'Bestätigt',lesson_period:3},staff.cookie)).status,409);
   assert.equal((await call('admin/appointments','PATCH',{id:next.data.appointment.id,status:'Bestätigt',lesson_period:6},staff.cookie)).status,200);
+  const moved=(await call('admin/calendar?from=2026-10-12&to=2026-10-19','GET',null,staff.cookie)).data.appointments.find(a=>a.id===next.data.appointment.id);assert.equal(moved.appointment_time,'12:35','Changing the lesson updates its start time');
   const concurrent=await Promise.all([call('admin/appointments','POST',{...input,lesson_period:5},staff.cookie),call('admin/appointments','POST',{...input,lesson_period:5},staff.cookie)]);assert.deepEqual(concurrent.map(r=>r.status).sort(),[201,409]);
   for(const invalid of [{lesson_period:13},{lesson_period:0},{requested_at:'2026-02-31'},{teacher_id:'missing'}])assert.equal((await call('admin/appointments','POST',{...input,...invalid},staff.cookie)).status,400);
   assert.equal((await call('admin/appointments','POST',{...input,lesson_period:0,appointment_time:'08:35'},staff.cookie)).status,201);

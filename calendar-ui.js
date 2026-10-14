@@ -1,4 +1,4 @@
-import { holidayOn } from './holidays.js';
+import { holidayOn, lessonTime } from './holidays.js';
 
 const weekdays = ['Mo','Di','Mi','Do','Fr','Sa','So'];
 const iso = date => date.toISOString().slice(0,10);
@@ -20,7 +20,7 @@ export function makeSchedule(root, request, admin=false) {
   const body=root.querySelector('.schedule-body');
   const controls=root.querySelector('.schedule-controls');
   const appointmentList=day=>(days[day]||[]).slice().sort((a,b)=>(a.lesson_period||99)-(b.lesson_period||99)||String(a.appointment_time||'').localeCompare(String(b.appointment_time||'')));
-  const when=item=>[item.lesson_period?`${item.lesson_period}. Stunde`:'',item.appointment_time?`${item.appointment_time} Uhr`:''].filter(Boolean).join(' · ')||'Uhrzeit offen';
+  const when=item=>[item.lesson_period?`${item.lesson_period}. Stunde`:'',lessonTime(item.lesson_period)?`${lessonTime(item.lesson_period).join('–')} Uhr`:item.appointment_time?`${item.appointment_time} Uhr`:''].filter(Boolean).join(' · ')||'Uhrzeit offen';
   const status=day=>{
     const list=appointmentList(day);
     return {confirmed:list.some(a=>a.status==='Bestätigt'||a.hasAppointments),pending:list.some(a=>a.status&&!['Bestätigt','Abgelehnt'].includes(a.status)||a.hasRequests)};

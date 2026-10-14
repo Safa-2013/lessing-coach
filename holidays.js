@@ -18,3 +18,10 @@ export const SCHOOL_HOLIDAYS = [
   ['2028-12-23','2029-01-05','Weihnachtsferien BW']
 ];
 export const holidayOn = day => SCHOOL_HOLIDAYS.find(([first,last]) => day >= first && day <= last)?.[2] || null;
+
+// Unterrichtszeiten aus dem Schulstundenplan.
+export const SCHOOL_LESSONS = [
+  ['08:00','08:45'], ['08:45','09:30'], ['09:55','10:40'], ['10:40','11:25'],
+  ['11:50','12:35'], ['12:35','13:20'], ['14:20','15:05'], ['15:05','15:50']
+];
+export const lessonTime = period => SCHOOL_LESSONS[Number(period)-1] || null;

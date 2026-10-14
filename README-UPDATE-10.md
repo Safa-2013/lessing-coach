@@ -156,3 +156,5 @@ Spielupdate 3D v18
 - Showdown: 1140 x 2175 statt 760 x 1450; 2,25-fache Fläche mit passender Kamera und skalierten Hindernissen. Andere Modi behalten ihre bisherigen Abmessungen.
 - WebGL-Figuren mit zusätzlichen Frisuren/Accessoires und editierbaren Proportionen; unterschiedliche Geschossfarben, Formen und Spuren. Das sind prozedurale 3D-Modelle, keine identischen 3D-Nachbildungen der Shop-Bilder. Ohne WebGL bleibt die 2D-Ersatzansicht.
 - 20 automatisierte Tests bestanden, darunter Bot-Navigation, Treffer, Ausweichen, Zeitbegrenzung, Maussteuerung und Spieleraufnahme. Kein Test auf echtem iMac oder iPhone; keine Garantie für Fehlerfreiheit oder 1:1-Brawl-Stars-Verhalten.
+
+Schulzeiten-Update 14.10.2026: Unterrichtsstunden 1–8 übernehmen die Startzeit automatisch; der Kalender zeigt Start und Ende. Auch beim Verschieben wird die Uhrzeit angepasst. Bestehende Termine bleiben erhalten.
